@@ -14,7 +14,11 @@ export function operationsPatch(stateDir: string, pluginPath?: string): object[]
         { id: 'persona', name: '@deepseek-ai/dsh-persona', config: { prefix: '你是 cc 的中文运营助手，只使用明确提供的运营工具。' } },
         { id: 'tool-skill', name: '@deepseek-ai/dsh-tool-skill' },
         { id: 'compaction', name: 'cordis:group', group: true, isolate: { compaction: true }, config: [
-          { id: 'compaction-basic', name: '@deepseek-ai/dsh-compaction-basic' },
+          // W=8192, O=2048: min(W*0.8, W-O-512)=5632 pressure tokens.
+          { id: 'compaction-basic', name: '@deepseek-ai/dsh-compaction-basic', config: {
+            headroomTokens: 512, retainTokens: 1024, maxTokens: 1024,
+            compactionRetries: 0, maxOverflowRetries: 0,
+          } },
         ] },
       ] } }));
   return [

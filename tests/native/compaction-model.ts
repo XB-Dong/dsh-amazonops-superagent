@@ -49,16 +49,17 @@ export async function fakeModel(evidence: string) {
       const continuing = text.includes('VERIFY_PERSISTED_COMPACTION');
       if (compacting) {
         if (!text.includes('WH-042') || !text.includes('6小时')) throw new Error('COMPACTION_INPUT_LOST_SOURCE_FACT');
+        if (!text.includes('human-compact-origin')) throw new Error('COMPACTION_INPUT_LOST_SOURCE_ID');
         const result = toolResults(body, 'cc_prepare_task')[0];
         const resultText = typeof result?.content === 'string' ? result.content : result?.content?.find((block: any) => block.type === 'text')?.text;
         const task = JSON.parse(resultText ?? 'null');
-        if (!task?.id || !task.sources?.[0]) throw new Error('COMPACTION_INPUT_LOST_COMMITTED_TOOL_RESULT');
-        summary = `## Current Work\n- 已创建草稿 ${task.id}; source ${task.sources[0]}; cc_prepare_task 已提交且不能重复。\n## Critical Context\n- 准备提前量6小时；仓库WH-042；等待cc确认，未执行外部操作。`;
+        if (result && (!task?.id || !task.sources?.[0])) throw new Error('COMPACTION_INPUT_LOST_COMMITTED_TOOL_RESULT');
+        summary = `## Current Work\n- source ${task?.sources?.[0] ?? 'human-compact-origin'}。${task?.id ? `已创建草稿 ${task.id}; cc_prepare_task 已提交且不能重复。` : '保留后续真实工具结果，不重复执行。'}\n## Critical Context\n- 准备提前量6小时；仓库WH-042；等待cc确认，未执行外部操作。`;
       } else if (continuing) {
         if (!text.includes('<compacted-summary>') || !text.includes('WH-042')) throw new Error('RESTART_DID_NOT_REPLAY_CHECKPOINT');
         if (text.includes('合成历史核验项')) throw new Error('RESTART_REINTRODUCED_SHADOWED_HISTORY');
       } else if (worker) {
-        if (!toolResults(body, 'cc_prepare_task').length) tool = { name: 'cc_prepare_task', input: {
+        if (!toolResults(body, 'cc_prepare_task').length && !text.includes('cc_prepare_task 已提交且不能重复')) tool = { name: 'cc_prepare_task', input: {
           title: draftTitle, timeZone: 'Asia/Shanghai', checklist: draftChecklist } };
         else if (!toolResults(body, 'orchestrator_report').length) tool = { name: 'orchestrator_report', input: { state: 'progress', summary: resultText } };
       } else {

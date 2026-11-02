@@ -1,6 +1,6 @@
 /** Read-only test observer. No Engine commands, model responses or tool registrations. */
 import type { Context } from '@deepseek-ai/cordis';
-import { appendFileSync, writeFileSync } from 'node:fs';
+import { appendFileSync, writeFileSync, renameSync } from 'node:fs';
 import { join } from 'node:path';
 import { randomUUID } from 'node:crypto';
 import type { Runtime } from '../../vendor/superagent/src/extension.ts';
@@ -39,7 +39,10 @@ export function apply(ctx: Context, config: { evidence: string }): void {
     const snapshot = () => {
       try {
         const triggers = runtime.store.read.triggers({ source: 'amazonops' }, 0, 500).items;
-        writeFileSync(join(config.evidence, 'native-state.json'), JSON.stringify({
+        // Readers run in another process. Publish complete JSON in one rename,
+        // never expose writeFileSync's truncate/write window as native corruption.
+        const snapshotPath = join(config.evidence, 'native-state.json');
+        writeFileSync(`${snapshotPath}.next`, JSON.stringify({
           engine: runtime.engine.constructor.name, store: runtime.store.constructor.name,
           executor: runtime.executor.constructor.name, masterId: runtime.masterId, generation, instance,
           tickets: runtime.store.tickets.list(), triggers, settings: runtime.store.settings(),
@@ -47,6 +50,7 @@ export function apply(ctx: Context, config: { evidence: string }): void {
           dispositions: triggers.map(trigger => ({ id: trigger.id, value: runtime.store.triggers.disposition(trigger.id) })),
           outbox: runtime.store.db.prepare('SELECT value FROM outbox ORDER BY rowid').all().map(row => JSON.parse(String(row.value))),
         }, null, 2));
+        renameSync(`${snapshotPath}.next`, snapshotPath);
       } catch { /* Checkpoint closes the old database before disposing the observer. */ }
     };
     snapshot();

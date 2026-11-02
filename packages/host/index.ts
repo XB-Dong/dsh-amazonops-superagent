@@ -65,6 +65,7 @@ export function apply(ctx:Context,config:Config):void {
         .catch(()=>ctx.logger.error('Privacy context refresh failed; workbench remains in maintenance.'));
     }
   });
+  ctx.effect(()=>ctx.webServer.tapIndex(html=>html.replace(/<title>[^<]*<\/title>/,'<title>cc 运营工作台</title>')));
   ctx.effect(()=>ctx.webServer.register({kind:'exact',path:'/amazonops/login',handler:(_req,res)=>loginPage(res)}));
   ctx.effect(()=>ctx.webServer.register({kind:'prefix',path:'/amazonops/api',handler:async(req,res)=>{
     try{

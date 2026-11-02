@@ -1,0 +1,20 @@
+diff --git a/lib/client.js b/lib/client.js
+index bf57a02484892ffe7746757835ae14bd64c58929..7e60d3227d7df0c8f637b9d7e0a5087cadc01704 100644
+--- a/lib/client.js
++++ b/lib/client.js
+@@ -1604,6 +1604,15 @@ window.__ModuleLoader__.load({
+ 				};
+ 			}
+ 			async restoreSelection(workspaces, sessions) {
++                // AmazonOps rc.3 adapter: read-only peers restore only granted sessions.
++                // rc.3 uses this private key for global sources; fail closed otherwise.
++                const canCreate = this.ctx.remoteAccess.source("\0global", "", "session/create").getSnapshot() === true;
++                if (!canCreate) {
++                    const savedId = this.selection.getSnapshot().sessionId;
++                    if (savedId !== void 0 && sessions.byId[savedId] !== void 0 && !workspaces.archivedSessionIds.includes(savedId))
++                        this.replaceMain(savedId, this.lifetime.signal, "preserve");
++                    return;
++                }
+ 				const saved = this.selection.getSnapshot();
+ 				if (saved.subagentAddress !== void 0) {
+ 					this.replaceMain(saved.subagentAddress, this.lifetime.signal, "preserve");

@@ -10,6 +10,8 @@ import { buildProject } from '../../scripts/build.mjs';
 import { localPatch } from '../../profiles/local.ts';
 import { scrubEnvironment, lineWriter } from '../../scripts/start.mjs';
 import { fakeModel, draftTitle, draftChecklist, resultText } from './native-e2e-model.ts';
+import { createHash } from 'node:crypto';
+import { DatabaseSync } from 'node:sqlite';
 
 test('fixture network fence denies non-loopback fetch, HTTP and raw socket before connection', () => {
   const home = mkdtempSync(join(tmpdir(), 'amazonops-native-fence-'));
@@ -54,11 +56,11 @@ test('offline real DSH routes, executes scoped task tool, reports and delivers e
   await build({ entryPoints: [join(root, 'tests/integration/native-e2e-probe.ts')], outfile: probe,
     bundle: true, packages: 'external', platform: 'node', format: 'esm', target: 'node24' });
   const patch = join(home, 'profile.json');
-  writeFileSync(patch, JSON.stringify([
+  function writeProfile(runHome: string) { writeFileSync(patch, JSON.stringify([
     { insert: [{ id: 'native-e2e-observer', name: probe.replaceAll('\\', '/'), config: { evidence } }] },
-    ...localPatch({ root, home, password, port, live: true, modelAccount: 'test' }),
+    ...localPatch({ root, home: runHome, password, port, live: true, modelAccount: 'test' }),
     { id: 'llm-deepseek', config: { baseURL: model.url, apiKeyEnv: 'AMAZONOPS_API_KEY' } },
-  ]));
+  ])); }
   async function api(path: string, body?: unknown) {
     const response = await fetch(`${origin}/amazonops/api/${path}`, { method: body === undefined ? 'GET' : 'POST',
       headers: { origin, ...(cookie ? { cookie } : {}), 'content-type': 'application/json' },
@@ -79,8 +81,9 @@ test('offline real DSH routes, executes scoped task tool, reports and delivers e
     }
     throw new Error(`${name} timed out: ${last ?? ''}\nRequests=${JSON.stringify(model.requests)}\n${logs.slice(-6000)}\nEvidence=${home}`);
   }
-  async function boot() {
-    const environment = scrubEnvironment(process.env, home, key);
+  async function boot(runHome = home) {
+    writeProfile(runHome);
+    const environment = scrubEnvironment(process.env, runHome, key);
     environment.AMAZONOPS_NETWORK_EVIDENCE = networkEvidence;
     child = spawn(process.execPath, ['--require', join(root, 'tests/integration/native-e2e-network.cjs'),
       join(root, 'node_modules/@deepseek-ai/dsh/lib/bin.js'), 'web', '--patch', patch, '--no-open'],
@@ -101,6 +104,11 @@ test('offline real DSH routes, executes scoped task tool, reports and delivers e
     if (!process || process.exitCode !== null) return;
     if (process.connected) process.send('native-e2e-graceful-stop'); else process.kill();
     await new Promise<void>(done => { process.once('exit', () => done()); setTimeout(() => { process.kill('SIGKILL'); done(); }, 5000).unref(); });
+  }
+  async function inspectWorker(id: string) {
+    const response = await fetch(`${origin}/native-e2e/inspection?sessionId=${encodeURIComponent(id)}`, { headers: { origin, cookie }, signal: AbortSignal.timeout(3000) });
+    assert.equal(response.status, 200);
+    return await response.json() as any;
   }
   try {
     await boot();
@@ -156,6 +164,20 @@ test('offline real DSH routes, executes scoped task tool, reports and delivers e
     assert.equal(status.budget.policy.account, 'amazonops-test');
     writeFileSync(join(evidence, 'acceptance.json'), JSON.stringify({ manifest, submitted: submitted.value, work, snapshot, status,
       fixtureRequests: model.requests, nativeTypes: [native.engine, native.store, native.executor], resultEvents: results.length }, null, 2));
+    const workerSession = await inspectWorker(`worker-${work.tickets[0].id}`);
+    assert.ok(workerSession.events.some((event: any) => event.type === 'tool/result' && JSON.stringify(event).includes(snapshot.tasks[0].id)));
+    const backup = await api('actions/backup', {});
+    assert.equal(backup.response.status, 200, JSON.stringify(backup.value));
+    assert.match(backup.value.id, /^[\w.:-]+$/);
+    const backupDirectory = join(home, 'data/backups', backup.value.id);
+    const backupManifest = JSON.parse(readFileSync(join(backupDirectory, 'manifest.json'), 'utf8'));
+    assert.ok(backupManifest.files.some((file: any) => file.path === 'superagent/orchestrator.sqlite'));
+    assert.ok(backupManifest.files.some((file: any) => file.path.endsWith(`/worker-${work.tickets[0].id}/session.v4.jsonl.zstd`)));
+    await until('native checkpoint provider replacement', async () => {
+      const next = JSON.parse(readFileSync(join(evidence, 'native-state.json'), 'utf8'));
+      const current = await api('work');
+      return next.instance !== native.instance && current.response.ok ? true : undefined;
+    });
     await shutdown();
     await boot();
     const restored = (await api('snapshot')).value;
@@ -192,6 +214,75 @@ test('offline real DSH routes, executes scoped task tool, reports and delivers e
     assert.equal(afterCancel.budget.used.calls, model.requests.length, 'Every fixture stream must be durably accounted, including cancellation');
     writeFileSync(join(evidence, 'restart-cancellation.json'), JSON.stringify({ restoredWork, replay: replay.value,
       second: second.value, stopped, abortedWorkers: model.control.abortedWorkers, status: afterCancel }, null, 2));
+    await shutdown();
+    const recoveredHome = mkdtempSync(join(tmpdir(), 'amazonops-native-recovered-'));
+    const recoveredData = join(recoveredHome, 'data');
+    const restoredByCli = spawnSync(process.execPath, ['--experimental-transform-types', join(root, 'scripts/recovery.ts'),
+      '--backup', backupDirectory, '--current', join(home, 'data'), '--destination', recoveredData],
+    { cwd: root, env: scrubEnvironment(process.env, recoveredHome), encoding: 'utf8', windowsHide: true, timeout: 15000 });
+    assert.equal(restoredByCli.status, 0, restoredByCli.stderr);
+    const recoveryResult = JSON.parse(restoredByCli.stdout);
+    assert.equal(recoveryResult.modelRequests, model.requests.length);
+    const ownerValidation = spawnSync(process.execPath, [join(root, 'scripts/validate-native-recovery.mjs'), recoveredData],
+      { cwd: root, encoding: 'utf8', windowsHide: true, timeout: 10000 });
+    assert.equal(ownerValidation.status, 0, ownerValidation.stderr);
+    assert.ok(JSON.parse(ownerValidation.stdout).sessions >= 2);
+    await boot(recoveredHome);
+    const recoveredSnapshot = (await api('snapshot')).value;
+    const recoveredWork = (await api('work')).value;
+    const recoveredBudget = (await api('status')).value.budget;
+    assert.equal(recoveredSnapshot.tasks.length, 1);
+    assert.equal(recoveredSnapshot.tasks[0].id, snapshot.tasks[0].id);
+    assert.equal(recoveredWork.tickets.length, 1, 'Backup predates the independently cancelled second ticket');
+    assert.equal(recoveredWork.tickets[0].id, work.tickets[0].id);
+    assert.deepEqual(recoveredBudget.used, afterCancel.budget.used, 'Restoration must retain later usage rather than refunding it');
+    const recoveredWorker = await inspectWorker(`worker-${work.tickets[0].id}`);
+    assert.deepEqual(recoveredWorker, workerSession, 'Official provider must read the exact restored worker header and events');
+    const recoveredReplay = await api('messages', input);
+    assert.deepEqual(recoveredReplay.value, submitted.value, 'Restored business receipt must preserve original input identity');
+    const nativeDb = new DatabaseSync(join(recoveredData, 'superagent/orchestrator.sqlite'), { readOnly: true });
+    try {
+      const replies = nativeDb.prepare("SELECT value FROM outbox WHERE json_extract(value,'$.status')='sent'").all();
+      assert.equal(replies.filter(row => JSON.parse(String(row.value)).text === resultText).length, 1);
+    } finally { nativeDb.close(); }
+    assert.equal(model.requests.length, 9, 'Reading and replaying recovered native owners must not generate new model calls');
+    writeFileSync(join(evidence, 'checkpoint-recovery.json'), JSON.stringify({ backup: backup.value, recoveryResult,
+      ownerValidation: JSON.parse(ownerValidation.stdout), recoveredTaskId: recoveredSnapshot.tasks[0].id,
+      recoveredTicketId: recoveredWork.tickets[0].id, workerSessionDigest: createHash('sha256').update(JSON.stringify(recoveredWorker)).digest('hex'),
+      preservedBudget: recoveredBudget.used, recoveredReplay: recoveredReplay.value }, null, 2));
+    const beforeErase = JSON.parse(readFileSync(join(evidence, 'native-state.json'), 'utf8'));
+    const erased = await api('actions/delete', { id: submitted.value.messageId });
+    assert.equal(erased.response.status, 200, JSON.stringify(erased.value));
+    const afterErase = await until('business privacy checkpoint and clean master', async () => {
+      const next = JSON.parse(readFileSync(join(evidence, 'native-state.json'), 'utf8'));
+      const current = await api('snapshot');
+      return next.masterId !== beforeErase.masterId && current.response.ok && current.value.tasks.length === 0 ? next : undefined;
+    });
+    assert.equal((await api('work')).value.tickets.length, 0);
+    assert.equal(model.requests.length, 9);
+    model.control.quietRouter = true;
+    const safeInput = await api('messages', { text: '删除后的安全会话核验，仅确认收到。', requestId: 'offline-e2e-after-erasure' });
+    assert.equal(safeInput.response.status, 200);
+    await until('fresh model request after business erasure', async () => model.requests.length === 10 ? true : undefined);
+    const requestLines = readFileSync(join(evidence, 'model-requests.jsonl'), 'utf8').trim().split('\n');
+    const safeBody = JSON.stringify(JSON.parse(requestLines.at(-1)!).body);
+    for (const revoked of [submitted.value.messageId, input.text, work.tickets[0].id, snapshot.tasks[0].id])
+      assert.ok(!safeBody.includes(revoked), `Deleted lineage reentered fresh master model context: ${revoked}`);
+    await until('fresh request durable settlement', async () => (await api('status')).value.budget.used.calls === 10 ? true : undefined);
+    await shutdown();
+    const privateRecoveredHome = mkdtempSync(join(tmpdir(), 'amazonops-native-private-recovered-'));
+    const privacyRestore = spawnSync(process.execPath, ['--experimental-transform-types', join(root, 'scripts/recovery.ts'),
+      '--backup', backupDirectory, '--current', recoveredData, '--destination', join(privateRecoveredHome, 'data')],
+    { cwd: root, env: scrubEnvironment(process.env, privateRecoveredHome), encoding: 'utf8', windowsHide: true, timeout: 15000 });
+    assert.equal(privacyRestore.status, 0, privacyRestore.stderr);
+    await boot(privateRecoveredHome);
+    assert.equal((await api('snapshot')).value.tasks.length, 0, 'Current privacy ledger must suppress deleted backup data');
+    assert.equal((await api('work')).value.tickets.length, 0, 'Restored native raw records must not reactivate revoked tickets');
+    assert.equal((await api('status')).value.budget.used.calls, 10);
+    assert.equal(model.requests.length, 10, 'Restoring an older backup must not resurrect or automatically model erased history');
+    writeFileSync(join(evidence, 'privacy-recovery.json'), JSON.stringify({ oldMasterId: beforeErase.masterId,
+      freshMasterId: afterErase.masterId, modelRequests: model.requests.length, erasure: erased.value,
+      privacyRestore: JSON.parse(privacyRestore.stdout), restoredTasks: 0, restoredTickets: 0 }, null, 2));
     const network = readFileSync(networkEvidence, 'utf8').trim().split('\n').filter(Boolean).map(line => JSON.parse(line));
     assert.ok(network.length > 0, 'Network fence must observe real model connections');
     assert.ok(network.every(row => row.allowed), 'Any external network attempt fails acceptance');

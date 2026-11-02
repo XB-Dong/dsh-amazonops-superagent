@@ -34,7 +34,7 @@ function response(res: ServerResponse, index: number, tool?: { name: string; inp
 }
 export async function fakeModel(evidence: string) {
   const requests: { role: string; tool?: string; input?: unknown; path: string }[] = [];
-  const control = { holdWorkers: false, activeWorkers: 0, abortedWorkers: 0 };
+  const control = { holdWorkers: false, quietRouter: false, activeWorkers: 0, abortedWorkers: 0 };
   const server = createServer(async (req, res) => {
     try {
       let raw = '';
@@ -48,7 +48,7 @@ export async function fakeModel(evidence: string) {
         if (!toolResults(body, 'cc_prepare_task').length) tool = { name: 'cc_prepare_task', input: {
           title: draftTitle, timeZone: 'Asia/Shanghai', checklist: draftChecklist } };
         else if (!toolResults(body, 'orchestrator_report').length) tool = { name: 'orchestrator_report', input: { state: 'ready', summary: resultText } };
-      } else {
+      } else if (!control.quietRouter) {
         // The actual native candidate and report notices carry the authoritative IDs.
         const reports = [...text.matchAll(/"kind"\s*:\s*"worker_report"[^\n]*/g)];
         const report = reports.at(-1)?.[0];

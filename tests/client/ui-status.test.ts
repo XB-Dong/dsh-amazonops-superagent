@@ -16,6 +16,7 @@ const status = (modelState: string, extra: Partial<Status> = {}): Status => ({
 
 test('configured live access does not enable sending or a healthy indicator after exhaustion', () => {
   assert.equal(canChat(status('budget_exhausted')), false);
+  assert.equal(canChat(status('maintenance')),false);
   assert.equal(assistantHealthy(status('budget_exhausted')), false);
   assert.equal(canChat(undefined), false);
   assert.equal(canChat(status('disabled', { live: false })), false);

@@ -5,6 +5,7 @@ export function modelLabel(status?: Status) {
   if (status.syntheticModel) return '示例体验';
   const labels: Record<string, string> = {
     disabled: '助手暂未开放',
+    maintenance: '助手正在更新，请稍后',
     budget_exhausted:
       status.budget.policy?.period === 'daily'
         ? '今日使用已达上限，明天可继续'
@@ -16,11 +17,12 @@ export function modelLabel(status?: Status) {
   return labels[status.modelState ?? ''] ?? (status.live ? '可以开始对话' : '助手暂未开放');
 }
 export const canChat = (status?: Status) =>
-  !!status?.live && !['disabled', 'budget_exhausted'].includes(status.modelState ?? '');
+  !!status?.live && !['disabled', 'budget_exhausted','maintenance'].includes(status.modelState ?? '');
 export const assistantHealthy = (status?: Status) =>
   canChat(status) && status?.modelState !== 'last_failed' && !status?.syntheticModel;
 const errorLabels: Record<string, string> = {
   AUTH_REQUIRED: '请先登录工作台',
+  MAINTENANCE_IN_PROGRESS:'助手正在更新，请稍后再试；已保存的记录不会丢失。',
   LOGIN_FAILED: '密码不正确，请重试',
   LOGIN_RATE_LIMITED: '尝试次数较多，请稍后再登录',
   TIME_ZONE_REQUIRED: '请先填写站点时区',

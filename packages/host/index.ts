@@ -77,13 +77,13 @@ export function apply(ctx:Context,config:Config):void {
       }
       const identity=auth.identity(req);if(!identity)throw new Error('AUTH_REQUIRED');
       const scope=identity.scope;
-      if(maintenance&&path!=='status'&&path!=='logout')throw new Error('MAINTENANCE_IN_PROGRESS');
+      if(maintenance&&path!=='status'&&path!=='logout'&&!(path==='snapshot'&&req.method==='GET'))throw new Error('MAINTENANCE_IN_PROGRESS');
       if(path==='logout'&&req.method==='POST'){
         auth.logout(req);res.setHeader('set-cookie','amazonops_session=; HttpOnly; SameSite=Strict; Path=/; Max-Age=0');json(res,{authenticated:false});return;
       }
       if(path==='status'&&req.method==='GET'){
-        const live=config.live===true&&!!source;
-        json(res,{authenticated:true,scope,live,version:'0.1.0',modelState:!live?'disabled':budget.exhausted()?'budget_exhausted':
+        const live=config.live===true&&!!source&&!maintenance;
+        json(res,{authenticated:true,scope,live,version:'0.1.0',modelState:maintenance?'maintenance':!live?'disabled':budget.exhausted()?'budget_exhausted':
           accounting.state.lastOutcome==='failed'?'last_failed':accounting.state.lastOutcome==='succeeded'?'last_succeeded':'enabled_unverified',
           budget:{used:budget.snapshot(),limits:budget.limits,policy:budget.policy,lifetime:budget.lifetimeSnapshot()}});return;
       }

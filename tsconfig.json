@@ -11,6 +11,6 @@
     "skipLibCheck": true,
     "types": ["node", "react", "react-dom"]
   },
-  "include": ["packages/**/*.ts", "packages/**/*.tsx", "scripts/**/*.ts", "tests/business/**/*.ts", "tests/client/**/*.ts", "tests/integration/**/*.ts", "tests/packaging/**/*.ts"],
+  "include": ["packages/**/*.ts", "packages/**/*.tsx", "scripts/**/*.ts", "tests/**/*.ts"],
   "exclude": ["node_modules", "lib", "vendor"]
 }

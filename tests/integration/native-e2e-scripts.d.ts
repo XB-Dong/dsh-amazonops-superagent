@@ -15,6 +15,6 @@ declare module '*scripts/start.mjs' {
       Pick<import('node:child_process').ChildProcess, 'stdout' | 'stderr' | 'once' | 'kill'>;
   }): { child: Pick<import('node:child_process').ChildProcess, 'stdout' | 'stderr' | 'once' | 'kill'>;
     home: string; port: number; cleanup(): void };
-  export function scrubEnvironment(env: NodeJS.ProcessEnv, home: string, apiKey?: string): NodeJS.ProcessEnv;
+  export function scrubEnvironment(env: NodeJS.ProcessEnv, home: string, apiKey?: string): NodeJS.ProcessEnv & { DSH_HOME:string };
   export function lineWriter(write: (text: string) => void, secrets?: string[]): { push(text: string): void; flush(): void };
 }

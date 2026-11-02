@@ -50,7 +50,7 @@ export function apply(ctx: Context, config: { evidence: string; automatic?: bool
         await agent.whenIdle();
         // A completed worker turn can queue one native status relay to the router.
         // Drain both real owners before observing accounting or shutting down.
-        const runtime = ctx.get('orchestrator') as { idle(): Promise<void> };
+        const runtime = ctx.get('orchestrator') as unknown as { idle(): Promise<void> };
         for (let pass = 0; pass < 2; pass++) {
           await runtime.idle();
           await Promise.all(ctx.agents.list().map(value => value.whenIdle()));

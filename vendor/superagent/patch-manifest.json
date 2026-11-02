@@ -120,6 +120,12 @@
     "hostObligations": "Provide privacy hooks before native boot; durably change epoch and enter maintenance on privacy actions; checkpoint and wait for the fresh native provider; authorize every referenced source/ticket/tool argument",
     "validation": "Actual DSH privacy Red/Green: old master second model request blocked, new epoch master clean after checkpoint, pending native assessment/relay/notice discarded, scoped route refused, fresh request contains no deleted sentinel; loopback-only model fixture"
   },
+  "operationsTurnCompletion": {
+    "mechanism": "Official ToolRunContext.concludeTurn on this successful tool result; preserve native steering and inbox behavior",
+    "terminalReports": ["ready", "blocked", "failed", "dropped"],
+    "requirements": "report requires reported=true; route requires nonempty results with no refused item; reply requires status=sent; errors and progress never conclude",
+    "validation": "Real native E2E Red showed delivered ready worker turn/end reason=error TICKET_ENDED; Green reason=completed with exactly two worker model requests, unchanged privacy guards and dynamic captured accounting"
+  },
   "transportAdaptations": [
     "Business tool results use JSON transport semantics for optional fields; real native output validator is authoritative",
     "Operations read tool schema documents only current ticket and authenticated original triggers; unlisted resources are denied by host authorization"

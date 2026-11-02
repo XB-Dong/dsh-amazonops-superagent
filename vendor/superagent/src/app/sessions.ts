@@ -269,9 +269,22 @@ export class Sessions {
           const image = value && typeof value === 'object' && 'image' in value ? (value as { image: never }).image : undefined
           return image ? [text, { type: 'image' as const, attachment: image }] : [text]
         } },
-        execute: (args, execution) => {
+        execute: async (args, execution) => {
           this.authorizeTool(agent, name, args)
-          return execute(schema.parse(args), execution.signal)
+          const value = await execute(schema.parse(args), execution.signal)
+          if (this.host.operationsMode && value && typeof value === 'object') {
+            const result = value as { reported?: unknown; status?: unknown; results?: unknown }
+            const state = (args as { state?: unknown }).state
+            const reported = name === 'orchestrator_report' && result.reported === true &&
+              ['ready', 'blocked', 'failed', 'dropped'].includes(String(state))
+            const routed = name === 'orchestrator_route' && Array.isArray(result.results) && result.results.length > 0 &&
+              result.results.every(row => row && typeof row === 'object' && !Object.hasOwn(row, 'refused'))
+            const replied = name === 'orchestrator_reply' && result.status === 'sent'
+            // The marker belongs to this successful tool result. DSH retains its own
+            // steering/inbox semantics; no cancellation or second loop is introduced.
+            if (reported || routed || replied) execution.concludeTurn()
+          }
+          return value
         } }))
     }
   }

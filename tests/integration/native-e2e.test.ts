@@ -164,8 +164,18 @@ test('offline real DSH routes, executes scoped task tool, reports and delivers e
     assert.equal(status.budget.policy.account, 'amazonops-test');
     writeFileSync(join(evidence, 'acceptance.json'), JSON.stringify({ manifest, submitted: submitted.value, work, snapshot, status,
       fixtureRequests: model.requests, nativeTypes: [native.engine, native.store, native.executor], resultEvents: results.length }, null, 2));
-    const workerSession = await inspectWorker(`worker-${work.tickets[0].id}`);
+    const workerSession = await until('successful ready worker native turn end', async () => {
+      const value = await inspectWorker(`worker-${work.tickets[0].id}`);
+      return value.events.some((event: any) => event.type === 'turn/end') ? value : undefined;
+    });
+    assert.equal(workerSession.events.findLast((event: any) => event.type === 'turn/end').data.reason.kind, 'completed',
+      'A delivered ready report must naturally conclude the worker turn, never fail with TICKET_ENDED');
     assert.ok(workerSession.events.some((event: any) => event.type === 'tool/result' && JSON.stringify(event).includes(snapshot.tasks[0].id)));
+    const capturedCalls = model.requests.length;
+    assert.equal(model.requests.filter(request => request.role === 'worker').length, 2,
+      'The ready worker must conclude immediately after prepare and report without a third model step');
+    await new Promise(done => setTimeout(done, 100));
+    assert.equal(model.requests.length, capturedCalls, 'Successful route/reply/report results must not request a redundant next model step');
     const backup = await api('actions/backup', {});
     assert.equal(backup.response.status, 200, JSON.stringify(backup.value));
     assert.match(backup.value.id, /^[\w.:-]+$/);
@@ -190,7 +200,7 @@ test('offline real DSH routes, executes scoped task tool, reports and delivers e
     assert.deepEqual(replay.value, submitted.value);
     await new Promise(done => setTimeout(done, 500));
     assert.equal((await api('snapshot')).value.tasks.length, 1);
-    assert.equal(model.requests.length, 6, 'A duplicate request or restored ready ticket must not invoke the model again');
+    assert.equal(model.requests.length, capturedCalls, 'A duplicate request or restored ready ticket must not invoke the model again');
     // A second real authenticated message creates a distinct native ticket. Hold only
     // its local model stream, then cancel through the public business endpoint.
     model.control.holdWorkers = true;
@@ -211,6 +221,7 @@ test('offline real DSH routes, executes scoped task tool, reports and delivers e
     assert.equal(stopped.tickets.length, 2);
     assert.equal((await api('snapshot')).value.tasks.length, 1, 'Cancelled worker must not save a second draft');
     const afterCancel = (await api('status')).value;
+    const cancelledCalls = model.requests.length;
     assert.equal(afterCancel.budget.used.calls, model.requests.length, 'Every fixture stream must be durably accounted, including cancellation');
     writeFileSync(join(evidence, 'restart-cancellation.json'), JSON.stringify({ restoredWork, replay: replay.value,
       second: second.value, stopped, abortedWorkers: model.control.abortedWorkers, status: afterCancel }, null, 2));
@@ -245,7 +256,7 @@ test('offline real DSH routes, executes scoped task tool, reports and delivers e
       const replies = nativeDb.prepare("SELECT value FROM outbox WHERE json_extract(value,'$.status')='sent'").all();
       assert.equal(replies.filter(row => JSON.parse(String(row.value)).text === resultText).length, 1);
     } finally { nativeDb.close(); }
-    assert.equal(model.requests.length, 9, 'Reading and replaying recovered native owners must not generate new model calls');
+    assert.equal(model.requests.length, cancelledCalls, 'Reading and replaying recovered native owners must not generate new model calls');
     writeFileSync(join(evidence, 'checkpoint-recovery.json'), JSON.stringify({ backup: backup.value, recoveryResult,
       ownerValidation: JSON.parse(ownerValidation.stdout), recoveredTaskId: recoveredSnapshot.tasks[0].id,
       recoveredTicketId: recoveredWork.tickets[0].id, workerSessionDigest: createHash('sha256').update(JSON.stringify(recoveredWorker)).digest('hex'),
@@ -259,16 +270,17 @@ test('offline real DSH routes, executes scoped task tool, reports and delivers e
       return next.masterId !== beforeErase.masterId && current.response.ok && current.value.tasks.length === 0 ? next : undefined;
     });
     assert.equal((await api('work')).value.tickets.length, 0);
-    assert.equal(model.requests.length, 9);
+    assert.equal(model.requests.length, cancelledCalls);
     model.control.quietRouter = true;
     const safeInput = await api('messages', { text: '删除后的安全会话核验，仅确认收到。', requestId: 'offline-e2e-after-erasure' });
     assert.equal(safeInput.response.status, 200);
-    await until('fresh model request after business erasure', async () => model.requests.length === 10 ? true : undefined);
+    await until('fresh model request after business erasure', async () => model.requests.length === cancelledCalls + 1 ? true : undefined);
+    const finalCalls = model.requests.length;
     const requestLines = readFileSync(join(evidence, 'model-requests.jsonl'), 'utf8').trim().split('\n');
     const safeBody = JSON.stringify(JSON.parse(requestLines.at(-1)!).body);
     for (const revoked of [submitted.value.messageId, input.text, work.tickets[0].id, snapshot.tasks[0].id])
       assert.ok(!safeBody.includes(revoked), `Deleted lineage reentered fresh master model context: ${revoked}`);
-    await until('fresh request durable settlement', async () => (await api('status')).value.budget.used.calls === 10 ? true : undefined);
+    await until('fresh request durable settlement', async () => (await api('status')).value.budget.used.calls === finalCalls ? true : undefined);
     await shutdown();
     const privateRecoveredHome = mkdtempSync(join(tmpdir(), 'amazonops-native-private-recovered-'));
     const privacyRestore = spawnSync(process.execPath, ['--experimental-transform-types', join(root, 'scripts/recovery.ts'),
@@ -278,8 +290,8 @@ test('offline real DSH routes, executes scoped task tool, reports and delivers e
     await boot(privateRecoveredHome);
     assert.equal((await api('snapshot')).value.tasks.length, 0, 'Current privacy ledger must suppress deleted backup data');
     assert.equal((await api('work')).value.tickets.length, 0, 'Restored native raw records must not reactivate revoked tickets');
-    assert.equal((await api('status')).value.budget.used.calls, 10);
-    assert.equal(model.requests.length, 10, 'Restoring an older backup must not resurrect or automatically model erased history');
+    assert.equal((await api('status')).value.budget.used.calls, finalCalls);
+    assert.equal(model.requests.length, finalCalls, 'Restoring an older backup must not resurrect or automatically model erased history');
     writeFileSync(join(evidence, 'privacy-recovery.json'), JSON.stringify({ oldMasterId: beforeErase.masterId,
       freshMasterId: afterErase.masterId, modelRequests: model.requests.length, erasure: erased.value,
       privacyRestore: JSON.parse(privacyRestore.stdout), restoredTasks: 0, restoredTickets: 0 }, null, 2));

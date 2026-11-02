@@ -12,7 +12,8 @@
     "src/app/setup.ts",
     "src/executor/dsh.ts",
     "src/app/tools/executor.ts",
-    "skills/dsh-superagent-github/SKILL.md"
+    "skills/dsh-superagent-github/SKILL.md",
+    "src/app/http.ts"
   ],
   "unchangedCore": [
     {
@@ -83,6 +84,13 @@
   "packagingAdaptations": [
     "Remove old coding management client metadata; root owns native operations client",
     "Delegate amazonopsHooks dynamically when each managed agent is decorated",
-    "Native entry and extension built independently under vendor package asset root"
-  ]
+    "Native entry and extension built independently under vendor package asset root",
+    "Keep harness and superagent state under Business dataDir for coordinated capture"
+  ],
+  "checkpointExtension": {
+    "method": "Runtime.checkpoint(capture)",
+    "behavior": "Await stop and flush before capture; request constructor-supplied fiber restart after success or failure",
+    "validation": "Actual native host reaches generations 1, 2 and 3; closed SQLite during capture",
+    "rootMaintenanceRequired": true
+  }
 }

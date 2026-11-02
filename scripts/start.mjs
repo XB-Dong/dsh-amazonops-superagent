@@ -33,7 +33,7 @@ export function loadSettings(home, env = process.env) {
 export function scrubEnvironment(env, home, apiKey) {
   const clean = Object.fromEntries(Object.entries(env).filter(([key]) =>
     /^(PATH|PATHEXT|SYSTEMROOT|WINDIR|COMSPEC|TEMP|TMP|USERPROFILE|APPDATA|LOCALAPPDATA)$/i.test(key)));
-  clean.DSH_HOME = join(home, 'harness');
+  clean.DSH_HOME = join(home, 'data', 'harness');
   if (apiKey) clean.AMAZONOPS_API_KEY = apiKey;
   return clean;
 }
@@ -75,7 +75,7 @@ export function start(options = {}) {
   }
   const apiKey = env.AMAZONOPS_API_KEY;
   mkdirSync(join(home, 'data'), { recursive: true, mode: 0o700 });
-  mkdirSync(join(home, 'superagent'), { recursive: true, mode: 0o700 });
+  mkdirSync(join(home, 'data', 'superagent'), { recursive: true, mode: 0o700 });
   const patch = join(home, `launch-${process.pid}-${randomBytes(6).toString('hex')}.json`);
   writeFileSync(patch, `${JSON.stringify(localPatch({ root, home, password: settings.password,
     port: settings.port, live: !!apiKey, modelAccount: settings.modelAccount }), null, 2)}\n`, { mode: 0o600, flag: 'wx' });

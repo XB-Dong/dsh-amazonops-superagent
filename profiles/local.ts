@@ -13,7 +13,7 @@ export interface LocalProfile {
 
 export function localPatch(options: LocalProfile): object[] {
   const path = (...parts: string[]) => join(...parts).replaceAll('\\', '/');
-  const stateDir = path(options.home, 'superagent');
+  const stateDir = path(options.home, 'data', 'superagent');
   return [
     ...operationsPatch(stateDir),
     { id: 'webserver', config: { host: '127.0.0.1', port: options.port } },

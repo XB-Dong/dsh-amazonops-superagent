@@ -87,12 +87,15 @@ export class Runtime extends Service implements SourceHost {
   private releaseLock?: () => Promise<void>
   private closingFlag = false
   private stopping?: Promise<void>
+  private checkpointing = false
+  private readonly restartAfterCheckpoint: () => void
   private readonly sourceDeps: SourceContextDeps
   private readonly toolHost: MainToolsHost & ExecutorToolsHost
   /** Non-zero while a main-Session tool is executing an Engine command, suppressing self-triggered domain event notices. */
   private quiet = 0
   constructor(ctx: Context, readonly machine: Machine, restart: () => void, readonly extensions: OperationsExtensions = {}) {
     super(ctx, 'orchestrator')
+    this.restartAfterCheckpoint = restart
     const runtime = this
     // Lock the state directory before opening the database so another process cannot migrate or write concurrently.
     mkdirSync(machine.stateDir, { recursive: true, mode: 0o700 })
@@ -182,6 +185,21 @@ export class Runtime extends Service implements SourceHost {
     }
   }
   get health(): Readonly<Record<string, Health>> { return this.board.all }
+  /** Close the real owner stores and native sessions before capture; request a fresh provider afterwards. */
+  async checkpoint<T>(capture: () => Promise<T>): Promise<T> {
+    if (this.checkpointing || this.closingFlag) throw new Error('CHECKPOINT_IN_PROGRESS')
+    this.checkpointing = true
+    try {
+      await this.stop()
+      return await capture()
+    } finally {
+      // A restart creates a new Runtime; this stopped instance must never reopen its own databases.
+      setTimeout(() => {
+        try { this.restartAfterCheckpoint() }
+        catch (error) { this.ctx.logger.error('dsh-superagent checkpoint restart failed: %s', String(error)) }
+      }, 0)
+    }
+  }
   /** Aborted when dsh-superagent stops or loses its state directory lock, cancelling running reads and subprocesses. */
   get lifetime(): AbortSignal { return this.stopped.signal }
   context(kind: { kind: string; health: readonly string[] }): SourceContext { return sourceContextOf(this.sourceDeps, kind) }

@@ -6,6 +6,7 @@ import { tmpdir } from 'node:os';
 import { pathToFileURL } from 'node:url';
 import { loadSettings, redactOutput, scrubEnvironment, start, lineWriter } from '../../scripts/start.mjs';
 import { buildProject } from '../../scripts/build.mjs';
+import { localPatch } from '../../profiles/local.ts';
 
 test('launcher rejects a relative runtime home before creating private state', () => {
   const before = process.cwd();
@@ -49,6 +50,17 @@ test('spawn environment carries only OS necessities, this home and the explicit 
     AMAZONOPS_API_KEY: 'explicit-key' }, 'D:/synthetic-home', 'explicit-key');
   assert.deepEqual(Object.keys(environment).sort(), ['AMAZONOPS_API_KEY', 'DSH_HOME', 'PATH']);
   assert.equal(environment.AMAZONOPS_API_KEY, 'explicit-key');
+  assert.equal(environment.DSH_HOME.replaceAll('\\', '/'), 'D:/synthetic-home/data/harness');
+});
+
+test('business backup root contains both native session and orchestrator state owners', () => {
+  const rows = localPatch({ root: 'D:/synthetic-app', home: 'D:/synthetic-home', password: 'synthetic-password',
+    port: 4315, live: false, modelAccount: 'test' });
+  const entries = rows.flatMap(row => (row as { insert?: { id: string; config: Record<string, unknown> }[] }).insert ?? []);
+  const host = entries.find(row => row.id === 'amazonops-host')!;
+  const native = entries.find(row => row.id === 'amazonops-superagent')!;
+  assert.equal(host.config.dataDir, 'D:/synthetic-home/data');
+  assert.equal(native.config.stateDir, 'D:/synthetic-home/data/superagent');
 });
 
 test('log redaction removes launch tokens and buffers secrets split across chunks', () => {

@@ -18,8 +18,12 @@ export async function apply(ctx: Context, config: DeploymentConfig): Promise<voi
   const restart = (): void => {
     ctx.fiber.restart().then(() => { ctx.get('settings')?.describe() }).catch((error: unknown) => { ctx.logger.error('dsh-superagent restart failed: %s', String(error)) })
   }
-  const hooks = ctx.get('amazonopsHooks') as import('./app/runtime.ts').OperationsExtensions | undefined
-  const runtime = new Runtime(ctx, machine, restart, hooks)
+  // Source/worker activation can follow a later host-plugin activation; never capture an absent hook service.
+  const currentHooks = () => ctx.get('amazonopsHooks') as import('./app/runtime.ts').OperationsExtensions | undefined
+  const runtime = new Runtime(ctx, machine, restart, {
+    tools: (agent, ticket) => currentHooks()?.tools?.(agent, ticket) ?? [],
+    onAgent: (agent, ticket) => currentHooks()?.onAgent?.(agent, ticket),
+  })
   ctx.effect(() => async () => { await runtime.stop() })
   await runtime.ready
   ctx.logger.info(runtime.configured() ? 'dsh-superagent ready; the Superagent sidebar entry opens the management panel' : `dsh-superagent is waiting for setup: ${runtime.setupProblem?.detail ?? ''}`)

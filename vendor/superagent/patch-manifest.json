@@ -79,5 +79,10 @@
   "nativeValidation": "5 tests passed; actual DSH Web Runtime startup; offline only",
   "whitespaceOnlyChanges": [
     "skills/dsh-superagent-github/SKILL.md"
+  ],
+  "packagingAdaptations": [
+    "Remove old coding management client metadata; root owns native operations client",
+    "Delegate amazonopsHooks dynamically when each managed agent is decorated",
+    "Native entry and extension built independently under vendor package asset root"
   ]
 }

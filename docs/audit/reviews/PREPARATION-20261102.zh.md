@@ -6,9 +6,13 @@
 
 | 发现 | 位置 / 触发 | Leader 处置 | 当前复验 |
 | --- | --- | --- | --- |
-| PREP-R1 / P2：Source 缺确定性事件准入 | domain-v0.1 的 outbox 接入；上游 core/intake.ts 会给无工单所有者的 Trigger 排 Eval，业务派生或助手回执直接回流可能自触发 | 采纳；增加准入表、过滤派生/回执/tick、非唤醒上下文边界；A17-04 验收 | 修订待独立复验 |
-| PREP-R2 / P2：跨 Assignment 无稳定业务操作身份 | 三个写工具没有可信 requestId 来源；重启改 Assignment 后可能产生新业务键 | 采纳；持久 originatingMessageEventId/kind/intentSlot→operationId，绑定 payload、重放回执、新请求区分；A17-05 验收 | 修订待独立复验 |
+| PREP-R1 / P2：Source 缺确定性事件准入 | domain-v0.1 的 outbox 接入；上游 core/intake.ts 会给无工单所有者的 Trigger 排 Eval，业务派生或助手回执直接回流可能自触发 | 采纳；增加准入表、过滤派生/回执/tick、非唤醒上下文边界；A17-04 验收 | 已关闭，独立复验 28658c32170507a5c11659a86e185cc6caa44941 |
+| PREP-R2 / P2：跨 Assignment 无稳定业务操作身份 | 三个写工具没有可信 requestId 来源；重启改 Assignment 后可能产生新业务键 | 采纳；持久 originatingMessageEventId/kind/intentSlot→operationId，绑定 payload、重放回执、新请求区分；A17-05 验收 | 已关闭，独立复验同一精确修订 |
 
 两项为设计缺口，不是已运行复现的产品故障。Leader 已完成同一准备根任务的第 1 轮修订，累计计数保留；未靠改名或分波清零。修订后 59 项设计验收，仍全部 not_run。
+
+复验由同一独立审核者只读完成：git rev-parse HEAD 与 28658c32170507a5c11659a86e185cc6caa44941 一致，工作区干净；读取初审到修订差异；实际运行 python scripts/verify_preparation.py 退出 0（32 文件、37 链接、20 组、59 设计项，错误为空）。两项均关闭，无新的前置规格阻断，前置审核 accepted。
+
+该 accepted 仅说明规格具备进入 P0 计划的条件，不证明准入、幂等或任何产品运行行为已通过。最终记录更新与仓库同步仍由 Leader 完成。
 
 审核范围包括完整复现、真实 SuperAgent 复用、Windows/权限/鉴权/重试、业务/编排/来源/恢复及模型记账和准备停止边界。审核未写文件、安装依赖、运行应用或产品测试、调用模型、读取凭据、访问生产或修改自动任务。

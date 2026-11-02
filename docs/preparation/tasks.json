@@ -78,7 +78,7 @@
         "PREP-INVENTORY",
         "PREP-NATIVE"
       ],
-      "status": "in_progress",
+      "status": "completed",
       "acceptance": "规格/完整矩阵/状态一致，准备检查通过，未创建P0计划或产品实现",
       "repairCount": 1,
       "repairCondition": "After two same-root-cause repairs, diagnose and record a revised decision; never reset by renaming",
@@ -105,7 +105,7 @@
       "dependencies": [
         "PREP-DESIGN"
       ],
-      "status": "in_progress",
+      "status": "completed",
       "acceptance": "独立审阅准确候选，逐项发现处置和复验，产品not_run保持",
       "repairCount": 0,
       "repairCondition": "After two same-root-cause repairs, diagnose and record a revised decision; never reset by renaming",
@@ -115,7 +115,8 @@
         "unauthorized_write",
         "scope_exceeds_pre_p0_plan"
       ],
-      "deliverable": "Chinese source-grounded findings; no fabricated runtime results"
+      "deliverable": "Chinese source-grounded findings; no fabricated runtime results",
+      "verifiedRevisionSha": "28658c32170507a5c11659a86e185cc6caa44941"
     }
   ]
 }

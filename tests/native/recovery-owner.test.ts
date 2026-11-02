@@ -75,6 +75,10 @@ test('orphan pending assignment cannot use an unrelated launch to waive session 
   const f=queuedFixture(store=>store.db.prepare("UPDATE effect SET value=? WHERE kind='launch'").run(JSON.stringify({ticketId:'different-ticket',assignmentId:'different-assignment'})));
   const result=validate(f.root);assert.equal(result.status,1);assert.deepEqual(JSON.parse(result.stderr),{ok:false,error:'NATIVE_WORKER_SESSION_REQUIRED'});
 });
+test('ticket row identity must match its native JSON aggregate before a launch can waive session creation',()=>{
+  const f=queuedFixture(store=>store.db.prepare('UPDATE ticket SET value=json_set(value,\'$.id\',?)').run('mismatched-ticket'));
+  const result=validate(f.root);assert.equal(result.status,1);assert.deepEqual(JSON.parse(result.stderr),{ok:false,error:'NATIVE_DATABASE_INVALID'});
+});
 for(const evidence of ['deliveredAt','idleAt','input-read','input-pending-read','input-delivered','prior-started'] as const)test(`native ${evidence} history still requires its worker artifact`,()=>{
   const f=queuedFixture((store,_engine,id)=>{
     const ticket=store.tickets.get(id)!;

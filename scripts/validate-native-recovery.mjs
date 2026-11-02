@@ -57,8 +57,11 @@ export async function validateNativeRecovery(dataDir) {
         const payload = JSON.parse(String(row.value));
         return row.key === payload.assignmentId ? [JSON.stringify([payload.ticketId, payload.assignmentId])] : [];
       }));
-      for (const row of db.prepare('SELECT id,value FROM ticket').all())
-        if (needsWorkerSession(JSON.parse(String(row.value)), launches)) ticketIds.add(`worker-${row.id}`);
+      for (const row of db.prepare('SELECT id,value FROM ticket').all()) {
+        const ticket = JSON.parse(String(row.value));
+        if (ticket.id !== row.id) throw new Error();
+        if (needsWorkerSession(ticket, launches)) ticketIds.add(`worker-${row.id}`);
+      }
       databases++;
     } catch { throw new Error('NATIVE_DATABASE_INVALID'); }
     finally { db?.close(); }

@@ -6,7 +6,12 @@ export function allowedRequest(req: Pick<IncomingMessage,'headers'|'method'|'url
   if (req.headers.host !== new URL(origin).host) return 403;
   if (req.method !== 'GET' && req.method !== 'HEAD' && req.headers.origin !== origin) return 403;
   if (req.headers.origin && req.headers.origin !== origin) return 403;
-  const path=new URL(req.url ?? '/',origin).pathname;
+  let path:string;
+  try{
+    const url=new URL(req.url??'/',origin);
+    if(url.origin!==origin)return 403;
+    path=url.pathname;
+  }catch{return 400;}
   if (path==='/amazonops/login' || path==='/amazonops/api/login') return 200;
   if (!auth.identity(req)) return 401;
   if (path.startsWith('/orchestrator') || path==='/api/file') return 403;

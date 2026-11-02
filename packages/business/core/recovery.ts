@@ -8,6 +8,7 @@ import {
   cpSync,
   existsSync,
   statSync,
+  lstatSync,
 } from 'node:fs';
 import { join, relative, resolve, dirname } from 'node:path';
 import { randomUUID, createHash } from 'node:crypto';
@@ -21,6 +22,13 @@ type Manifest = {
   harnessVersion: string;
   files: { path: string; bytes: number; sha256: string }[];
 };
+function noLinks(path:string):void {
+  let current=resolve(path);
+  for(;;){
+    if(existsSync(current)&&lstatSync(current).isSymbolicLink())throw new Error('BACKUP_SYMLINK_FORBIDDEN');
+    const parent=dirname(current);if(parent===current)return;current=parent;
+  }
+}
 function inventory(root: string, directory = root): Manifest['files'] {
   return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
     const path = join(directory, entry.name);
@@ -94,18 +102,28 @@ export function restoreRecoveryPoint(
 ) {
   const root = resolve(directory);
   const destination = resolve(target);
+  noLinks(root);noLinks(destination);noLinks(currentLedger);
+  if(currentBudget)noLinks(currentBudget);
   if (existsSync(destination) && readdirSync(destination).length)
     throw new Error('RESTORE_TARGET_NOT_EMPTY');
   if (!existsSync(currentLedger)) throw new Error('CURRENT_PRIVACY_LEDGER_REQUIRED');
   if (!currentBudget || !existsSync(currentBudget))
     throw new Error('CURRENT_MODEL_BUDGET_REQUIRED');
+  noLinks(join(root,'manifest.json'));
   const manifest = JSON.parse(readFileSync(join(root, 'manifest.json'), 'utf-8')) as Manifest;
   if (manifest.schemaVersion !== '1.0' || !Array.isArray(manifest.files))
     throw new Error('INVALID_BACKUP_MANIFEST');
+  const names=new Set<string>();
   for (const file of manifest.files) {
+    if(typeof file.path!=='string'||!file.path||file.path.includes('\\')||file.path.includes(':')||
+      file.path.split('/').some(part=>!part||part==='.'||part==='..')||/[\x00-\x1f]/.test(file.path)||names.has(file.path.toLowerCase()))
+      throw new Error('BACKUP_PATH_FORBIDDEN');
+    names.add(file.path.toLowerCase());
     const path = resolve(root, file.path);
     if (!path.startsWith(root + '/') && !path.startsWith(root + '\\'))
       throw new Error('BACKUP_PATH_FORBIDDEN');
+    noLinks(path);
+    if(!lstatSync(path).isFile())throw new Error('BACKUP_FILE_REQUIRED');
     const bytes = readFileSync(path);
     if (
       bytes.length !== file.bytes ||

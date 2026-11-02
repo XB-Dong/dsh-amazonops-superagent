@@ -34,7 +34,9 @@ function response(res: ServerResponse, index: number, tool?: { name: string; inp
 }
 export async function fakeModel(evidence: string) {
   const requests: { role: string; tool?: string; input?: unknown; path: string }[] = [];
-  const control = { holdWorkers: false, quietRouter: false, activeWorkers: 0, abortedWorkers: 0 };
+  const control = { holdWorkers: false, quietRouter: false, activeWorkers: 0, abortedWorkers: 0,
+    prepareChecklist: draftChecklist,
+    copyFrom: undefined as { taskId: string; revision: number } | undefined };
   const server = createServer(async (req, res) => {
     try {
       let raw = '';
@@ -45,9 +47,23 @@ export async function fakeModel(evidence: string) {
       const worker = body.tools?.some(tool => tool.name === 'cc_prepare_task');
       let tool: { name: string; input: unknown } | undefined;
       if (worker) {
-        if (!toolResults(body, 'cc_prepare_task').length) tool = { name: 'cc_prepare_task', input: {
-          title: draftTitle, timeZone: 'Asia/Shanghai', checklist: draftChecklist } };
-        else if (!toolResults(body, 'orchestrator_report').length) tool = { name: 'orchestrator_report', input: { state: 'ready', summary: resultText } };
+        if (control.copyFrom) {
+          const pages = toolResults(body, 'cc_get_task');
+          const content = pages.at(-1)?.content;
+          const rawResult = typeof content === 'string' ? content : content?.find((item: any) => item.type === 'text')?.text;
+          const last = rawResult ? JSON.parse(rawResult) : undefined;
+          if (!last || last.nextOffset !== null)
+            tool = { name: 'cc_get_task', input: { taskId: control.copyFrom.taskId, offset: last?.nextOffset ?? 0 } };
+          else if (!toolResults(body, 'cc_copy_task').length)
+            tool = { name: 'cc_copy_task', input: { taskId: last.task.id, revision: last.task.revision,
+              replaceFrom: 'SKU-A', replaceTo: 'SKU-B' } };
+          else if (!toolResults(body, 'orchestrator_report').length)
+            tool = { name: 'orchestrator_report', input: { state: 'ready', summary: resultText } };
+        } else {
+          if (!toolResults(body, 'cc_prepare_task').length) tool = { name: 'cc_prepare_task', input: {
+            title: draftTitle, timeZone: 'Asia/Shanghai', checklist: control.prepareChecklist } };
+          else if (!toolResults(body, 'orchestrator_report').length) tool = { name: 'orchestrator_report', input: { state: 'ready', summary: resultText } };
+        }
       } else if (!control.quietRouter) {
         // The actual native candidate and report notices carry the authoritative IDs.
         const reports = [...text.matchAll(/"kind"\s*:\s*"worker_report"[^\n]*/g)];

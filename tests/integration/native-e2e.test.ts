@@ -301,6 +301,62 @@ test('offline real DSH routes, executes scoped task tool, reports and delivers e
     writeFileSync(join(evidence, 'privacy-recovery.json'), JSON.stringify({ oldMasterId: beforeErase.masterId,
       freshMasterId: afterErase.masterId, modelRequests: model.requests.length, erasure: erased.value,
       privacyRestore: JSON.parse(privacyRestore.stdout), restoredTasks: 0, restoredTickets: 0 }, null, 2));
+    // A04-01: the actual worker, rather than a direct business test, reads every
+    // page before copying. Model responses are deterministic; callbacks are real.
+    model.control.quietRouter = false;
+    model.control.holdWorkers = false;
+    model.control.prepareChecklist = Array.from({ length: 9 }, (_, index) => `SKU-A 第${index + 1}项核对`);
+    const pagedOriginalRequest = await api('messages', { text: '保存含九项SKU-A检查的任务草稿。', requestId: 'paged-original' });
+    assert.equal(pagedOriginalRequest.response.status, 200);
+    const pagedOriginal = await until('nine-step source task and result', async () => {
+      const state = (await api('snapshot')).value;
+      const currentWork = (await api('work')).value;
+      return state.tasks.length === 1 && currentWork.messages.some((message: any) => message.text === resultText)
+        ? state.tasks[0] : undefined;
+    });
+    assert.deepEqual(pagedOriginal.checklist, model.control.prepareChecklist);
+    const copyRequestStart = model.requests.length;
+    model.control.copyFrom = { taskId: pagedOriginal.id, revision: pagedOriginal.revision };
+    const copyRequest = await api('messages', { text: `完整读取任务 ${pagedOriginal.id}，把全部SKU-A字面替换为SKU-B，复制为待确认草稿。`, requestId: 'paged-copy' });
+    assert.equal(copyRequest.response.status, 200);
+    const pagedCopy = await until('paged copy delivered result', async () => {
+      const state = (await api('snapshot')).value;
+      const currentWork = (await api('work')).value;
+      const ready = currentWork.tickets.find((ticket: any) => ticket.latestReport?.status === 'ready' &&
+        state.tasks.some((task: any) => task.id !== pagedOriginal.id && task.sources.includes(copyRequest.value.messageId)));
+      return state.tasks.length === 2 && ready && currentWork.messages.filter((message: any) => message.text === resultText).length === 2
+        ? state.tasks.find((task: any) => task.id !== pagedOriginal.id) : undefined;
+    });
+    assert.deepEqual((await api('snapshot')).value.tasks.find((task: any) => task.id === pagedOriginal.id), pagedOriginal);
+    assert.deepEqual(pagedCopy.checklist, pagedOriginal.checklist.map((text: string) => text.replaceAll('SKU-A', 'SKU-B')));
+    assert.deepEqual(pagedCopy.checked, Array(9).fill(false));
+    assert.equal(pagedCopy.status, 'draft');
+    assert.ok(pagedCopy.sources.includes(pagedOriginal.id));
+    assert.ok(pagedCopy.sources.includes(copyRequest.value.messageId));
+    const copyCalls = model.requests.slice(copyRequestStart).filter(request => request.role === 'worker');
+    assert.deepEqual(copyCalls.map(request => request.tool), ['cc_get_task', 'cc_get_task', 'cc_get_task', 'cc_copy_task', 'orchestrator_report']);
+    assert.deepEqual(copyCalls.slice(0, 3).map(request => (request.input as any).offset), [0, 4, 8]);
+    const allEvents = readFileSync(join(evidence, 'session-events.jsonl'), 'utf8').trim().split('\n').map(line => JSON.parse(line));
+    const pageCalls = allEvents.filter(row => row.event.type === 'tool/call' && row.event.data.name === 'cc_get_task');
+    const pageResults = pageCalls.map(call => {
+      const result = allEvents.find(row => row.sessionId === call.sessionId && row.event.type === 'tool/result' &&
+        row.event.data.message.toolCallId === call.event.data.callId);
+      assert.ok(result && result.event.data.message.isError !== true);
+      const text = result.event.data.message.content.find((item: any) => item.type === 'text').text;
+      assert.ok(Buffer.byteLength(text, 'utf8') <= 6000);
+      return { bytes: Buffer.byteLength(text, 'utf8'), ...JSON.parse(text) };
+    });
+    assert.deepEqual(pageResults.map(page => page.checklist.length), [4, 4, 1]);
+    assert.deepEqual(pageResults.flatMap(page => page.checklist), pagedOriginal.checklist);
+    assert.deepEqual(pageResults.map(page => page.nextOffset), [4, 8, null]);
+    const pagedTicket = (await api('work')).value.tickets.find((ticket: any) => `worker-${ticket.id}` === pageCalls[0].sessionId);
+    assert.ok(pagedTicket);
+    await until('paged copy native completed', async () => {
+      const worker = await inspectWorker(`worker-${pagedTicket.id}`);
+      return worker.events.findLast((event: any) => event.type === 'turn/end')?.data.reason.kind === 'completed' ? true : undefined;
+    });
+    writeFileSync(join(evidence, 'paged-copy.json'), JSON.stringify({ original: pagedOriginal, copied: pagedCopy,
+      request: copyRequest.value, ticket: pagedTicket, pages: pageResults, workerCalls: copyCalls }, null, 2));
     const network = readFileSync(networkEvidence, 'utf8').trim().split('\n').filter(Boolean).map(line => JSON.parse(line));
     assert.ok(network.length > 0, 'Network fence must observe real model connections');
     assert.ok(network.every(row => row.allowed), 'Any external network attempt fails acceptance');

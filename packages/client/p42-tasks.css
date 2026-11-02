@@ -1,0 +1,44 @@
+
+
+.amazonops .p42-group-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 24px;
+}
+.amazonops .p42-group-controls label {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 0 0 210px;
+  font-size: 13px;
+}
+.amazonops .p42-group-controls .metadata {
+  margin-bottom: 0;
+}
+.amazonops .p42-date-heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 10px;
+}
+.amazonops .p42-date-heading h2 {
+  margin: 0;
+  font-size: 16px;
+  color: #42665a;
+}
+.amazonops .p42-date-heading span {
+  color: #7b8b81;
+  font-size: 12px;
+}
+@media (max-width: 600px) {
+.amazonops .p42-group-controls {
+    flex-direction: column;
+    gap: 16px;
+  }
+.amazonops .p42-group-controls label {
+    flex: auto;
+    width: 100%;
+  }
+}

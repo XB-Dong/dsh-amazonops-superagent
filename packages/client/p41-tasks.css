@@ -1,0 +1,79 @@
+
+
+.amazonops .p41-task-form {
+  margin-bottom: 24px;
+}
+.amazonops .p41-schedule {
+  min-width: 0;
+  border: 1px solid #dce4e0;
+  border-radius: 8px;
+  padding: 14px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.amazonops .p41-schedule legend {
+  font-size: 13px;
+  padding: 0 6px;
+  color: #4a5c56;
+}
+.amazonops .p41-schedule .text-button {
+  grid-column: 1 / -1;
+  justify-self: start;
+}
+.amazonops .p41-confirm {
+  flex-direction: row;
+  align-items: center;
+  background: #fff9e9;
+  padding: 12px;
+}
+.amazonops .p41-confirm input {
+  width: auto;
+}
+.amazonops .p41-error {
+  color: #a14430;
+  font-size: 13px;
+}
+.amazonops .p41-minutes {
+  display: grid;
+  gap: 9px;
+  padding-top: 16px;
+  margin-top: 16px;
+  border-top: 1px solid #e7ece8;
+}
+.amazonops .p41-minutes input {
+  max-width: 220px;
+}
+.amazonops .p41-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+  align-items: center;
+}
+.amazonops .p41-calendar-controls {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+}
+.amazonops .p41-calendar-summary {
+  margin: 16px 0;
+  color: #42665a;
+}
+.amazonops .p41-history {
+  margin-top: 24px;
+}
+.amazonops .p41-history summary {
+  cursor: pointer;
+  padding: 12px 0;
+}
+@media (max-width: 600px) {
+.amazonops .p41-calendar-controls,
+.amazonops .p41-schedule {
+    grid-template-columns: 1fr;
+  }
+.amazonops .p41-task-form .form-actions,
+.amazonops .task-card .card-footer {
+    flex-wrap: wrap;
+  }
+}

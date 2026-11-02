@@ -57,6 +57,8 @@ def check(final: bool) -> dict:
         errors.append("Incomplete full-P0 parity baseline")
     if set(row["requirementId"] for row in cases) != required_ids:
         errors.append("Acceptance coverage differs from complete P0 requirement set")
+    if not {"A17-04", "A17-05"}.issubset(case_ids):
+        errors.append("Missing independently reviewed source-admission or stable-operation acceptance")
     for row in requirements:
         linked = {case["id"] for case in cases if case["requirementId"] == row["id"]}
         if set(row["acceptanceIds"]) != linked:
@@ -108,6 +110,9 @@ def check(final: bool) -> dict:
             continue
         if path.suffix in {".db", ".sqlite", ".key", ".pem", ".pfx", ".p12", ".csv", ".xlsx"}:
             errors.append(f"Runtime/private artifact: {name}")
+        if (path.name == ".env" or (path.name.startswith(".env.") and path.name != ".env.example")
+                or {"runtime", "data", "sessions", "generated-skills", "worktrees", ".worktrees", "evidence", ".local"}.intersection(path.relative_to(ROOT).parts)):
+            errors.append(f"Private configuration or runtime directory: {name}")
         raw = path.read_bytes()
         try:
             content = raw.decode("utf-8")

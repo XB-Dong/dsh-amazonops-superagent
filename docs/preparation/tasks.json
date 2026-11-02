@@ -80,7 +80,7 @@
       ],
       "status": "in_progress",
       "acceptance": "规格/完整矩阵/状态一致，准备检查通过，未创建P0计划或产品实现",
-      "repairCount": 0,
+      "repairCount": 1,
       "repairCondition": "After two same-root-cause repairs, diagnose and record a revised decision; never reset by renaming",
       "timeboxMinutes": 15,
       "stopConditions": [
@@ -94,7 +94,7 @@
       "id": "PREP-REVIEW",
       "rootTask": "SUPERAGENT-REFACTOR-PREPARATION",
       "owner": "prep_review",
-      "baselineSha": "aa386f7de576a95e21feb51a05486ca7ac7774d9",
+      "baselineSha": "8d33c5c9b7e23f5f48f9a6857bbc768d43cf7466",
       "specVersion": "0.1.0",
       "inputBaselines": {
         "ccagent": "bc964298d49ad399ae325f57068c9149502b8c62",
@@ -105,7 +105,7 @@
       "dependencies": [
         "PREP-DESIGN"
       ],
-      "status": "not_started",
+      "status": "in_progress",
       "acceptance": "独立审阅准确候选，逐项发现处置和复验，产品not_run保持",
       "repairCount": 0,
       "repairCondition": "After two same-root-cause repairs, diagnose and record a revised decision; never reset by renaming",

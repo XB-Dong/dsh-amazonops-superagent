@@ -23,6 +23,25 @@ Ticket/Mandate/Assignment 使用上游真实对象。业务请求 ID、来源事
 - 事务提交后、投递前崩溃可重放；投递后、记录游标前崩溃不得重复建 Ticket 或业务记录。不能假称跨业务库/编排库事务。
 - 学习消费成功事件，不被 Task 领域同步反向调用。活动一次生成的阶段任务和复制来源在业务事务中保持失败原子性。
 
+### Source 确定性准入
+
+| 事件类别 | 是否进入 Engine.receive / Eval | 处理 |
+| --- | --- | --- |
+| 认证对话入口提交的 human_request | 可进入，仍受 Policy/Mandate 约束 | 稳定消息事件 ID；人类补充按上游订阅路由，不重造授权 |
+| 普通表单 Command、任务完成、学习派生、活动 tick、反馈存档 | 不进入新工单准入 | 仅业务消费者处理；即使 actor 是人，也不是对话工作请求 |
+| 助手 Channel 回执、工具结果、模型输出 | 不重新接入 Source.receive | 关联原 Ticket/业务回执展示，禁止输出回流自触发 |
+| 已关联 Ticket 的必要业务上下文更新 | 不得产生新 Eval、Ticket 或模型调用 | 默认下次执行时查询；若使用推送，只能走受控的非唤醒上下文接口，并先验证该接缝 |
+
+Source 在调用上游 receive 前过滤非 human_request，不能仅依赖模型判断“无需处理”。业务 outbox→Source 连线表示选择性适配，不是全部事件转 Trigger。原生执行器内部的已授权后台工作完成仍按其既有机制继续，不将该完成事件伪装成新用户请求。
+
+### 稳定业务操作身份
+
+模型写工具不负责生成可信 requestId。适配层在首次执行前将 logical operation 绑定为 `{scope, originatingMessageEventId, operationKind, intentSlot}`，分配 operationId，持久化规范化 payloadHash、原生事件/逻辑步骤引用、pending/committed 状态及结果引用。业务 Command 使用 operationId 作为幂等键，实体写入、结果回执和 outbox 在同一业务事务提交。
+
+唯一逻辑键跨 Assignment 更换、进程重启、原生事件重放和同一来源的模型重新规划保持不变；不得使用新 Assignment ID、临时 toolCallId 或随机运行内 ID 生成新业务键。已绑定的同一 intentSlot 如 payload 改变必须冲突，不能借修改 payloadHash 产生第二个操作。首次并发预留通过唯一约束获得同一 operationId；pending 但无业务提交可继续，committed 返回原回执。
+
+不同的真实人类消息事件即使 payload 相同也有不同操作身份，应分别执行。同一来源确实要求多份相同结果时，先形成可证明属于该请求的多个逻辑意图及独立 intentSlot，再执行；缺少可恢复的意图区分则澄清，不以重复模型调用猜测新意图。intentSlot 是可信适配层持久化的逻辑步骤身份，不接受模型任意改值扩大次数。该映射作为 SP-06 接缝的必验部分，不能宣称已有现成 API。
+
 ## 来源修订、撤回和删除
 
 消息补充产生新版本/事件，不覆盖旧确认事实。反馈/经验来源是数据，不授予开发或外部写权限。收到撤回/删除后：持久化隐私意图→阻止新的工具执行/派生→停相应后台工单或标不可继续→失效摘要/Skill/缓存与引用。迟到投递重新检查 tombstone，不重建原文。

@@ -198,7 +198,9 @@
       "acceptanceIds": [
         "A17-01",
         "A17-02",
-        "A17-03"
+        "A17-03",
+        "A17-04",
+        "A17-05"
       ],
       "implementationStatus": "not_started"
     },

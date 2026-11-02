@@ -15,7 +15,7 @@
 | SP-03 | app/sessions.ts:152 danger-full-access；:61/:263/:292 固定开发工具 | 运营 preset/角色/allowlist 可配置；agent-local cc 工具+单调 guard；新建、恢复、HMR、派工切换一致；默认关闭业务子 Agent |
 | SP-04 | executor/dsh.ts:30、:549–575 瞬时失败自动重试 3 次 | 模型/worker 自动续调策略显式设零；outbox 投递重放与付费模型重试分开记账 |
 | SP-05 | app/tools/executor.ts:82 报告工具构造读取 GitHub；prompts.ts:145 和 sessions.ts:319–324 编码 Skill | 普通产物报告、运营提示及经验不依赖 GitHub；PR 工具仅研发模式加载 |
-| SP-06 | exports 无 source/extension；sources/host.ts、registry.ts 提供内部 seam | 新增最小版本化 extension exports，注册 cc-workbench 来源；禁任意内部深导入；不重写 core |
+| SP-06 | exports 无 source/extension；sources/host.ts、registry.ts 提供内部 seam | 最小版本化 extension exports；Source 分类过滤/非唤醒上下文；持久逻辑操作身份贯穿 Assignment；禁任意内部深导入；不重写 core |
 | SP-07 | DSH host/webserver 无全局认证；SuperAgent 管理面仅本机/Host/Origin 类检查 | 全入口运营认证与能力限制：原生 Remote/stream/附件/会话/管理均要覆盖。原生 ingress/guard seam 尚需实验；必要时单独登记有界 DSH host patch |
 | SP-08 | DSH llm/stream 可覆盖实际调用；SuperAgent 角色各有模型调用 | llm/stream durable reserve/settle、身份及账户传播、未知 usage 保守记录，禁止任何角色绕过；关闭 llm-retry 与 worker 重试 |
 

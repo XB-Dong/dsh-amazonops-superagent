@@ -44,6 +44,10 @@ flowchart TD
 
 普通表单、导入预览、笔记和确定性计算直接调用业务 Command/Query，模型离线不受影响。自然语言工作由 Source 接收，经过上游授权评估后生成 Ticket/Assignment，在运营 Session 调用相同业务服务。
 
+图中的 outbox→Source 是分类过滤后的连接。只有认证对话入口的 human_request 可进入新工单准入；普通业务派生、反馈存档、tick 和助手回执不得直接送 Engine.receive。已关联业务状态默认由当前 Ticket 查询，非唤醒推送接缝须另行验证；结果回流不能创造新工单或额外模型调用。
+
+写工具通过可信适配层持久的 originatingMessageEventId、operationKind、intentSlot 映射 operationId；换 Assignment 后沿用，不按瞬时 toolCallId 重新分配。同一逻辑意图绑定原 payload，新的真实用户请求仍可建立新操作，详见领域契约。
+
 BusinessTask 是业务清单；Ticket 是一次授权的助手工作；Assignment 是该工作的一次执行。报告“草稿已准备”可以完成 Ticket，但不能替代 cc 确认 BusinessTask，也不能标业务清单完成。
 
 页面关闭只解绑订阅，后台工单继续。显式取消先持久化取消意图，再停止执行器、拒绝后续写入，已提交业务记录可见；不能宣称撤回已完成的写入。取消、恢复、补充消息和来源删除详见[契约](contracts/domain-v0.1.md)。

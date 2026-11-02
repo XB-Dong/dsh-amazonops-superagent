@@ -741,6 +741,26 @@
       "status": "not_run",
       "evidence": [],
       "legacyTestReferences": []
+    },
+    {
+      "id": "A17-04",
+      "requirementId": "SA-NATIVE-001",
+      "layer": "fault",
+      "mandatory": true,
+      "expected": "普通业务事件/反馈存档/tick/助手Channel与工具回执不进入新Eval，不产生自触发Ticket或额外模型调用；只有认证human_request可准入",
+      "status": "not_run",
+      "evidence": [],
+      "legacyTestReferences": []
+    },
+    {
+      "id": "A17-05",
+      "requirementId": "SA-NATIVE-001",
+      "layer": "fault",
+      "mandatory": true,
+      "expected": "同一原始消息逻辑操作换Assignment/重启/重新规划后沿用operationId并只写一次；相同payload的两次新用户请求分别生效；同intentSlot变payload冲突；同源多份需独立授权意图",
+      "status": "not_run",
+      "evidence": [],
+      "legacyTestReferences": []
     }
   ]
 }

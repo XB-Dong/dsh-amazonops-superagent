@@ -92,5 +92,22 @@
     "behavior": "Await stop and flush before capture; request constructor-supplied fiber restart after success or failure",
     "validation": "Actual native host reaches generations 1, 2 and 3; closed SQLite during capture",
     "rootMaintenanceRequired": true
+  },
+  "privacyExtension": {
+    "owner": "Business-owned durable epoch and lineage authorization; native Runtime-owned session lifecycle",
+    "masterIdentity": "Stable stateDir/epoch hash before resolving any native session; no historical master reuse after privacy change",
+    "guards": [
+      "Every real native llm/stream step checks current durable epoch and host agent authorization before provider execution",
+      "Tool guards cover native and preset tools including skill; execute wrappers recheck native tool authorization",
+      "Queued relay/notice effects carry producer epoch; stale or legacy untagged effects are discarded when privacy is enabled",
+      "Candidate, relay and notice delivery rechecks host tombstones immediately before native inbox acceptance",
+      "Retired orchestrator IDs cannot request models in a later active runtime"
+    ],
+    "operationsTools": {
+      "master": ["orchestrator_route", "orchestrator_reply"],
+      "worker": ["orchestrator_read", "orchestrator_ack", "orchestrator_report", "skill", "cc business tools"]
+    },
+    "hostObligations": "Provide privacy hooks before native boot; durably change epoch and enter maintenance on privacy actions; checkpoint and wait for the fresh native provider; authorize every referenced source/ticket/tool argument",
+    "validation": "Actual DSH privacy Red/Green: old master second model request blocked, new epoch master clean after checkpoint, pending native assessment/relay/notice discarded, scoped route refused, fresh request contains no deleted sentinel; loopback-only model fixture"
   }
 }

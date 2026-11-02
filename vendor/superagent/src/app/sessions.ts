@@ -20,10 +20,13 @@ import type { Store } from './store.ts'
 import { KV } from '../kv.ts'
 import { OPERATOR_PERMISSION, operationToolAllowed } from '../operations.ts'
 import type { RegisterTool, Tool } from './tools/tool.ts'
+import type { MasterInput, OperationsPrivacy } from './runtime.ts'
 
 /** Host dependencies used by `Sessions`. */
 export interface SessionsHost {
   readonly operationsMode?: boolean
+  readonly privacy?: OperationsPrivacy
+  readonly privacyEpoch?: string
   onAgent?(agent: Agent, ticket?: Ticket): void | Promise<void>
   /** DSH Cordis context: sessions, agents, persistence, and their events. */
   readonly context: Context
@@ -104,12 +107,30 @@ export class Sessions {
     this.ctx = host.context
     this.agentDelivery = new AgentDelivery(host.context)
     // Deliver relays and notices to the main Session in the order they were queued.
-    host.effects.handle('relay', ({ text }, requestId) => this.prompt(host.masterId, requestId, text, 'steer'), { ordered: true })
-    host.effects.handle('notice', ({ value, summary }, name) => this.inject(name, value, summary), { ordered: true })
+    host.effects.handle('relay', async (payload, requestId) => {
+      if (!this.sameQueuedEpoch(payload)) return
+      await this.prompt(host.masterId, requestId, payload.text, 'steer')
+    }, { ordered: true })
+    host.effects.handle('notice', async (payload, name) => {
+      if (!this.sameQueuedEpoch(payload)) return
+      await this.inject(name, payload.value, payload.summary)
+    }, { ordered: true })
   }
   /** Subscribes to host agent and session events so newly created sessions are decorated and model-budget retries are reflected in health. Call once at startup. */
   install(): void {
     const ctx = this.ctx
+    // This event wraps the real provider call for every model step, including restored
+    // histories, compactors and tools which scheduled another step without a new input.
+    const sessions = this
+    ctx.on('llm/stream', async function* (request, next) {
+      if (sessions.host.privacy && request.sessionId) {
+        if (request.sessionId.startsWith('orchestrator-') && request.sessionId !== sessions.host.masterId)
+          throw new Error('RETIRED_MASTER_SESSION')
+        const agent = ctx.agents.get(request.sessionId as SessionId)
+        if (agent && (agent.id === sessions.host.masterId || sessions.ticketOf(agent))) sessions.authorizeAgent(agent)
+      }
+      yield* next()
+    }, { global: true })
     ctx.on('agent/disposed', ({ agent }) => {
       this.release(agent)
       this.retryHealth.clear(agent.id); this.updateModelHealth()
@@ -164,16 +185,22 @@ export class Sessions {
   /** Deliver a message once per request id: to the next turn, the current one, or `inject`ed with its label without waking the agent. */
   async prompt(sessionId: string, requestId: string, text: string, mode: 'queue' | 'steer' | { inject: string }, authorize?: () => void,
     accepted?: () => void): Promise<void> {
+    const input: MasterInput = { kind: requestId.startsWith('candidate:') ? 'candidate' : 'relay', id: requestId, text }
+    if (sessionId === this.host.masterId && !this.allowMasterInput(input)) return
     const result = await this.ctx.sessionController.resolveAgent(sessionId as SessionId)
     if ('error' in result) throw result.error
-    await this.agentDelivery.send(result.agent, key(requestId), text, mode, this.host.lifetime, authorize, accepted)
+    await this.agentDelivery.send(result.agent, key(requestId), text, mode, this.host.lifetime, () => {
+      this.authorizeAgent(result.agent)
+      if (sessionId === this.host.masterId && !this.allowMasterInput(input)) throw new Error('MASTER_INPUT_REVOKED')
+      authorize?.()
+    }, accepted)
   }
   /** The id of the message `prompt` delivers under `requestId`, which DSH's inbox events name it by. */
   promptedId(requestId: string): MessageId { return messageId(key(requestId)) }
   /** Enqueues a steering relay to the main Session; relays are durable and retried by `Effects` until delivered, at most once per `requestId`. */
-  relay(requestId: string, text: string): void { this.host.effects.enqueue('relay', requestId, { text }) }
+  relay(requestId: string, text: string): void { this.host.effects.enqueue('relay', requestId, { text, ...this.queuedEpoch() }) }
   /** Enqueues a durable background notice for injection into the main Session; a new notice with the same `name` replaces a still-waiting notice of that `name`. */
-  notify(name: string, value: Record<string, unknown>, summary: string): void { this.host.effects.enqueue('notice', name, { value, summary }) }
+  notify(name: string, value: Record<string, unknown>, summary: string): void { this.host.effects.enqueue('notice', name, { value, summary, ...this.queuedEpoch() }) }
   /** Waits for currently runnable `notice` effects to settle and returns `'injected'` if notice `name` has reached the main Session or `'pending'` if it is still queued. */
   async delivery(name: string): Promise<'injected' | 'pending'> {
     await this.host.effects.idle('notice')
@@ -181,11 +208,36 @@ export class Sessions {
   }
   /** Injects a notice into the main Session without waking it; no-op if the main Session does not exist yet. */
   private async inject(name: string, value: Record<string, unknown>, summary: string): Promise<void> {
+    const text = JSON.stringify(value)
+    const input: MasterInput = { kind: 'notice', id: name, text: `${summary}\n${text}` }
+    if (!this.allowMasterInput(input)) return
     const resolved = await this.ctx.sessionController.resolveAgent(this.host.masterId as SessionId)
     if ('error' in resolved) return
     // Deduplicate by notice name and payload hash so retries are idempotent while updated payloads still deliver.
-    const text = JSON.stringify(value)
-    await this.agentDelivery.send(resolved.agent, `notice:${name}:${key(text)}`, text, { inject: summary }, this.host.lifetime)
+    await this.agentDelivery.send(resolved.agent, `notice:${name}:${key(text)}`, text, { inject: summary }, this.host.lifetime, () => {
+      this.authorizeAgent(resolved.agent)
+      if (!this.allowMasterInput(input)) throw new Error('MASTER_INPUT_REVOKED')
+    })
+  }
+  private queuedEpoch(): { privacyEpoch?: string } {
+    return this.host.privacy ? { privacyEpoch: this.host.privacyEpoch } : {}
+  }
+  private sameQueuedEpoch(payload: object): boolean {
+    return !this.host.privacy || (payload as { privacyEpoch?: string }).privacyEpoch === this.host.privacyEpoch
+  }
+  private allowMasterInput(input: MasterInput): boolean {
+    const privacy = this.host.privacy
+    return !privacy || (this.host.privacyEpoch !== undefined && privacy.epoch() === this.host.privacyEpoch && privacy.allowMasterInput(input))
+  }
+  private authorizeAgent(agent: Agent): void {
+    const privacy = this.host.privacy
+    if (!privacy) return
+    if (this.host.privacyEpoch === undefined || privacy.epoch() !== this.host.privacyEpoch) throw new Error('PRIVACY_EPOCH_CHANGED')
+    privacy.authorizeAgent?.(agent, agent.id === this.host.masterId ? undefined : this.ticketOf(agent))
+  }
+  private authorizeTool(agent: Agent, name: string, args: unknown): void {
+    this.authorizeAgent(agent)
+    this.host.privacy?.authorizeTool?.(agent, agent.id === this.host.masterId ? undefined : this.ticketOf(agent), name, args)
   }
   /** Returns the current prompt revision, the active prompt revision of each loaded Session, and whether the main Session still has a pending `'prompts'` notice. */
   status() {
@@ -216,7 +268,10 @@ export class Sessions {
           const image = value && typeof value === 'object' && 'image' in value ? (value as { image: never }).image : undefined
           return image ? [text, { type: 'image' as const, attachment: image }] : [text]
         } },
-        execute: (args, execution) => execute(schema.parse(args), execution.signal) }))
+        execute: (args, execution) => {
+          this.authorizeTool(agent, name, args)
+          return execute(schema.parse(args), execution.signal)
+        } }))
     }
   }
   /** Returns `sessionId`'s active model-budget retry state (`{ model_retry }`) for status listings, or `{}` when not waiting on one. */
@@ -270,6 +325,11 @@ export class Sessions {
       const inherited = !master && agent.ctx.tools.get('skill', parent) ? ['skill'] : []
       binding.disposers.push(agent.ctx.tools.restrict({ allow: inherited }), agent.ctx.tools.guard(execution => {
         if (!operationToolAllowed(execution.name, master ? 'orchestrator' : 'worker')) return 'Tool forbidden in operations mode'
+        if (master ? !['orchestrator_route', 'orchestrator_reply'].includes(execution.name)
+          : !['orchestrator_read', 'orchestrator_ack', 'orchestrator_report', 'skill'].includes(execution.name) && !execution.name.startsWith('cc_'))
+          return 'Tool forbidden in scoped operations mode'
+        try { this.authorizeTool(agent, execution.name, execution.arguments) }
+        catch (error) { return error instanceof Error ? error.message : 'Business authorization refused' }
         if (!master) {
           const current = ticket && host.store.tickets.get(ticket.id)
           if (!current || !liveTicket(current)) return 'Ticket ended; business operation refused'

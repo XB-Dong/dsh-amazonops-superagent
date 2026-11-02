@@ -49,7 +49,16 @@ import { executorTools, type ExecutorToolsHost } from './tools/executor.ts'
 import type { Tool } from './tools/tool.ts'
 import { operationsMode, operationToolAllowed } from '../operations.ts'
 
+export interface MasterInput { kind: 'candidate' | 'relay' | 'notice'; id: string; text: string }
+/** The business owner supplies durable privacy state; Runtime owns native sessions and scheduling. */
+export interface OperationsPrivacy {
+  epoch(): string
+  allowMasterInput(input: MasterInput): boolean
+  authorizeAgent?(agent: Agent, ticket?: Ticket): void
+  authorizeTool?(agent: Agent, ticket: Ticket | undefined, name: string, args: unknown): void
+}
 export interface OperationsExtensions {
+  readonly privacy?: OperationsPrivacy
   tools?(agent: Agent, ticket?: Ticket): Tool[]
   onAgent?(agent: Agent, ticket?: Ticket): void | Promise<void>
 }
@@ -81,6 +90,7 @@ export class Runtime extends Service implements SourceHost {
   private readonly board = new HealthBoard()
   private readonly runtimeHealth = this.board.claim('runtime', { state: 'starting', detail: '' })
   readonly masterId: string
+  readonly privacyEpoch: string | undefined
   private readonly sourceLinks = new TextCache(200_000)
   private readonly stopped = new AbortController()
   private readonly disposers: (() => void)[] = []
@@ -111,7 +121,11 @@ export class Runtime extends Service implements SourceHost {
         ? environmentOf({ deployment: setup.deployment, sources: this.sources, settings: store.settings() }) : undefined
       const feishu = () => setup.configured() && !!setup.deployment.feishu
       const prompts = this.prompts = new Prompts(store, () => machine.promptMaxChars.get(), deployed, feishu, operationsMode(machine))
-      const masterId = this.masterId = store.get(KV.runtime.masterId) ?? `orchestrator-${key(machine.stateDir)}`
+      const privacyEpoch = this.privacyEpoch = extensions.privacy?.epoch()
+      if (privacyEpoch !== undefined && (!privacyEpoch || privacyEpoch.length > 200)) throw new Error('INVALID_PRIVACY_EPOCH')
+      const masterId = this.masterId = privacyEpoch === undefined
+        ? store.get(KV.runtime.masterId) ?? `orchestrator-${key(machine.stateDir)}`
+        : `orchestrator-${key(machine.stateDir, 'privacy', privacyEpoch)}`
       store.set(KV.runtime.masterId, masterId)
       const commands = this.commands = new Commands(() => setup.deployment, setup.commandEnvironment, this.lifetime)
       const board = this.board
@@ -130,10 +144,13 @@ export class Runtime extends Service implements SourceHost {
         feishuPageSize: () => feishuSettings(sources).readPageSize, sourceLink: link }
       const sessions = this.sessions = new Sessions({ context: ctx, store, prompts, effects, health: board.claim('models'), masterId,
         lifetime: this.lifetime, operationsMode: operationsMode(machine), onAgent: extensions.onAgent,
+        privacyEpoch, get privacy() { return extensions.privacy },
         closing: () => this.closing(), environment,
         tools: (agent, ticket) => {
           const built = ticket ? executorTools(this.toolHost, ticket) : mainTools(this.toolHost, agent)
-          const selected = operationsMode(machine) ? built.filter(tool => operationToolAllowed(tool.name, ticket ? 'worker' : 'orchestrator')) : built
+          const selected = operationsMode(machine) ? built.filter(tool => operationToolAllowed(tool.name, ticket ? 'worker' : 'orchestrator') &&
+            (ticket ? ['orchestrator_read', 'orchestrator_ack', 'orchestrator_report'].includes(tool.name)
+              : ['orchestrator_route', 'orchestrator_reply'].includes(tool.name))) : built
           return [...selected, ...extensions.tools?.(agent, ticket) ?? []]
         } })
       const policyChanged: EngineForSettings['policyChanged'] = (from, to, effects) => { this.engine.policyChanged(from, to, effects) }

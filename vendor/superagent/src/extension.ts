@@ -1,5 +1,5 @@
 /** Versioned integration seam; business bundles must not deep-import upstream internals. */
-export { Runtime, type OperationsExtensions } from './app/runtime.ts'
+export { Runtime, type OperationsExtensions, type OperationsPrivacy, type MasterInput } from './app/runtime.ts'
 export { Config, machineOf, type Machine, type DeploymentConfig } from './deployment.ts'
 export { Store } from './app/store.ts'
 export { SourceRegistry } from './sources/registry.ts'

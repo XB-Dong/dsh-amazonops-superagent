@@ -21,6 +21,7 @@ export async function apply(ctx: Context, config: DeploymentConfig): Promise<voi
   // Source/worker activation can follow a later host-plugin activation; never capture an absent hook service.
   const currentHooks = () => ctx.get('amazonopsHooks') as import('./app/runtime.ts').OperationsExtensions | undefined
   const runtime = new Runtime(ctx, machine, restart, {
+    get privacy() { return currentHooks()?.privacy },
     tools: (agent, ticket) => currentHooks()?.tools?.(agent, ticket) ?? [],
     onAgent: (agent, ticket) => currentHooks()?.onAgent?.(agent, ticket),
   })

@@ -6,6 +6,7 @@ import { ActualMinutesForm } from './TaskForm.tsx';
 import { Empty } from './components.tsx';
 import { timeZones, timeZoneLabel } from './display.ts';
 import { calendarDay, plannedLabel } from './task-time.ts';
+import { projectWorkCalendar } from './work-calendar.ts';
 import './p41-tasks.css';
 
 export function WorkCalendarPage({
@@ -21,18 +22,7 @@ export function WorkCalendarPage({
   const [date, setDate] = useState(
     () => calendarDay(new Date().toISOString(), 'Asia/Shanghai') ?? '',
   );
-  const completed = data.tasks.filter((task) => task.status === 'done');
-  const rows = completed
-    .filter((task) => calendarDay(task.completedAt, zone) === date)
-    .sort(
-      (a, b) =>
-        (b.completedAt ?? '').localeCompare(a.completedAt ?? '') || a.id.localeCompare(b.id),
-    );
-  const unknown = completed
-    .filter((task) => !calendarDay(task.completedAt, zone))
-    .sort((a, b) => a.id.localeCompare(b.id));
-  const recorded = rows.filter((task) => task.actualMinutes != null);
-  const minutes = recorded.reduce((sum, task) => sum + task.actualMinutes!, 0);
+  const { rows, unknown, recorded, minutes } = projectWorkCalendar(data.tasks, date, zone);
   return (
     <>
       <div className="page-heading">

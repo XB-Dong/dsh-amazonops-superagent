@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import ipaddress
 import json
 import re
@@ -35,6 +36,9 @@ def read_json(name: str):
 
 def check(final: bool) -> dict:
     errors: list[str] = []
+    execution_path = ROOT / "docs/waves/P0/state.json"
+    execution = json.loads(execution_path.read_text(encoding="utf-8")) if execution_path.is_file() else None
+    executing = execution is not None
     for name in REQUIRED:
         if not (ROOT / name).is_file():
             errors.append(f"Missing preparation artifact: {name}")
@@ -63,15 +67,21 @@ def check(final: bool) -> dict:
         linked = {case["id"] for case in cases if case["requirementId"] == row["id"]}
         if set(row["acceptanceIds"]) != linked:
             errors.append(f"Broken traceability: {row['id']}")
-        if row["scope"] == "p0_parity" and (not linked or row["implementationStatus"] != "not_started"):
+        if row["scope"] == "p0_parity" and (not linked or (not executing and row["implementationStatus"] != "not_started")):
             errors.append(f"Invalid preparation implementation state: {row['id']}")
     for row in cases:
-        if row["status"] != "not_run" or row["evidence"] or row["mandatory"] is not True or not row["expected"]:
+        status = row["status"]
+        if row["mandatory"] is not True or not row["expected"]:
+            errors.append(f"Missing mandatory acceptance definition: {row['id']}")
+        if not executing and (status != "not_run" or row["evidence"]):
             errors.append(f"Product evidence cannot be prefilled: {row['id']}")
+        if executing and (status not in {"not_run", "passed", "failed", "blocked", "partial"}
+                          or (status == "passed" and not row["evidence"])):
+            errors.append(f"Execution result requires real evidence: {row['id']}")
     for key in ("ccagent", "superagent", "harness"):
         if not SHA.fullmatch(baselines[key]["sha"]):
             errors.append(f"Unpinned source baseline: {key}")
-    if baselines["productDependenciesInstalled"] is not False:
+    if not executing and baselines["productDependenciesInstalled"] is not False:
         errors.append("Dependencies must remain uninstalled in preparation")
     expected = {"phase": "preparation_before_p0_plan", "p0PlanStatus": "not_created",
                 "p0ExecutionStatus": "not_started", "productImplementationStatus": "not_started",
@@ -82,7 +92,7 @@ def check(final: bool) -> dict:
     for key, value in expected.items():
         if state.get(key) != value:
             errors.append(f"Preparation boundary changed: {key}")
-    if (ROOT / "docs/waves/P0/PLAN.md").exists() or (ROOT / "package.json").exists():
+    if not executing and ((ROOT / "docs/waves/P0/PLAN.md").exists() or (ROOT / "package.json").exists()):
         errors.append("P0 execution plan and product scaffold are outside current preparation scope")
     if state["github"]["repository"] != "XB-Dong/dsh-amazonops-superagent" or state["github"]["visibility"] != "private":
         errors.append("Unexpected repository identity or visibility")
@@ -114,6 +124,11 @@ def check(final: bool) -> dict:
                 or {"runtime", "data", "sessions", "generated-skills", "worktrees", ".worktrees", "evidence", ".local"}.intersection(path.relative_to(ROOT).parts)):
             errors.append(f"Private configuration or runtime directory: {name}")
         raw = path.read_bytes()
+        vendored = name.startswith("vendor/superagent/")
+        if vendored:
+            if SECRET.search(raw.decode("utf-8", errors="replace")):
+                errors.append(f"Credential pattern in vendored source: {name}")
+            continue
         try:
             content = raw.decode("utf-8")
         except UnicodeDecodeError:
@@ -151,9 +166,37 @@ def check(final: bool) -> dict:
                 local_links += 1
                 if not resolved.is_relative_to(ROOT) or not resolved.is_file():
                     errors.append(f"Invalid local link in {name}: {target}")
-    return {"check": "pre-p0-artifacts-only", "files": len(names), "localLinks": local_links,
+    if executing:
+        if execution.get("waveId") != "P0" or execution.get("phase") not in {"executing", "partial", "blocked", "completed"}:
+            errors.append("Invalid P0 execution phase")
+        if execution.get("cloudAccess") != "not_performed" or execution.get("legacyAutomationChanges") != "not_performed":
+            errors.append("Local P0 boundary changed")
+        if execution.get("laterWaves"):
+            errors.append("Later waves are outside P0 authorization")
+        if not (ROOT / "docs/waves/P0/PLAN.md").is_file():
+            errors.append("Missing actual P0 execution plan")
+        if execution.get("phase") == "completed" and any(row["status"] != "passed" for row in cases):
+            errors.append("P0 cannot complete with mandatory acceptance outstanding")
+        vendor = ROOT / "vendor/superagent"
+        provenance = read_json("vendor/superagent/UPSTREAM.json")
+        patches = read_json("vendor/superagent/patch-manifest.json")
+        if provenance["sha"] != baselines["superagent"]["sha"] or patches["upstreamSha"] != provenance["sha"]:
+            errors.append("Vendor provenance differs from pinned baseline")
+        if not (vendor / "LICENSE").is_file() or "MIT" not in (vendor / "LICENSE").read_text(encoding="utf-8"):
+            errors.append("Missing upstream MIT license")
+        core = patches.get("unchangedCore", [])
+        if {row["path"] for row in core} != {str(path.relative_to(vendor)).replace(chr(92), "/") for path in (vendor / "src/core").glob("*.ts")}:
+            errors.append("Unchanged-core provenance inventory incomplete")
+        for row in core:
+            file = (vendor / row["path"]).resolve()
+            if not file.is_relative_to(vendor.resolve()) or not file.is_file() or hashlib.sha256(file.read_bytes()).hexdigest() != row["sha256"]:
+                errors.append(f"Upstream core changed without an architecture decision: {row['path']}")
+        for name in patches.get("modifiedUpstreamFiles", []):
+            if not (vendor / name).is_file():
+                errors.append(f"Patch manifest references missing file: {name}")
+    return {"check": "p0-execution-artifacts" if executing else "pre-p0-artifacts-only", "files": len(names), "localLinks": local_links,
             "p0Requirements": len(required_ids), "mandatoryCasesDesigned": len(cases),
-            "productTests": "not_run", "errors": errors}
+            "productTests": "see execution evidence; this command is not a product test" if executing else "not_run", "errors": errors}
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

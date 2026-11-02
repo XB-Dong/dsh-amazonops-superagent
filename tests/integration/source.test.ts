@@ -1,6 +1,29 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { fixture } from './review-fixtures.ts';
+import { fixture,WorkbenchSource } from './review-fixtures.ts';
+
+for(const boundary of ['before-native-commit','after-native-commit'] as const)
+test(`fault: stable human receipt recovers a lost response ${boundary}`,async()=>{
+  const f=fixture();
+  try{
+    const normal=f.runtime.context;
+    f.runtime.context=()=>({receive:async(trigger:any)=>{
+      if(boundary==='after-native-commit')await normal().receive(trigger);
+      throw new Error('SIMULATED_RECEIPT_CURSOR_LOSS');
+    }});
+    await assert.rejects(f.source.submit('main','创建合成清单','cursor-recovery'),/SIMULATED_RECEIPT_CURSOR_LOSS/);
+    const source=f.business.store.list('main','source')[0];
+    const committed=f.triggers.get(source.id);
+    assert.equal(f.business.store.list('main','source').length,1);
+    f.runtime.context=normal;
+    const resumed=new WorkbenchSource(f.runtime,f.business);
+    const receipt=await resumed.submit('main','创建合成清单','cursor-recovery');
+    assert.equal(receipt.messageId,source.id);
+    assert.equal(f.business.store.list('main','source').length,1);
+    assert.equal(f.triggers.size,1);
+    if(committed)assert.equal(f.triggers.get(source.id),committed,'A replay must retain the actual native trigger timestamp and payload');
+  }finally{f.dispose();}
+});
 
 test('unit: sensitive original text is rejected before business persistence or native admission', async () => {
   const f = fixture();

@@ -19,6 +19,7 @@ import { WorktreeNameSchema } from '../app/assessment.ts'
 import { resultRelay } from '../app/notices.ts'
 import type { HealthEntry } from '../infra/health.ts'
 import { cancelled, collectJob, killJobs, runningJobs, stopBackground, stopSubagents, until, untilQuiet } from './background.ts'
+import type { OperationsWorkspaceAuthority } from '../app/operations-workspace.ts'
 
 const now = (): string => new Date().toISOString()
 /** Returns the worker session ID (`worker-<ticketId>`) for a ticket. */
@@ -77,6 +78,7 @@ export interface ExecutorHost {
   /** The `worker` health entry, which reports whether background worker event handling failed. */
   readonly health: HealthEntry
   readonly machine: Pick<Machine, 'stateDir' | 'executionMode'>
+  readonly workspaceAuthority?: OperationsWorkspaceAuthority
   readonly lifetime: AbortSignal
   /** Session manager for worker sessions and for relaying worker reports to the main Session. */
   readonly sessions: Pick<Sessions, 'ensure' | 'prompt' | 'promptedId' | 'relay' | 'holds'>
@@ -258,6 +260,10 @@ export class DshExecutor implements Executor {
     }
   }
   workspace(ticket: Ticket): string {
+    if (operationsMode(this.host.machine)) {
+      if (!this.host.workspaceAuthority) throw new Error('OPERATIONS_WORKSPACE_AUTHORITY_REQUIRED')
+      this.host.workspaceAuthority.assertRoot()
+    }
     return operationsMode(this.host.machine) ? operationsWorkspace(ticket, this.host.machine.stateDir) : ticket.execution?.directory ?? ''
   }
   /**
@@ -268,7 +274,10 @@ export class DshExecutor implements Executor {
    */
   private async prepareDirectory(ticket: Ticket): Promise<void> {
     const directory = this.workspace(ticket)
-    if (operationsMode(this.host.machine)) { await mkdir(directory, { recursive: true }); return }
+    if (operationsMode(this.host.machine)) {
+      if (!this.host.workspaceAuthority) throw new Error('OPERATIONS_WORKSPACE_AUTHORITY_REQUIRED')
+      this.host.workspaceAuthority.prepareDirectory(directory); return
+    }
     await mkdir(dirname(directory), { recursive: true })
     const command = this.host.store.settings().executor.prepare.trim()
     const env = Object.fromEntries(this.host.environment(ticket).map(variable => [variable.key, variable.value]))

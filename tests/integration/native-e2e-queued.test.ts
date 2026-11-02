@@ -3,9 +3,9 @@
  * All business/model inputs are synthetic and raw evidence stays outside Git. */
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtempSync,mkdirSync,readFileSync,writeFileSync,readdirSync } from 'node:fs';
+import { mkdtempSync,mkdirSync,readFileSync,writeFileSync,readdirSync,realpathSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join,resolve,relative } from 'node:path';
+import { join,resolve,relative,isAbsolute,sep } from 'node:path';
 import { createHash } from 'node:crypto';
 import { pathToFileURL } from 'node:url';
 import { spawn,spawnSync,type ChildProcess } from 'node:child_process';
@@ -24,7 +24,10 @@ function sourceTree(root:string,directory=root):{path:string;type:string;sha256?
     return entry.isDirectory()?[{path:name,type:'directory'},...sourceTree(root,path)]:[{path:name,type:'file',sha256:createHash('sha256').update(readFileSync(path)).digest('hex')}];
   });
 }
-function within(root:string,path:string):boolean {const rel=relative(resolve(root),resolve(path));return !!rel&&!rel.startsWith('..')&&!resolve(path).startsWith('..');}
+function within(root:string,path:string):boolean {
+  const rel=relative(realpathSync.native(root),realpathSync.native(path));
+  return !!rel&&!isAbsolute(rel)&&rel!=='..'&&!rel.startsWith(`..${sep}`);
+}
 
 test('real native queued worker without a session survives checkpoint, CLI restore and eventual launch',{timeout:100000},async t=>{
   const root=resolve('.');const home=mkdtempSync(join(tmpdir(),'amazonops-native-queued-'));

@@ -131,6 +131,8 @@
     "paths": "Rebase ticket execution directory projections before native startup; use the same authority in prepare, launch and input-delivery session recreation",
     "existingSessions": "Preserve immutable original header.cwd and event history; awaited agent/created decoration commits official WorkingDirectoryService.set to the current instance before restored inbox work is released",
     "guards": "Every managed operations model step and native/preset tool invocation verifies the committed effective cwd still equals current deployment authority; official ensure fallback to an old original header fails closed",
+    "physicalAuthority": "src/app/operations-workspace.ts pins native realpath root and dev/ino after rejecting all existing lexical ancestor symlinks/junctions before mkdir/lock/storage; runtime paths use the canonical root; each mkdir/set/step/tool rechecks pinned identity and ancestors before realpath comparison, never resolve-falls-back on missing paths",
+    "windowsAliases": "Real cmd %~sI 8.3 TEMP alias reproduces old master startup refusal; actual native master and queued/restored workers pass with canonical physical authority while outward junctions, same-realpath linked targets, replaced roots and old/missing directories remain denied",
     "validation": "Actual native queued checkpoint Red/Green; fresh queued header in recovered home, started session official cwd-change event and provider context in recovered home, two real drafts, unchanged full source-home tree after restore/start/execution/shutdown, forced fallback tool denial and no new provider request"
   },
   "transportAdaptations": [

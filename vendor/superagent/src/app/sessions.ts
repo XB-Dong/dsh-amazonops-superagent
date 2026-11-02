@@ -4,8 +4,7 @@ import type { Agent } from '@deepseek-ai/dsh-agent'
 import type { MessageId } from '@deepseek-ai/dsh-llm'
 import { scopeParentOf } from '@deepseek-ai/dsh-scope'
 import type { SessionId } from '@deepseek-ai/dsh-session'
-import { dirname, resolve } from 'node:path'
-import { mkdir } from 'node:fs/promises'
+import { dirname } from 'node:path'
 import { z } from 'zod'
 import { key, liveTicket, type Ticket } from '../core/index.ts'
 import { mandateInstructions, ticketOfSession } from '../executor/dsh.ts'
@@ -22,12 +21,14 @@ import { KV } from '../kv.ts'
 import { OPERATOR_PERMISSION, operationToolAllowed } from '../operations.ts'
 import type { RegisterTool, Tool } from './tools/tool.ts'
 import type { MasterInput, OperationsPrivacy } from './runtime.ts'
+import type { OperationsWorkspaceAuthority } from './operations-workspace.ts'
 
 /** Host dependencies used by `Sessions`. */
 export interface SessionsHost {
   readonly operationsMode?: boolean
   readonly privacy?: OperationsPrivacy
   readonly privacyEpoch?: string
+  readonly workspaceAuthority?: OperationsWorkspaceAuthority
   onAgent?(agent: Agent, ticket?: Ticket): void | (() => void | Promise<void>) | Promise<void | (() => void | Promise<void>)>
   /** DSH Cordis context: sessions, agents, persistence, and their events. */
   readonly context: Context
@@ -248,9 +249,8 @@ export class Sessions {
   }
   private assertWorkspace(agent: Agent): void {
     const ticket = agent.id === this.host.masterId ? undefined : this.ticketOf(agent)
-    const expected = resolve(this.host.workspace(ticket)), current = resolve(this.workingDirectory().get(agent.session))
-    const normalize = (path: string) => process.platform === 'win32' ? path.toLowerCase() : path
-    if (normalize(expected) !== normalize(current)) throw new Error('OPERATIONS_WORKSPACE_CHANGED')
+    if (!this.host.workspaceAuthority) throw new Error('OPERATIONS_WORKSPACE_AUTHORITY_REQUIRED')
+    this.host.workspaceAuthority.assertWorkspace(this.host.workspace(ticket), this.workingDirectory().get(agent.session))
   }
   private authorizeTool(agent: Agent, name: string, args: unknown): void {
     this.authorizeAgent(agent)
@@ -328,8 +328,8 @@ export class Sessions {
     const binding: SessionBinding = { disposers: [] }
     this.bindings.set(agent, binding)
     if (host.operationsMode) {
-      const directory = host.workspace(ticket)
-      await mkdir(directory, { recursive: true })
+      if (!host.workspaceAuthority) throw new Error('OPERATIONS_WORKSPACE_AUTHORITY_REQUIRED')
+      const directory = host.workspaceAuthority.prepareDirectory(host.workspace(ticket))
       // agent/created is awaited before restored inbox work is released. Preserve
       // immutable header/history and relocate current execution via the official event.
       await this.workingDirectory().set(agent, directory, host.lifetime)

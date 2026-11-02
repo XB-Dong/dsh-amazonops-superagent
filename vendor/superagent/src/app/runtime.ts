@@ -48,6 +48,7 @@ import { mainTools, type MainToolsHost } from './tools/main.ts'
 import { executorTools, type ExecutorToolsHost } from './tools/executor.ts'
 import type { Tool } from './tools/tool.ts'
 import { operationsMode, operationToolAllowed } from '../operations.ts'
+import { OperationsWorkspaceAuthority } from './operations-workspace.ts'
 
 export interface MasterInput { kind: 'candidate' | 'relay' | 'notice'; id: string; text: string }
 /** The business owner supplies durable privacy state; Runtime owns native sessions and scheduling. */
@@ -107,6 +108,10 @@ export class Runtime extends Service implements SourceHost {
     super(ctx, 'orchestrator')
     this.restartAfterCheckpoint = restart
     const runtime = this
+    // Pin a regular physical root before mkdir/locking/storage can follow copied
+    // paths or aliases; retain the original spelling inside the authority guard.
+    const workspaceAuthority = operationsMode(machine) ? new OperationsWorkspaceAuthority(machine.stateDir) : undefined
+    if (workspaceAuthority) machine = this.machine = { ...machine, stateDir: workspaceAuthority.root }
     // Lock the state directory before opening the database so another process cannot migrate or write concurrently.
     mkdirSync(machine.stateDir, { recursive: true, mode: 0o700 })
     const compromised = (error: Error) => { this.runtimeHealth.set({ state: 'error', detail: error.message }); this.stopped.abort() }
@@ -144,7 +149,7 @@ export class Runtime extends Service implements SourceHost {
         feishuPageSize: () => feishuSettings(sources).readPageSize, sourceLink: link }
       const sessions = this.sessions = new Sessions({ context: ctx, store, prompts, effects, health: board.claim('models'), masterId,
         lifetime: this.lifetime, operationsMode: operationsMode(machine), onAgent: extensions.onAgent,
-        privacyEpoch, get privacy() { return extensions.privacy },
+        privacyEpoch, get privacy() { return extensions.privacy }, workspaceAuthority,
         closing: () => this.closing(), environment,
         workspace: ticket => ticket ? this.executor.workspace(ticket) : machine.stateDir,
         tools: (agent, ticket) => {
@@ -157,7 +162,7 @@ export class Runtime extends Service implements SourceHost {
       const policyChanged: EngineForSettings['policyChanged'] = (from, to, effects) => { this.engine.policyChanged(from, to, effects) }
       this.settings = new Settings({ store, sources, engine: { policyChanged }, health: board, context: ctx, lifetime: this.lifetime, sessions,
         sourceHost: this, setup, requestPass: () => { this.passes.request() } })
-      this.executor = new DshExecutor({ context: ctx, get engine() { return runtime.engine }, store, effects, health: board.claim('worker'), machine,
+      this.executor = new DshExecutor({ context: ctx, get engine() { return runtime.engine }, store, effects, health: board.claim('worker'), machine, workspaceAuthority,
         lifetime: this.lifetime, sessions, closing: () => this.closing(), paused: () => this.paused(), environment, sourceLink: link,
         repliedTo: trigger => repliedTo({ store, sources }, trigger) })
       this.assessor = new MasterAssessor({ get engine() { return runtime.engine }, commands, get deployment() { return setup.deployment }, effects,

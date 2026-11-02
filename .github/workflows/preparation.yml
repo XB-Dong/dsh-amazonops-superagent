@@ -22,4 +22,6 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: node scripts/check.mjs
       - run: node scripts/build.mjs
+      - name: Verify native Windows startup before the full suite
+        run: node --experimental-transform-types --test tests/native/native-startup.test.ts
       - run: node scripts/test.mjs

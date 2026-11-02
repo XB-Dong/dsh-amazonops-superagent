@@ -251,12 +251,10 @@ test('offline real DSH routes, executes scoped task tool, reports and delivers e
     assert.equal(recoveredWork.tickets[0].id, work.tickets[0].id);
     assert.deepEqual(recoveredBudget.used, afterCancel.budget.used, 'Restoration must retain later usage rather than refunding it');
     const recoveredWorker = await inspectWorker(`worker-${work.tickets[0].id}`);
-    assert.deepEqual(recoveredWorker.header, workerSession.header, 'Immutable header remains truthful original-session history');
-    assert.deepEqual(recoveredWorker.events.slice(0, workerSession.events.length), workerSession.events,
-      'The official provider must preserve every original event without rewriting history');
-    assert.ok(recoveredWorker.events.some((event: any) => event.type === 'working-directory/change' &&
-      resolve(event.data.cwd).startsWith(resolve(recoveredData, 'superagent/work') + (process.platform === 'win32' ? '\\' : '/'))),
-      'The supported working-directory event relocates effective execution into the new home');
+    // This completed Ticket is read through its persistence owner without loading
+    // an executing Agent. History is unchanged; the separate queued integration
+    // exercises official relocation when an existing worker actually resumes.
+    assert.deepEqual(recoveredWorker, workerSession, 'Dormant completed history remains exact and is not spuriously resumed');
     const recoveredReplay = await api('messages', input);
     assert.deepEqual(recoveredReplay.value, submitted.value, 'Restored business receipt must preserve original input identity');
     const nativeDb = new DatabaseSync(join(recoveredData, 'superagent/orchestrator.sqlite'), { readOnly: true });

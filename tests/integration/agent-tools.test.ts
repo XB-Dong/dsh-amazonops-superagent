@@ -3,6 +3,18 @@ import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { fixture, AgentTools } from './review-fixtures.ts';
 
+test('unit: published task list and detail are lossless native JSON with optional schedules absent',async()=>{
+  const f=fixture();
+  try{
+    const {row}=await f.ticket();const a=f.agent(row);
+    const task=await a.execute('cc_prepare_task',{title:'无排期任务',timeZone:'Asia/Shanghai',checklist:['核对']});
+    for(const [tool,args] of [['cc_list_tasks',{}],['cc_get_task',{taskId:task.id}]] as const){
+      const value=await a.execute(tool,args);
+      assert.deepEqual(value,JSON.parse(JSON.stringify(value)),'Native DSH rejects undefined properties in tool results');
+    }
+  }finally{f.dispose();}
+});
+
 test('unit: consumed native followup owns stable operation and same-message payload conflicts', async () => {
   const f = fixture();
   try {

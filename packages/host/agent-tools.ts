@@ -62,7 +62,9 @@ export class AgentTools {
           const skill=this.business.learning.activeSkills(scope).find(s=>s.id===input.skillId);
           if (skill) this.rememberSkill(scope,agent.id,skill);
         }
-        return value;
+        // Native DSH validates lossless JSON; optional object properties are omitted
+        // at this transport boundary, as they already are on the HTTP boundary.
+        return JSON.parse(JSON.stringify(value));
       },
     }));
   }

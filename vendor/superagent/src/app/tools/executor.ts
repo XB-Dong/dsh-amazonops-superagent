@@ -25,7 +25,8 @@ export function executorTools(host: ExecutorToolsHost, ticket: Ticket): Tool[] {
   const ticketId = ticket.id
   return [
     readTool('Read one page of a resource of this ticket that the resource parameter lists. Follow next_offset, and next_resource where a page names one.',
-      true, (resource, offset, limit, signal) => readResource(host.resources, resource, offset, limit, ticketId, signal)),
+      true, (resource, offset, limit, signal) => readResource(host.resources, resource, offset, limit, ticketId, signal),
+      host.operationsMode?`ticket/${ticketId} and its assignment, assignments, inputs, result, transcript or message/<n> subresources; trigger/<id> only for this ticket's authenticated original inputs. Business tasks are separate: use cc_list_tasks and cc_get_task. No thread, github, feishu, settings or arbitrary ticket resources`:undefined),
     tool({
       name: 'orchestrator_ack',
       description: 'Acknowledge one original human request before substantial work, as the replies section says; it posts as a reply to that message.',

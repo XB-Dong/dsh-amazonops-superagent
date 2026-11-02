@@ -13,7 +13,8 @@
     "src/executor/dsh.ts",
     "src/app/tools/executor.ts",
     "skills/dsh-superagent-github/SKILL.md",
-    "src/app/http.ts"
+    "src/app/http.ts",
+    "src/app/tools/tool.ts"
   ],
   "unchangedCore": [
     {
@@ -104,10 +105,23 @@
       "Retired orchestrator IDs cannot request models in a later active runtime"
     ],
     "operationsTools": {
-      "master": ["orchestrator_route", "orchestrator_reply"],
-      "worker": ["orchestrator_read", "orchestrator_ack", "orchestrator_report", "skill", "cc business tools"]
+      "master": [
+        "orchestrator_route",
+        "orchestrator_reply"
+      ],
+      "worker": [
+        "orchestrator_read",
+        "orchestrator_ack",
+        "orchestrator_report",
+        "skill",
+        "cc business tools"
+      ]
     },
     "hostObligations": "Provide privacy hooks before native boot; durably change epoch and enter maintenance on privacy actions; checkpoint and wait for the fresh native provider; authorize every referenced source/ticket/tool argument",
     "validation": "Actual DSH privacy Red/Green: old master second model request blocked, new epoch master clean after checkpoint, pending native assessment/relay/notice discarded, scoped route refused, fresh request contains no deleted sentinel; loopback-only model fixture"
-  }
+  },
+  "transportAdaptations": [
+    "Business tool results use JSON transport semantics for optional fields; real native output validator is authoritative",
+    "Operations read tool schema documents only current ticket and authenticated original triggers; unlisted resources are denied by host authorization"
+  ]
 }

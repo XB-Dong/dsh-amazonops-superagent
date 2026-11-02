@@ -90,7 +90,7 @@
   ],
   "checkpointExtension": {
     "method": "Runtime.checkpoint(capture)",
-    "behavior": "Await stop and flush before capture; request constructor-supplied fiber restart after success or failure",
+    "behavior": "Await stop, extension cleanup and flush before capture; request constructor-supplied fiber restart after success or failure; onAgent may return an awaited disposer owned by the native binding",
     "validation": "Actual native host reaches generations 1, 2 and 3; closed SQLite during capture",
     "rootMaintenanceRequired": true
   },

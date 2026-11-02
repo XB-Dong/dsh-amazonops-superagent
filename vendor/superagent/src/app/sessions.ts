@@ -27,7 +27,7 @@ export interface SessionsHost {
   readonly operationsMode?: boolean
   readonly privacy?: OperationsPrivacy
   readonly privacyEpoch?: string
-  onAgent?(agent: Agent, ticket?: Ticket): void | Promise<void>
+  onAgent?(agent: Agent, ticket?: Ticket): void | (() => void | Promise<void>) | Promise<void | (() => void | Promise<void>)>
   /** DSH Cordis context: sessions, agents, persistence, and their events. */
   readonly context: Context
   readonly store: Pick<Store, 'tickets' | 'settings' | 'get' | 'set' | 'keys'>
@@ -48,7 +48,7 @@ export interface SessionsHost {
  * What Sessions registered for an agent it decorated: the releases of its prompt section, tools and skill scope, the scope
  * its skills are registered in, and the skills of one prompt revision; for a worker's subagent, only its tool limits.
  */
-interface SessionBinding { disposers: (() => void)[]; scope?: Context; skills?: { revision: number; dispose: () => void }; subagent?: true }
+interface SessionBinding { disposers: (() => void | Promise<void>)[]; scope?: Context; skills?: { revision: number; dispose: () => void }; subagent?: true }
 
 /** The agent presets Executor Sessions and the main Session are created with, which the bundle's patch defines. */
 export const WORKER_PRESET = 'dsh-superagent-worker', ROUTER_PRESET = 'dsh-superagent-router'
@@ -100,6 +100,7 @@ export class Sessions {
   private readonly agentDelivery: AgentDelivery
   /** Decorated agents mapped to their registered disposers and skill scope until the agent is disposed or `Sessions.dispose()` runs. */
   private readonly bindings = new Map<Agent, SessionBinding>()
+  private readonly releasing = new Set<Promise<void>>()
   private readonly retryHealth = new RetryHealth()
   private readonly ctx: Context
   /** Registers ordered `relay` and `notice` effect handlers that deliver to the main Session. */
@@ -131,8 +132,8 @@ export class Sessions {
       }
       yield* next()
     }, { global: true })
-    ctx.on('agent/disposed', ({ agent }) => {
-      this.release(agent)
+    ctx.on('agent/disposed', async ({ agent }) => {
+      await this.release(agent)
       this.retryHealth.clear(agent.id); this.updateModelHealth()
     })
     ctx.on('session/event', (session, event) => {
@@ -319,7 +320,11 @@ export class Sessions {
     if (this.bindings.get(agent) !== binding) return
     const register = this.registerTool(agent, binding)
     for (const tool of host.tools(agent, ticket)) register(tool.name, tool.description, tool.schema, tool.execute)
-    await host.onAgent?.(agent, ticket)
+    const offExtension = await host.onAgent?.(agent, ticket)
+    if (offExtension) {
+      if (this.bindings.get(agent) !== binding) { await offExtension(); return }
+      binding.disposers.push(offExtension)
+    }
     if (host.operationsMode) {
       const parent = scopeParentOf(agent)
       const inherited = !master && agent.ctx.tools.get('skill', parent) ? ['skill'] : []
@@ -417,15 +422,23 @@ export class Sessions {
     return version
   }
   /** Releases registrations for `agent` in reverse order (LIFO); disposing its skill scope releases its skills as well. */
-  private release(agent: Agent): void {
+  private release(agent: Agent): Promise<void> {
     const binding = this.bindings.get(agent)
-    if (!binding) return
+    if (!binding) return Promise.resolve()
     this.bindings.delete(agent)
-    binding.skills?.dispose()
-    for (const dispose of binding.disposers.splice(0).reverse()) {
-      try { dispose() } catch (error) { this.ctx.logger.warn('dsh-superagent could not release what it registered for a Session: %s', String(error)) }
-    }
+    const done = (async () => {
+      binding.skills?.dispose()
+      for (const dispose of binding.disposers.splice(0).reverse()) {
+        try { await dispose() } catch (error) { this.ctx.logger.warn('dsh-superagent could not release what it registered for a Session: %s', String(error)) }
+      }
+    })()
+    this.releasing.add(done)
+    void done.finally(() => this.releasing.delete(done))
+    return done
   }
   /** Releases prompt sections, skills, and tools registered by `Sessions` across all decorated agents. */
-  dispose(): void { for (const agent of [...this.bindings.keys()]) this.release(agent) }
+  async dispose(): Promise<void> {
+    for (const agent of [...this.bindings.keys()]) void this.release(agent)
+    await Promise.all([...this.releasing])
+  }
 }

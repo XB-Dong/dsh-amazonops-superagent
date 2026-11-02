@@ -60,7 +60,7 @@ export interface OperationsPrivacy {
 export interface OperationsExtensions {
   readonly privacy?: OperationsPrivacy
   tools?(agent: Agent, ticket?: Ticket): Tool[]
-  onAgent?(agent: Agent, ticket?: Ticket): void | Promise<void>
+  onAgent?(agent: Agent, ticket?: Ticket): void | (() => void | Promise<void>) | Promise<void | (() => void | Promise<void>)>
 }
 
 // Source plugins interact with dsh-superagent exclusively through the `SourceHost` service interface.
@@ -284,7 +284,7 @@ export class Runtime extends Service implements SourceHost {
       // The workers' jobs and subagents stop too: their ends would start worker turns without the tool limits released below.
       await this.executor.shutdown()
       this.executor.dispose()
-      this.sessions.dispose()
+      await this.sessions.dispose()
       for (const dispose of this.disposers.reverse()) dispose()
       await this.ctx.sessionPersistence.flush()
     } finally {

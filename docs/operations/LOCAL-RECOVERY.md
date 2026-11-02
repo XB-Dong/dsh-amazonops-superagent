@@ -18,4 +18,8 @@ node scripts/recovery.ts --backup '<备份目录>' --destination '<新home目录
 
 旧 ccagent 兼容格式的 business.sqlite 可通过同一流程复制到新数据目录，原 id、scope、revision、来源和字段保持；新 Store 添加自己的必要表。最新隐私账本要求删除或撤销的数据会按规则失效，因此不能仅以迁移前后总条数相等判断正确。P0 合成测试核对保留任务的精确字段、来源引用、查询输出、文件 hash、旧表升级、较晚模型用量/归因和删除不复活。
 
+恢复启动时，Ticket的执行目录按当前实例重新派生。新建worker的Session header指向新home；既有Session的不可变header仍记录历史路径，有效目录通过DSH官方working-directory/change事件迁入当前home。每步模型和工具调用继续检查有效目录，不能退回原输入目录执行。真实进程测试比较恢复、启动、派工执行和关闭前后的源目录全树路径及文件hash，源目录不变。
+
+合成旧格式测试覆盖任务、报告、预测、库存、实物池、分配、发货、广告、活动、笔记、反馈、记忆及经验的字段和业务输出。旧CC conversation在没有隐私删除时原样保留在业务SQLite，供离线审阅；不会转成新原生Session或加载到工作台对话。当前隐私账本含删除时，历史conversation/summary按闭包退役。正式旧资料迁移未在本轮执行。
+
 这不证明任意未来格式、旧原生 Session 或生产迁移均已支持。原生日志只能由其受支持 provider 处理，不能改写成伪造的新对话。正式数据迁移与云部署仍需独立明确范围。

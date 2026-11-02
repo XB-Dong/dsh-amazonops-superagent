@@ -7,7 +7,7 @@
   "plan": "docs/waves/P0/PLAN.md",
   "specVersion": "0.2.0",
   "goal": "Complete the full native SuperAgent refactor and functional acceptance",
-  "activeRound": "integration_acceptance",
+  "activeRound": "final_independent_review_and_ci",
   "tasks": [
     {
       "id": "P0-NATIVE",
@@ -27,8 +27,8 @@
         "SA-LOCAL-001"
       ],
       "acceptance": "Actual native Runtime/Engine/Store/Effects on Windows and documented operations-mode patches, compatible preset/tool/auth/LLM extension seams; native integration tests. Do not build a replacement loop.",
-      "status": "in_progress",
-      "repairCount": 0,
+      "status": "verified",
+      "repairCount": 7,
       "stopConditions": [
         "cloud_or_legacy_write",
         "credential_or_data_exposure",
@@ -39,8 +39,14 @@
       "dispatchHistory": "Original frozen packet retained; follow-up scopes below extend ownership.",
       "followupWritePaths": [
         "tests/integration/native-e2e*",
-        "vendor/superagent/src/app/*privacy*"
-      ]
+        "vendor/superagent/src/app/*privacy*",
+        "packages/host/boundary.ts",
+        "tests/integration/boundary.test.ts",
+        "tests/integration/*socket*"
+      ],
+      "repairCountAtInitialDispatch": 0,
+      "repairCountMeaning": "Recorded product fix commits affecting this responsibility area; details in repairJournal.",
+      "verifiedImplementationSha": "b0afbdd088d1022b6fef53c8424cb73184543e1a"
     },
     {
       "id": "P0-BACKEND",
@@ -71,8 +77,8 @@
         "SA-RECOVERY-001"
       ],
       "acceptance": "All delivered domain/storage/learning behaviors migrated with pure queries, typed command handlers, task-owned types and event-driven learning; all relevant old behavior regressions rerun and new behavior Red/Green.",
-      "status": "integrated_pending_acceptance",
-      "repairCount": 0,
+      "status": "verified",
+      "repairCount": 4,
       "stopConditions": [
         "cloud_or_legacy_write",
         "credential_or_data_exposure",
@@ -84,7 +90,10 @@
       "followupWritePaths": [
         "packages/host/accounting.ts",
         "tests/integration/**"
-      ]
+      ],
+      "repairCountAtInitialDispatch": 0,
+      "repairCountMeaning": "Recorded product fix commits affecting this responsibility area; details in repairJournal.",
+      "verifiedImplementationSha": "b0afbdd088d1022b6fef53c8424cb73184543e1a"
     },
     {
       "id": "P0-FRONTEND",
@@ -115,8 +124,8 @@
         "CC-SKILL-001"
       ],
       "acceptance": "Native DSH client panel with all 13 page entry points, login/settings, Chinese UX and preserved behavior; only shared DTO imports, no business implementation imports; native ticket/messages API rather than duplicated chat authority.",
-      "status": "integrated_pending_acceptance",
-      "repairCount": 0,
+      "status": "verified",
+      "repairCount": 5,
       "stopConditions": [
         "cloud_or_legacy_write",
         "credential_or_data_exposure",
@@ -130,8 +139,13 @@
         "scripts/**",
         "tests/packaging/**",
         ".github/workflows/**",
-        "tests/integration/recovery-cli.test.ts"
-      ]
+        "tests/integration/recovery-cli.test.ts",
+        "tests/business/privacy-closure.test.ts",
+        "tests/integration/fixtures/legacy-business.ts"
+      ],
+      "repairCountAtInitialDispatch": 0,
+      "repairCountMeaning": "Recorded product fix commits affecting this responsibility area; details in repairJournal.",
+      "verifiedImplementationSha": "b0afbdd088d1022b6fef53c8424cb73184543e1a"
     },
     {
       "id": "P0-INTEGRATION",
@@ -165,8 +179,8 @@
         "CC-HARNESS-001"
       ],
       "acceptance": "Actual host/source/tools/provider/auth/accounting/restore integration, stable operation identity and no self-trigger; browser/live-model acceptance and honest evidence for all59 cases.",
-      "status": "in_progress",
-      "repairCount": 0,
+      "status": "verified",
+      "repairCount": 17,
       "stopConditions": [
         "cloud_or_legacy_write",
         "credential_or_data_exposure",
@@ -175,7 +189,10 @@
       "timeboxMinutes": 30,
       "deliverable": "Exact commit SHA, changed files, actual tests/commands/exit codes, Red/Green where applicable, unverified gaps and integration instructions",
       "dispatchHistory": "Original frozen packet retained; follow-up scopes below extend ownership.",
-      "followupWritePaths": []
+      "followupWritePaths": [],
+      "repairCountAtInitialDispatch": 0,
+      "repairCountMeaning": "Recorded product fix commits affecting this responsibility area; details in repairJournal.",
+      "verifiedImplementationSha": "b0afbdd088d1022b6fef53c8424cb73184543e1a"
     },
     {
       "id": "P0-REVIEW",
@@ -203,25 +220,58 @@
       "timeboxMinutes": 30,
       "deliverable": "Exact commit SHA, changed files, actual tests/commands/exit codes, Red/Green where applicable, unverified gaps and integration instructions",
       "dispatchHistory": "Original frozen packet retained; follow-up scopes below extend ownership.",
-      "followupWritePaths": []
+      "followupWritePaths": [],
+      "repairCountAtInitialDispatch": 0,
+      "repairCountMeaning": "Recorded product fix commits affecting this responsibility area; details in repairJournal.",
+      "verifiedImplementationSha": "b0afbdd088d1022b6fef53c8424cb73184543e1a"
     }
   ],
-  "acceptanceStatus": "partial",
+  "acceptanceStatus": "passed",
   "cloudAccess": "not_performed",
   "productionDeployment": "not_performed",
   "legacyAutomationChanges": "not_performed",
   "laterWaves": [],
-  "lastVerifiedCommit": "af140ee",
+  "lastVerifiedCommit": "b0afbdd088d1022b6fef53c8424cb73184543e1a",
   "offlineTestsLastRun": {
-    "passed": 144,
+    "command": "node scripts/test.mjs",
+    "exitCode": 0,
+    "tests": 231,
+    "passed": 231,
     "failed": 0,
-    "note": "Before latest recovery/native E2E additions; final suite will run again."
+    "skipped": 0,
+    "sourceDirty": true,
+    "uncommittedAtStart": [
+      "docs/README.md",
+      "docs/operations/LOCAL-RECOVERY.md",
+      "docs/testing/acceptance.json",
+      "docs/waves/P0/state.json",
+      "docs/architecture/IMPLEMENTED.zh.md",
+      "docs/testing/EXECUTION-20261102.md",
+      "docs/testing/execution-20261102.json"
+    ],
+    "note": "Actual local suite; published clean commit is also validated by CI.",
+    "productSourcesMatchCommit": true
   },
   "pendingMandatoryValidation": [
-    "Native master privacy epoch and queued history guard",
-    "Launcher/recovery junction refusal",
-    "Remaining browser cases",
-    "Necessary real-model scenarios with actual accounting",
-    "Final independent review and CI"
-  ]
+    "Final independent evidence review",
+    "New repository CI and branch synchronization"
+  ],
+  "modelValidation": {
+    "scenarios": 2,
+    "requests": 20,
+    "verified": 20,
+    "verifiedInputTokens": 82777,
+    "verifiedOutputTokens": 4589,
+    "unknown": 0,
+    "acceptance": "sent final outbox/result callback and completed master/worker turns required",
+    "unknownReservedInputTokens": 0,
+    "unknownReservedOutputTokens": 0,
+    "implementationSha": "9558c4ae0f85e3dee7d78078c857eb6096511b16",
+    "status": "passed"
+  },
+  "evidenceIndex": "docs/testing/execution-20261102.json",
+  "repairJournal": "docs/waves/P0/repairs.json",
+  "productionMigration": "not_performed",
+  "legacyProjectWrites": "not_performed",
+  "completionBoundary": "Local refactor and synthetic/native/browser/live-model acceptance; no production migration or external Amazon/ERP writes."
 }

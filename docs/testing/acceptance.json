@@ -1,7 +1,7 @@
 {
-  "schemaVersion": "0.1",
-  "specVersion": "0.1.0",
-  "productAcceptanceStatus": "not_run",
+  "schemaVersion": "0.2",
+  "specVersion": "0.2.0",
+  "productAcceptanceStatus": "passed",
   "cases": [
     {
       "id": "A01-01",
@@ -9,11 +9,18 @@
       "layer": "browser",
       "mandatory": true,
       "expected": "首次中文问候和例句不调用模型，能力目录仅展示真实状态",
-      "status": "not_run",
-      "evidence": [],
+      "status": "passed",
+      "evidence": [
+        "docs/testing/EXECUTION-20261102.md#a01",
+        "docs/testing/execution-20261102.json#offline-suite",
+        "docs/testing/execution-20261102.json#browser-offline",
+        "tests/client/ui-status.test.ts",
+        "tests/integration/boundary.test.ts"
+      ],
       "legacyTestReferences": [
         "ui-status.test.ts"
-      ]
+      ],
+      "verificationNote": "Layered evidence; native, controlled fault, browser and live-model scopes are distinguished in the execution report."
     },
     {
       "id": "A01-02",
@@ -21,11 +28,18 @@
       "layer": "browser",
       "mandatory": true,
       "expected": "模型离线时全部确定性表单及短说明仍可使用，错误不泄露内部资料",
-      "status": "not_run",
-      "evidence": [],
+      "status": "passed",
+      "evidence": [
+        "docs/testing/EXECUTION-20261102.md#a01",
+        "docs/testing/execution-20261102.json#offline-suite",
+        "docs/testing/execution-20261102.json#browser-offline",
+        "tests/client/ui-status.test.ts",
+        "tests/integration/boundary.test.ts"
+      ],
       "legacyTestReferences": [
         "ui-status.test.ts"
-      ]
+      ],
+      "verificationNote": "Layered evidence; native, controlled fault, browser and live-model scopes are distinguished in the execution report."
     },
     {
       "id": "A02-01",
@@ -33,14 +47,25 @@
       "layer": "native",
       "mandatory": true,
       "expected": "真实原生会话流式、工具、压缩及重启恢复，不复制独立对话权威",
-      "status": "not_run",
-      "evidence": [],
+      "status": "passed",
+      "evidence": [
+        "docs/testing/EXECUTION-20261102.md#a02",
+        "docs/testing/execution-20261102.json#offline-suite",
+        "docs/testing/execution-20261102.json#native-e2e",
+        "docs/testing/execution-20261102.json#compaction",
+        "docs/testing/execution-20261102.json#live-final",
+        "tests/integration/accounting.test.ts",
+        "tests/native/compaction.test.ts",
+        "tests/native/compaction-profile.test.ts",
+        "tests/integration/live-proof.test.ts"
+      ],
       "legacyTestReferences": [
         "harness.test.ts",
         "harness-cancel.test.ts",
         "chat-restart.test.ts",
         "chat-truncation.test.ts"
-      ]
+      ],
+      "verificationNote": "Layered evidence; native, controlled fault, browser and live-model scopes are distinguished in the execution report."
     },
     {
       "id": "A02-02",
@@ -48,14 +73,25 @@
       "layer": "native",
       "mandatory": true,
       "expected": "截断/失败/取消如实结算，页面断开与显式取消语义分开",
-      "status": "not_run",
-      "evidence": [],
+      "status": "passed",
+      "evidence": [
+        "docs/testing/EXECUTION-20261102.md#a02",
+        "docs/testing/execution-20261102.json#offline-suite",
+        "docs/testing/execution-20261102.json#native-e2e",
+        "docs/testing/execution-20261102.json#compaction",
+        "docs/testing/execution-20261102.json#live-final",
+        "tests/integration/accounting.test.ts",
+        "tests/native/compaction.test.ts",
+        "tests/native/compaction-profile.test.ts",
+        "tests/integration/live-proof.test.ts"
+      ],
       "legacyTestReferences": [
         "harness.test.ts",
         "harness-cancel.test.ts",
         "chat-restart.test.ts",
         "chat-truncation.test.ts"
-      ]
+      ],
+      "verificationNote": "Layered evidence; native, controlled fault, browser and live-model scopes are distinguished in the execution report."
     },
     {
       "id": "A02-03",
@@ -63,14 +99,25 @@
       "layer": "live_model",
       "mandatory": true,
       "expected": "必要代表场景真实工具调用及最终回复，实际用量与持久状态一致",
-      "status": "not_run",
-      "evidence": [],
+      "status": "passed",
+      "evidence": [
+        "docs/testing/EXECUTION-20261102.md#a02",
+        "docs/testing/execution-20261102.json#offline-suite",
+        "docs/testing/execution-20261102.json#native-e2e",
+        "docs/testing/execution-20261102.json#compaction",
+        "docs/testing/execution-20261102.json#live-final",
+        "tests/integration/accounting.test.ts",
+        "tests/native/compaction.test.ts",
+        "tests/native/compaction-profile.test.ts",
+        "tests/integration/live-proof.test.ts"
+      ],
       "legacyTestReferences": [
         "harness.test.ts",
         "harness-cancel.test.ts",
         "chat-restart.test.ts",
         "chat-truncation.test.ts"
-      ]
+      ],
+      "verificationNote": "Layered evidence; native, controlled fault, browser and live-model scopes are distinguished in the execution report."
     },
     {
       "id": "A03-01",
@@ -78,15 +125,25 @@
       "layer": "domain",
       "mandatory": true,
       "expected": "草稿确认/编辑/状态/勾选保持ID、来源和CAS，完成/取消锁结构",
-      "status": "not_run",
-      "evidence": [],
+      "status": "passed",
+      "evidence": [
+        "docs/testing/EXECUTION-20261102.md#a03",
+        "docs/testing/execution-20261102.json#offline-suite",
+        "docs/testing/execution-20261102.json#browser-task",
+        "tests/business/tasks.test.ts",
+        "tests/business/task-edit.test.ts",
+        "tests/client/task-list-view.test.ts",
+        "tests/client/task-groups.test.ts",
+        "tests/client/tasks-draft.test.ts"
+      ],
       "legacyTestReferences": [
         "tasks.test.ts",
         "task-edit.test.ts",
         "task-time.test.ts",
         "task-groups.test.ts",
         "task-list-view.test.ts"
-      ]
+      ],
+      "verificationNote": "Layered evidence; native, controlled fault, browser and live-model scopes are distinguished in the execution report."
     },
     {
       "id": "A03-02",
@@ -94,15 +151,25 @@
       "layer": "domain",
       "mandatory": true,
       "expected": "用时0至1440或空，站点排期/IANA/DST/起止校验与旧行为一致",
-      "status": "not_run",
-      "evidence": [],
+      "status": "passed",
+      "evidence": [
+        "docs/testing/EXECUTION-20261102.md#a03",
+        "docs/testing/execution-20261102.json#offline-suite",
+        "docs/testing/execution-20261102.json#browser-task",
+        "tests/business/tasks.test.ts",
+        "tests/business/task-edit.test.ts",
+        "tests/client/task-list-view.test.ts",
+        "tests/client/task-groups.test.ts",
+        "tests/client/tasks-draft.test.ts"
+      ],
       "legacyTestReferences": [
         "tasks.test.ts",
         "task-edit.test.ts",
         "task-time.test.ts",
         "task-groups.test.ts",
         "task-list-view.test.ts"
-      ]
+      ],
+      "verificationNote": "Layered evidence; native, controlled fault, browser and live-model scopes are distinguished in the execution report."
     },
     {
       "id": "A03-03",
@@ -110,15 +177,25 @@
       "layer": "browser",
       "mandatory": true,
       "expected": "北京时间创建日期筛选、空日期提示、未知日期末尾；切状态保留未保存分钟",
-      "status": "not_run",
-      "evidence": [],
+      "status": "passed",
+      "evidence": [
+        "docs/testing/EXECUTION-20261102.md#a03",
+        "docs/testing/execution-20261102.json#offline-suite",
+        "docs/testing/execution-20261102.json#browser-task",
+        "tests/business/tasks.test.ts",
+        "tests/business/task-edit.test.ts",
+        "tests/client/task-list-view.test.ts",
+        "tests/client/task-groups.test.ts",
+        "tests/client/tasks-draft.test.ts"
+      ],
       "legacyTestReferences": [
         "tasks.test.ts",
         "task-edit.test.ts",
         "task-time.test.ts",
         "task-groups.test.ts",
         "task-list-view.test.ts"
-      ]
+      ],
+      "verificationNote": "Layered evidence; native, controlled fault, browser and live-model scopes are distinguished in the execution report."
     },
     {
       "id": "A04-01",
@@ -126,12 +203,21 @@
       "layer": "native",
       "mandatory": true,
       "expected": "每页4完整步骤、中文模型结果不超过6000 UTF-8 bytes，完整读取后复制",
-      "status": "not_run",
-      "evidence": [],
+      "status": "passed",
+      "evidence": [
+        "docs/testing/EXECUTION-20261102.md#a04",
+        "docs/testing/execution-20261102.json#offline-suite",
+        "docs/testing/execution-20261102.json#native-paged-copy",
+        "docs/testing/execution-20261102.json#browser-task",
+        "tests/business/task-copy.test.ts",
+        "tests/client/task-list-view.test.ts",
+        "tests/integration/native-e2e.test.ts"
+      ],
       "legacyTestReferences": [
         "task-copy.test.ts",
         "p43-harness.test.ts"
-      ]
+      ],
+      "verificationNote": "Layered evidence; native, controlled fault, browser and live-model scopes are distinguished in the execution report."
     },
     {
       "id": "A04-02",
@@ -139,12 +225,21 @@
       "layer": "domain",
       "mandatory": true,
       "expected": "区分大小写字面替换、可选标题、新草稿重置勾选/状态/完成/用时/排期",
-      "status": "not_run",
-      "evidence": [],
+      "status": "passed",
+      "evidence": [
+        "docs/testing/EXECUTION-20261102.md#a04",
+        "docs/testing/execution-20261102.json#offline-suite",
+        "docs/testing/execution-20261102.json#native-paged-copy",
+        "docs/testing/execution-20261102.json#browser-task",
+        "tests/business/task-copy.test.ts",
+        "tests/client/task-list-view.test.ts",
+        "tests/integration/native-e2e.test.ts"
+      ],
       "legacyTestReferences": [
         "task-copy.test.ts",
         "p43-harness.test.ts"
-      ]
+      ],
+      "verificationNote": "Layered evidence; native, controlled fault, browser and live-model scopes are distinguished in the execution report."
     },
     {
       "id": "A04-03",
@@ -152,12 +247,21 @@
       "layer": "fault",
       "mandatory": true,
       "expected": "源revision冲突/重复requestId/不同payload/失败无孤儿及来源删除闭包",
-      "status": "not_run",
-      "evidence": [],
+      "status": "passed",
+      "evidence": [
+        "docs/testing/EXECUTION-20261102.md#a04",
+        "docs/testing/execution-20261102.json#offline-suite",
+        "docs/testing/execution-20261102.json#native-paged-copy",
+        "docs/testing/execution-20261102.json#browser-task",
+        "tests/business/task-copy.test.ts",
+        "tests/client/task-list-view.test.ts",
+        "tests/integration/native-e2e.test.ts"
+      ],
       "legacyTestReferences": [
         "task-copy.test.ts",
         "p43-harness.test.ts"
-      ]
+      ],
+      "verificationNote": "Layered evidence; native, controlled fault, browser and live-model scopes are distinguished in the execution report."
     },
     {
       "id": "A04-04",
@@ -165,12 +269,21 @@
       "layer": "browser",
       "mandatory": true,
       "expected": "完整预览与确认，原任务不变，未配对替换与非法遗留时区拒绝",
-      "status": "not_run",
-      "evidence": [],
+      "status": "passed",
+      "evidence": [
+        "docs/testing/EXECUTION-20261102.md#a04",
+        "docs/testing/execution-20261102.json#offline-suite",
+        "docs/testing/execution-20261102.json#native-paged-copy",
+        "docs/testing/execution-20261102.json#browser-task",
+        "tests/business/task-copy.test.ts",
+        "tests/client/task-list-view.test.ts",
+        "tests/integration/native-e2e.test.ts"
+      ],
       "legacyTestReferences": [
         "task-copy.test.ts",
         "p43-harness.test.ts"
-      ]
+      ],
+      "verificationNote": "Layered evidence; native, controlled fault, browser and live-model scopes are distinguished in the execution report."
     },
     {
       "id": "A05-01",
@@ -178,12 +291,19 @@
       "layer": "domain",
       "mandatory": true,
       "expected": "按完成日期和所选时区汇总，跨午夜/DST正确，历史未知日期不猜",
-      "status": "not_run",
-      "evidence": [],
+      "status": "passed",
+      "evidence": [
+        "docs/testing/EXECUTION-20261102.md#a05",
+        "docs/testing/execution-20261102.json#offline-suite",
+        "docs/testing/execution-20261102.json#browser-calendar",
+        "tests/client/work-calendar.test.ts",
+        "tests/business/task-edit.test.ts"
+      ],
       "legacyTestReferences": [
         "task-time.test.ts",
         "p41-api.test.ts"
-      ]
+      ],
+      "verificationNote": "Layered evidence; native, controlled fault, browser and live-model scopes are distinguished in the execution report."
     },
     {
       "id": "A05-02",
@@ -191,12 +311,19 @@
       "layer": "browser",
       "mandatory": true,
       "expected": "实际用时可更正、计划与实际分开、缺失不当零",
-      "status": "not_run",
-      "evidence": [],
+      "status": "passed",
+      "evidence": [
+        "docs/testing/EXECUTION-20261102.md#a05",
+        "docs/testing/execution-20261102.json#offline-suite",
+        "docs/testing/execution-20261102.json#browser-calendar",
+        "tests/client/work-calendar.test.ts",
+        "tests/business/task-edit.test.ts"
+      ],
       "legacyTestReferences": [
         "task-time.test.ts",
         "p41-api.test.ts"
-      ]
+      ],
+      "verificationNote": "Layered evidence; native, controlled fault, browser and live-model scopes are distinguished in the execution report."
     },
     {
       "id": "A06-01",
@@ -204,12 +331,19 @@
       "layer": "browser",
       "mandatory": true,
       "expected": "纯文本新增编辑搜索删除，刷新/重启持久化，关闭学习仍可使用",
-      "status": "not_run",
-      "evidence": [],
+      "status": "passed",
+      "evidence": [
+        "docs/testing/EXECUTION-20261102.md#a06",
+        "docs/testing/execution-20261102.json#offline-suite",
+        "docs/testing/execution-20261102.json#browser-notes",
+        "tests/business/notes.test.ts",
+        "tests/business/note-privacy.test.ts"
+      ],
       "legacyTestReferences": [
         "notes.test.ts",
         "note-privacy.test.ts"
-      ]
+      ],
+      "verificationNote": "Layered evidence; native, controlled fault, browser and live-model scopes are distinguished in the execution report."
     },
     {
       "id": "A06-02",
@@ -217,12 +351,19 @@
       "layer": "fault",
       "mandatory": true,
       "expected": "scope/CAS/幂等，笔记不自动入模型或Skill，恢复后删除不复活",
-      "status": "not_run",
-      "evidence": [],
+      "status": "passed",
+      "evidence": [
+        "docs/testing/EXECUTION-20261102.md#a06",
+        "docs/testing/execution-20261102.json#offline-suite",
+        "docs/testing/execution-20261102.json#browser-notes",
+        "tests/business/notes.test.ts",
+        "tests/business/note-privacy.test.ts"
+      ],
       "legacyTestReferences": [
         "notes.test.ts",
         "note-privacy.test.ts"
-      ]
+      ],
+      "verificationNote": "Layered evidence; native, controlled fault, browser and live-model scopes are distinguished in the execution report."
     },
     {
       "id": "A07-01",
@@ -230,11 +371,17 @@
       "layer": "domain",
       "mandatory": true,
       "expected": "准备/切换/检查/恢复及IANA/DST、可配置提前时长，人工确认实际状态",
-      "status": "not_run",
-      "evidence": [],
+      "status": "passed",
+      "evidence": [
+        "docs/testing/EXECUTION-20261102.md#a07",
+        "docs/testing/execution-20261102.json#offline-suite",
+        "docs/testing/execution-20261102.json#browser-activity",
+        "tests/business/activity.test.ts"
+      ],
       "legacyTestReferences": [
         "activity.test.ts"
-      ]
+      ],
+      "verificationNote": "Layered evidence; native, controlled fault, browser and live-model scopes are distinguished in the execution report."
     },
     {
       "id": "A07-02",
@@ -242,11 +389,17 @@
       "layer": "fault",
       "mandatory": true,
       "expected": "到期提醒重启补一次、取消后不新增，阶段任务多实体创建失败原子性",
-      "status": "not_run",
-      "evidence": [],
+      "status": "passed",
+      "evidence": [
+        "docs/testing/EXECUTION-20261102.md#a07",
+        "docs/testing/execution-20261102.json#offline-suite",
+        "docs/testing/execution-20261102.json#browser-activity",
+        "tests/business/activity.test.ts"
+      ],
       "legacyTestReferences": [
         "activity.test.ts"
-      ]
+      ],
+      "verificationNote": "Layered evidence; native, controlled fault, browser and live-model scopes are distinguished in the execution report."
     },
     {
       "id": "A07-03",
@@ -254,11 +407,17 @@
       "layer": "browser",
       "mandatory": true,
       "expected": "活动页面与内部提醒可操作，不声称真实平台改价或发送外部提醒",
-      "status": "not_run",
-      "evidence": [],
+      "status": "passed",
+      "evidence": [
+        "docs/testing/EXECUTION-20261102.md#a07",
+        "docs/testing/execution-20261102.json#offline-suite",
+        "docs/testing/execution-20261102.json#browser-activity",
+        "tests/business/activity.test.ts"
+      ],
       "legacyTestReferences": [
         "activity.test.ts"
-      ]
+      ],
+      "verificationNote": "Layered evidence; native, controlled fault, browser and live-model scopes are distinguished in the execution report."
     },
     {
       "id": "A08-01",
@@ -266,11 +425,18 @@
       "layer": "domain",
       "mandatory": true,
       "expected": "销量/广告预览、字段映射、质量/缺值/重复校验，标识保持字符串",
-      "status": "not_run",
-      "evidence": [],
+      "status": "passed",
+      "evidence": [
+        "docs/testing/EXECUTION-20261102.md#a08",
+        "docs/testing/execution-20261102.json#offline-suite",
+        "docs/testing/execution-20261102.json#browser-sales",
+        "tests/business/reports.test.ts",
+        "tests/client/csv.test.ts"
+      ],
       "legacyTestReferences": [
         "reports.test.ts"
-      ]
+      ],
+      "verificationNote": "Layered evidence; native, controlled fault, browser and live-model scopes are distinguished in the execution report."
     },
     {
       "id": "A08-02",
@@ -278,11 +444,18 @@
       "layer": "domain",
       "mandatory": true,
       "expected": "内容指纹幂等、店铺站点币种规范、批次来源、asOf及日期缺口规则",
-      "status": "not_run",
-      "evidence": [],
+      "status": "passed",
+      "evidence": [
+        "docs/testing/EXECUTION-20261102.md#a08",
+        "docs/testing/execution-20261102.json#offline-suite",
+        "docs/testing/execution-20261102.json#browser-sales",
+        "tests/business/reports.test.ts",
+        "tests/client/csv.test.ts"
+      ],
       "legacyTestReferences": [
         "reports.test.ts"
-      ]
+      ],
+      "verificationNote": "Layered evidence; native, controlled fault, browser and live-model scopes are distinguished in the execution report."
     },
     {
       "id": "A08-03",
@@ -290,11 +463,18 @@
       "layer": "browser",
       "mandatory": true,
       "expected": "导入预览确认和导出使用相同批次，不把未支持Excel称可用",
-      "status": "not_run",
-      "evidence": [],
+      "status": "passed",
+      "evidence": [
+        "docs/testing/EXECUTION-20261102.md#a08",
+        "docs/testing/execution-20261102.json#offline-suite",
+        "docs/testing/execution-20261102.json#browser-sales",
+        "tests/business/reports.test.ts",
+        "tests/client/csv.test.ts"
+      ],
       "legacyTestReferences": [
         "reports.test.ts"
-      ]
+      ],
+      "verificationNote": "Layered evidence; native, controlled fault, browser and live-model scopes are distinguished in the execution report."
     },
     {
       "id": "A09-01",
@@ -302,11 +482,17 @@
       "layer": "domain",
       "mandatory": true,
       "expected": "连续7日基线或带原因人工需求、版本和原基线保留，不足不猜",
-      "status": "not_run",
-      "evidence": [],
+      "status": "passed",
+      "evidence": [
+        "docs/testing/EXECUTION-20261102.md#a09",
+        "docs/testing/execution-20261102.json#offline-suite",
+        "docs/testing/execution-20261102.json#browser-inventory",
+        "tests/business/inventory.test.ts"
+      ],
       "legacyTestReferences": [
         "inventory.test.ts"
-      ]
+      ],
+      "verificationNote": "Layered evidence; native, controlled fault, browser and live-model scopes are distinguished in the execution report."
     },
     {
       "id": "A09-02",
@@ -314,11 +500,17 @@
       "layer": "domain",
       "mandatory": true,
       "expected": "逐日入库/活动倍率/预留/缺货损失/建议量和日期，分数均值不虚增",
-      "status": "not_run",
-      "evidence": [],
+      "status": "passed",
+      "evidence": [
+        "docs/testing/EXECUTION-20261102.md#a09",
+        "docs/testing/execution-20261102.json#offline-suite",
+        "docs/testing/execution-20261102.json#browser-inventory",
+        "tests/business/inventory.test.ts"
+      ],
       "legacyTestReferences": [
         "inventory.test.ts"
-      ]
+      ],
+      "verificationNote": "Layered evidence; native, controlled fault, browser and live-model scopes are distinguished in the execution report."
     },
     {
       "id": "A09-03",
@@ -326,11 +518,17 @@
       "layer": "browser",
       "mandatory": true,
       "expected": "CSV到预测到库存完整流程，有来源和假设，过期/非法在途明确拒绝",
-      "status": "not_run",
-      "evidence": [],
+      "status": "passed",
+      "evidence": [
+        "docs/testing/EXECUTION-20261102.md#a09",
+        "docs/testing/execution-20261102.json#offline-suite",
+        "docs/testing/execution-20261102.json#browser-inventory",
+        "tests/business/inventory.test.ts"
+      ],
       "legacyTestReferences": [
         "inventory.test.ts"
-      ]
+      ],
+      "verificationNote": "Layered evidence; native, controlled fault, browser and live-model scopes are distinguished in the execution report."
     },
     {
       "id": "A10-01",
@@ -338,12 +536,18 @@
       "layer": "domain",
       "mandatory": true,
       "expected": "实物批次身份唯一、CAS分配、SKU/店铺日期窗和不超分配",
-      "status": "not_run",
-      "evidence": [],
+      "status": "passed",
+      "evidence": [
+        "docs/testing/EXECUTION-20261102.md#a10",
+        "docs/testing/execution-20261102.json#offline-suite",
+        "docs/testing/execution-20261102.json#browser-shipping",
+        "tests/business/shipping.test.ts"
+      ],
       "legacyTestReferences": [
         "shipping.test.ts",
         "inventory.test.ts"
-      ]
+      ],
+      "verificationNote": "Layered evidence; native, controlled fault, browser and live-model scopes are distinguished in the execution report."
     },
     {
       "id": "A10-02",
@@ -351,12 +555,18 @@
       "layer": "domain",
       "mandatory": true,
       "expected": "四前置、字段复用、人工双号唯一、累计到货不倒退/超量/早于发运，取消释放",
-      "status": "not_run",
-      "evidence": [],
+      "status": "passed",
+      "evidence": [
+        "docs/testing/EXECUTION-20261102.md#a10",
+        "docs/testing/execution-20261102.json#offline-suite",
+        "docs/testing/execution-20261102.json#browser-shipping",
+        "tests/business/shipping.test.ts"
+      ],
       "legacyTestReferences": [
         "shipping.test.ts",
         "inventory.test.ts"
-      ]
+      ],
+      "verificationNote": "Layered evidence; native, controlled fault, browser and live-model scopes are distinguished in the execution report."
     },
     {
       "id": "A10-03",
@@ -364,12 +574,18 @@
       "layer": "browser",
       "mandatory": true,
       "expected": "库存到分配到发货合成闭环，不调用真实Amazon/ERP",
-      "status": "not_run",
-      "evidence": [],
+      "status": "passed",
+      "evidence": [
+        "docs/testing/EXECUTION-20261102.md#a10",
+        "docs/testing/execution-20261102.json#offline-suite",
+        "docs/testing/execution-20261102.json#browser-shipping",
+        "tests/business/shipping.test.ts"
+      ],
       "legacyTestReferences": [
         "shipping.test.ts",
         "inventory.test.ts"
-      ]
+      ],
+      "verificationNote": "Layered evidence; native, controlled fault, browser and live-model scopes are distinguished in the execution report."
     },
     {
       "id": "A11-01",
@@ -377,11 +593,17 @@
       "layer": "domain",
       "mandatory": true,
       "expected": "各层分组保留campaign/币种，CTR/CPC/CVR/ACOS/ROAS零分母null，微单位精度",
-      "status": "not_run",
-      "evidence": [],
+      "status": "passed",
+      "evidence": [
+        "docs/testing/EXECUTION-20261102.md#a11",
+        "docs/testing/execution-20261102.json#offline-suite",
+        "docs/testing/execution-20261102.json#browser-ads",
+        "tests/business/advertising.test.ts"
+      ],
       "legacyTestReferences": [
         "advertising.test.ts"
-      ]
+      ],
+      "verificationNote": "Layered evidence; native, controlled fault, browser and live-model scopes are distinguished in the execution report."
     },
     {
       "id": "A11-02",
@@ -389,11 +611,17 @@
       "layer": "domain",
       "mandatory": true,
       "expected": "预算/利润受成本完整性限制，归因成熟使用报表asOf，缺成本利润未知",
-      "status": "not_run",
-      "evidence": [],
+      "status": "passed",
+      "evidence": [
+        "docs/testing/EXECUTION-20261102.md#a11",
+        "docs/testing/execution-20261102.json#offline-suite",
+        "docs/testing/execution-20261102.json#browser-ads",
+        "tests/business/advertising.test.ts"
+      ],
       "legacyTestReferences": [
         "advertising.test.ts"
-      ]
+      ],
+      "verificationNote": "Layered evidence; native, controlled fault, browser and live-model scopes are distinguished in the execution report."
     },
     {
       "id": "A11-03",
@@ -401,11 +629,17 @@
       "layer": "browser",
       "mandatory": true,
       "expected": "导入分析建议与导出同结果，不执行广告修改",
-      "status": "not_run",
-      "evidence": [],
+      "status": "passed",
+      "evidence": [
+        "docs/testing/EXECUTION-20261102.md#a11",
+        "docs/testing/execution-20261102.json#offline-suite",
+        "docs/testing/execution-20261102.json#browser-ads",
+        "tests/business/advertising.test.ts"
+      ],
       "legacyTestReferences": [
         "advertising.test.ts"
-      ]
+      ],
+      "verificationNote": "Layered evidence; native, controlled fault, browser and live-model scopes are distinguished in the execution report."
     },
     {
       "id": "A12-01",
@@ -413,12 +647,20 @@
       "layer": "domain",
       "mandatory": true,
       "expected": "来源去重、有限中文规则、精确归并计次，语义相似不擅自合并",
-      "status": "not_run",
-      "evidence": [],
+      "status": "passed",
+      "evidence": [
+        "docs/testing/EXECUTION-20261102.md#a12",
+        "docs/testing/execution-20261102.json#offline-suite",
+        "docs/testing/execution-20261102.json#browser-feedback",
+        "tests/business/learning.test.ts",
+        "tests/business/privacy-closure.test.ts",
+        "tests/integration/source.test.ts"
+      ],
       "legacyTestReferences": [
         "learning.test.ts",
         "privacy-closure.test.ts"
-      ]
+      ],
+      "verificationNote": "Layered evidence; native, controlled fault, browser and live-model scopes are distinguished in the execution report."
     },
     {
       "id": "A12-02",
@@ -426,12 +668,20 @@
       "layer": "fault",
       "mandatory": true,
       "expected": "补充/修订/撤回/删除闭包及迟到重放，候选不授予开发权限",
-      "status": "not_run",
-      "evidence": [],
+      "status": "passed",
+      "evidence": [
+        "docs/testing/EXECUTION-20261102.md#a12",
+        "docs/testing/execution-20261102.json#offline-suite",
+        "docs/testing/execution-20261102.json#browser-feedback",
+        "tests/business/learning.test.ts",
+        "tests/business/privacy-closure.test.ts",
+        "tests/integration/source.test.ts"
+      ],
       "legacyTestReferences": [
         "learning.test.ts",
         "privacy-closure.test.ts"
-      ]
+      ],
+      "verificationNote": "Layered evidence; native, controlled fault, browser and live-model scopes are distinguished in the execution report."
     },
     {
       "id": "A12-03",
@@ -439,12 +689,20 @@
       "layer": "browser",
       "mandatory": true,
       "expected": "可查看补充修改撤回，不加载私人生产去重登记",
-      "status": "not_run",
-      "evidence": [],
+      "status": "passed",
+      "evidence": [
+        "docs/testing/EXECUTION-20261102.md#a12",
+        "docs/testing/execution-20261102.json#offline-suite",
+        "docs/testing/execution-20261102.json#browser-feedback",
+        "tests/business/learning.test.ts",
+        "tests/business/privacy-closure.test.ts",
+        "tests/integration/source.test.ts"
+      ],
       "legacyTestReferences": [
         "learning.test.ts",
         "privacy-closure.test.ts"
-      ]
+      ],
+      "verificationNote": "Layered evidence; native, controlled fault, browser and live-model scopes are distinguished in the execution report."
     },
     {
       "id": "A13-01",
@@ -452,13 +710,23 @@
       "layer": "domain",
       "mandatory": true,
       "expected": "确认/推断/纠正替代和scope保留，引用或否定不当确认",
-      "status": "not_run",
-      "evidence": [],
+      "status": "passed",
+      "evidence": [
+        "docs/testing/EXECUTION-20261102.md#a13",
+        "docs/testing/execution-20261102.json#offline-suite",
+        "docs/testing/execution-20261102.json#native-skills",
+        "docs/testing/execution-20261102.json#master-privacy",
+        "docs/testing/execution-20261102.json#native-e2e",
+        "tests/business/learning.test.ts",
+        "tests/business/privacy-closure.test.ts",
+        "tests/integration/agent-tools.test.ts"
+      ],
       "legacyTestReferences": [
         "learning.test.ts",
         "privacy-closure.test.ts",
         "context-bounds.test.ts"
-      ]
+      ],
+      "verificationNote": "Layered evidence; native, controlled fault, browser and live-model scopes are distinguished in the execution report."
     },
     {
       "id": "A13-02",
@@ -466,13 +734,23 @@
       "layer": "fault",
       "mandatory": true,
       "expected": "事实权威、摘要可重建/CAS、压缩保真、删除后缓存和重放不复活",
-      "status": "not_run",
-      "evidence": [],
+      "status": "passed",
+      "evidence": [
+        "docs/testing/EXECUTION-20261102.md#a13",
+        "docs/testing/execution-20261102.json#offline-suite",
+        "docs/testing/execution-20261102.json#native-skills",
+        "docs/testing/execution-20261102.json#master-privacy",
+        "docs/testing/execution-20261102.json#native-e2e",
+        "tests/business/learning.test.ts",
+        "tests/business/privacy-closure.test.ts",
+        "tests/integration/agent-tools.test.ts"
+      ],
       "legacyTestReferences": [
         "learning.test.ts",
         "privacy-closure.test.ts",
         "context-bounds.test.ts"
-      ]
+      ],
+      "verificationNote": "Layered evidence; native, controlled fault, browser and live-model scopes are distinguished in the execution report."
     },
     {
       "id": "A13-03",
@@ -480,13 +758,23 @@
       "layer": "native",
       "mandatory": true,
       "expected": "新会话只装配当前有效来源与范围，旧历史无法绕删除",
-      "status": "not_run",
-      "evidence": [],
+      "status": "passed",
+      "evidence": [
+        "docs/testing/EXECUTION-20261102.md#a13",
+        "docs/testing/execution-20261102.json#offline-suite",
+        "docs/testing/execution-20261102.json#native-skills",
+        "docs/testing/execution-20261102.json#master-privacy",
+        "docs/testing/execution-20261102.json#native-e2e",
+        "tests/business/learning.test.ts",
+        "tests/business/privacy-closure.test.ts",
+        "tests/integration/agent-tools.test.ts"
+      ],
       "legacyTestReferences": [
         "learning.test.ts",
         "privacy-closure.test.ts",
         "context-bounds.test.ts"
-      ]
+      ],
+      "verificationNote": "Layered evidence; native, controlled fault, browser and live-model scopes are distinguished in the execution report."
     },
     {
       "id": "A14-01",
@@ -494,13 +782,22 @@
       "layer": "domain",
       "mandatory": true,
       "expected": "明确确认成功任务派生，L0回放后启用、L1待确认、L2拒绝，暂停后流程不丢",
-      "status": "not_run",
-      "evidence": [],
+      "status": "passed",
+      "evidence": [
+        "docs/testing/EXECUTION-20261102.md#a14",
+        "docs/testing/execution-20261102.json#offline-suite",
+        "docs/testing/execution-20261102.json#native-skills",
+        "docs/testing/execution-20261102.json#browser-skill",
+        "tests/business/learning.test.ts",
+        "tests/business/refactor-closure.test.ts",
+        "tests/integration/agent-tools.test.ts"
+      ],
       "legacyTestReferences": [
         "learning.test.ts",
         "harness.test.ts",
         "privacy-closure.test.ts"
-      ]
+      ],
+      "verificationNote": "Layered evidence; native, controlled fault, browser and live-model scopes are distinguished in the execution report."
     },
     {
       "id": "A14-02",
@@ -508,13 +805,22 @@
       "layer": "native",
       "mandatory": true,
       "expected": "cc-approved目录及全量分页搜索、hash/scope/source校验，撤销主动失效且每次重检",
-      "status": "not_run",
-      "evidence": [],
+      "status": "passed",
+      "evidence": [
+        "docs/testing/EXECUTION-20261102.md#a14",
+        "docs/testing/execution-20261102.json#offline-suite",
+        "docs/testing/execution-20261102.json#native-skills",
+        "docs/testing/execution-20261102.json#browser-skill",
+        "tests/business/learning.test.ts",
+        "tests/business/refactor-closure.test.ts",
+        "tests/integration/agent-tools.test.ts"
+      ],
       "legacyTestReferences": [
         "learning.test.ts",
         "harness.test.ts",
         "privacy-closure.test.ts"
-      ]
+      ],
+      "verificationNote": "Layered evidence; native, controlled fault, browser and live-model scopes are distinguished in the execution report."
     },
     {
       "id": "A14-03",
@@ -522,13 +828,22 @@
       "layer": "fault",
       "mandatory": true,
       "expected": "旧会话、恢复与在途工具不能绕撤销，复用只返回草稿而非自动业务确认",
-      "status": "not_run",
-      "evidence": [],
+      "status": "passed",
+      "evidence": [
+        "docs/testing/EXECUTION-20261102.md#a14",
+        "docs/testing/execution-20261102.json#offline-suite",
+        "docs/testing/execution-20261102.json#native-skills",
+        "docs/testing/execution-20261102.json#browser-skill",
+        "tests/business/learning.test.ts",
+        "tests/business/refactor-closure.test.ts",
+        "tests/integration/agent-tools.test.ts"
+      ],
       "legacyTestReferences": [
         "learning.test.ts",
         "harness.test.ts",
         "privacy-closure.test.ts"
-      ]
+      ],
+      "verificationNote": "Layered evidence; native, controlled fault, browser and live-model scopes are distinguished in the execution report."
     },
     {
       "id": "A15-01",
@@ -536,12 +851,19 @@
       "layer": "domain",
       "mandatory": true,
       "expected": "稳定需求/变更ID、日期追加、确认与撤回/替代版本，重复导出不重复",
-      "status": "not_run",
-      "evidence": [],
+      "status": "passed",
+      "evidence": [
+        "docs/testing/EXECUTION-20261102.md#a15",
+        "docs/testing/execution-20261102.json#offline-suite",
+        "docs/testing/execution-20261102.json#browser-feedback",
+        "tests/business/privacy-closure.test.ts",
+        "tests/native/packaging.test.ts"
+      ],
       "legacyTestReferences": [
         "learning.test.ts",
         "privacy-closure.test.ts"
-      ]
+      ],
+      "verificationNote": "Layered evidence; native, controlled fault, browser and live-model scopes are distinguished in the execution report."
     },
     {
       "id": "A15-02",
@@ -549,12 +871,19 @@
       "layer": "fault",
       "mandatory": true,
       "expected": "新补充未确认不覆盖旧确认，产品无GitHub凭据且不改源码",
-      "status": "not_run",
-      "evidence": [],
+      "status": "passed",
+      "evidence": [
+        "docs/testing/EXECUTION-20261102.md#a15",
+        "docs/testing/execution-20261102.json#offline-suite",
+        "docs/testing/execution-20261102.json#browser-feedback",
+        "tests/business/privacy-closure.test.ts",
+        "tests/native/packaging.test.ts"
+      ],
       "legacyTestReferences": [
         "learning.test.ts",
         "privacy-closure.test.ts"
-      ]
+      ],
+      "verificationNote": "Layered evidence; native, controlled fault, browser and live-model scopes are distinguished in the execution report."
     },
     {
       "id": "A16-01",
@@ -562,11 +891,20 @@
       "layer": "domain",
       "mandatory": true,
       "expected": "活动/库存/发货/广告摘要带来源/日期/scope，截断有遗漏元数据和字节边界",
-      "status": "not_run",
-      "evidence": [],
+      "status": "passed",
+      "evidence": [
+        "docs/testing/EXECUTION-20261102.md#a16",
+        "docs/testing/execution-20261102.json#offline-suite",
+        "docs/testing/execution-20261102.json#native-e2e",
+        "tests/business/context-bounds.test.ts",
+        "tests/native/operations-policy.test.ts",
+        "tests/integration/agent-tools.test.ts",
+        "tests/native/native-startup.test.ts"
+      ],
       "legacyTestReferences": [
         "context-bounds.test.ts"
-      ]
+      ],
+      "verificationNote": "Layered evidence; native, controlled fault, browser and live-model scopes are distinguished in the execution report."
     },
     {
       "id": "A16-02",
@@ -574,11 +912,20 @@
       "layer": "native",
       "mandatory": true,
       "expected": "模型只读相应摘要，不因页面写功能扩大工具权限",
-      "status": "not_run",
-      "evidence": [],
+      "status": "passed",
+      "evidence": [
+        "docs/testing/EXECUTION-20261102.md#a16",
+        "docs/testing/execution-20261102.json#offline-suite",
+        "docs/testing/execution-20261102.json#native-e2e",
+        "tests/business/context-bounds.test.ts",
+        "tests/native/operations-policy.test.ts",
+        "tests/integration/agent-tools.test.ts",
+        "tests/native/native-startup.test.ts"
+      ],
       "legacyTestReferences": [
         "context-bounds.test.ts"
-      ]
+      ],
+      "verificationNote": "Layered evidence; native, controlled fault, browser and live-model scopes are distinguished in the execution report."
     },
     {
       "id": "A17-01",
@@ -586,9 +933,19 @@
       "layer": "native",
       "mandatory": true,
       "expected": "真实Source→Runtime/Engine→Ticket/Mandate→Assignment→DSH worker→业务回执→Channel闭环",
-      "status": "not_run",
-      "evidence": [],
-      "legacyTestReferences": []
+      "status": "passed",
+      "evidence": [
+        "docs/testing/EXECUTION-20261102.md#a17",
+        "docs/testing/execution-20261102.json#offline-suite",
+        "docs/testing/execution-20261102.json#native-e2e",
+        "docs/testing/execution-20261102.json#core-provenance",
+        "tests/integration/source.test.ts",
+        "tests/integration/operations.test.ts",
+        "tests/business/operation-identity.test.ts",
+        "tests/native/operations-policy.test.ts"
+      ],
+      "legacyTestReferences": [],
+      "verificationNote": "Layered evidence; native, controlled fault, browser and live-model scopes are distinguished in the execution report."
     },
     {
       "id": "A17-02",
@@ -596,9 +953,19 @@
       "layer": "fault",
       "mandatory": true,
       "expected": "重复Trigger/游标崩溃/事件补充/断线继续/显式取消/重启恢复不重复业务效果",
-      "status": "not_run",
-      "evidence": [],
-      "legacyTestReferences": []
+      "status": "passed",
+      "evidence": [
+        "docs/testing/EXECUTION-20261102.md#a17",
+        "docs/testing/execution-20261102.json#offline-suite",
+        "docs/testing/execution-20261102.json#native-e2e",
+        "docs/testing/execution-20261102.json#core-provenance",
+        "tests/integration/source.test.ts",
+        "tests/integration/operations.test.ts",
+        "tests/business/operation-identity.test.ts",
+        "tests/native/operations-policy.test.ts"
+      ],
+      "legacyTestReferences": [],
+      "verificationNote": "Layered evidence; native, controlled fault, browser and live-model scopes are distinguished in the execution report."
     },
     {
       "id": "A17-03",
@@ -606,9 +973,19 @@
       "layer": "native",
       "mandatory": true,
       "expected": "operations模式无GitHub身份/push/shell前提，保留上游Store/Effects与core规则",
-      "status": "not_run",
-      "evidence": [],
-      "legacyTestReferences": []
+      "status": "passed",
+      "evidence": [
+        "docs/testing/EXECUTION-20261102.md#a17",
+        "docs/testing/execution-20261102.json#offline-suite",
+        "docs/testing/execution-20261102.json#native-e2e",
+        "docs/testing/execution-20261102.json#core-provenance",
+        "tests/integration/source.test.ts",
+        "tests/integration/operations.test.ts",
+        "tests/business/operation-identity.test.ts",
+        "tests/native/operations-policy.test.ts"
+      ],
+      "legacyTestReferences": [],
+      "verificationNote": "Layered evidence; native, controlled fault, browser and live-model scopes are distinguished in the execution report."
     },
     {
       "id": "A18-01",
@@ -616,14 +993,29 @@
       "layer": "fault",
       "mandatory": true,
       "expected": "匿名/错误Origin/token/scope拒绝，DSH原生会话/stream/RPC/附件/管理路由无绕行",
-      "status": "not_run",
-      "evidence": [],
+      "status": "passed",
+      "evidence": [
+        "docs/testing/EXECUTION-20261102.md#a18",
+        "docs/testing/execution-20261102.json#offline-suite",
+        "docs/testing/execution-20261102.json#native-e2e",
+        "docs/testing/execution-20261102.json#native-socket",
+        "docs/testing/execution-20261102.json#handoff-network",
+        "tests/integration/boundary.test.ts",
+        "tests/integration/native-access.test.ts",
+        "tests/integration/security-acceptance.test.ts",
+        "tests/integration/agent-tools.test.ts",
+        "tests/integration/accounting.test.ts",
+        "tests/native/native-startup.test.ts",
+        "tests/business/budget.test.ts",
+        "tests/business/budget-policy.test.ts"
+      ],
       "legacyTestReferences": [
         "auth.test.ts",
         "budget.test.ts",
         "gateway.test.ts",
         "budget-policy.test.ts"
-      ]
+      ],
+      "verificationNote": "Layered evidence; native, controlled fault, browser and live-model scopes are distinguished in the execution report."
     },
     {
       "id": "A18-02",
@@ -631,14 +1023,29 @@
       "layer": "native",
       "mandatory": true,
       "expected": "运营会话新建/恢复/HMR/派工均无shell/文件/安装/凭据工具，agent-local guard有效",
-      "status": "not_run",
-      "evidence": [],
+      "status": "passed",
+      "evidence": [
+        "docs/testing/EXECUTION-20261102.md#a18",
+        "docs/testing/execution-20261102.json#offline-suite",
+        "docs/testing/execution-20261102.json#native-e2e",
+        "docs/testing/execution-20261102.json#native-socket",
+        "docs/testing/execution-20261102.json#handoff-network",
+        "tests/integration/boundary.test.ts",
+        "tests/integration/native-access.test.ts",
+        "tests/integration/security-acceptance.test.ts",
+        "tests/integration/agent-tools.test.ts",
+        "tests/integration/accounting.test.ts",
+        "tests/native/native-startup.test.ts",
+        "tests/business/budget.test.ts",
+        "tests/business/budget-policy.test.ts"
+      ],
       "legacyTestReferences": [
         "auth.test.ts",
         "budget.test.ts",
         "gateway.test.ts",
         "budget-policy.test.ts"
-      ]
+      ],
+      "verificationNote": "Layered evidence; native, controlled fault, browser and live-model scopes are distinguished in the execution report."
     },
     {
       "id": "A18-03",
@@ -646,14 +1053,29 @@
       "layer": "fault",
       "mandatory": true,
       "expected": "所有角色/标题/压缩模型调用reserve/settle、未知usage不算零，失败无自动模型重试",
-      "status": "not_run",
-      "evidence": [],
+      "status": "passed",
+      "evidence": [
+        "docs/testing/EXECUTION-20261102.md#a18",
+        "docs/testing/execution-20261102.json#offline-suite",
+        "docs/testing/execution-20261102.json#native-e2e",
+        "docs/testing/execution-20261102.json#native-socket",
+        "docs/testing/execution-20261102.json#handoff-network",
+        "tests/integration/boundary.test.ts",
+        "tests/integration/native-access.test.ts",
+        "tests/integration/security-acceptance.test.ts",
+        "tests/integration/agent-tools.test.ts",
+        "tests/integration/accounting.test.ts",
+        "tests/native/native-startup.test.ts",
+        "tests/business/budget.test.ts",
+        "tests/business/budget-policy.test.ts"
+      ],
       "legacyTestReferences": [
         "auth.test.ts",
         "budget.test.ts",
         "gateway.test.ts",
         "budget-policy.test.ts"
-      ]
+      ],
+      "verificationNote": "Layered evidence; native, controlled fault, browser and live-model scopes are distinguished in the execution report."
     },
     {
       "id": "A18-04",
@@ -661,14 +1083,29 @@
       "layer": "domain",
       "mandatory": true,
       "expected": "单一写入服务的CAS/幂等和跨scope错误不泄露实体存在",
-      "status": "not_run",
-      "evidence": [],
+      "status": "passed",
+      "evidence": [
+        "docs/testing/EXECUTION-20261102.md#a18",
+        "docs/testing/execution-20261102.json#offline-suite",
+        "docs/testing/execution-20261102.json#native-e2e",
+        "docs/testing/execution-20261102.json#native-socket",
+        "docs/testing/execution-20261102.json#handoff-network",
+        "tests/integration/boundary.test.ts",
+        "tests/integration/native-access.test.ts",
+        "tests/integration/security-acceptance.test.ts",
+        "tests/integration/agent-tools.test.ts",
+        "tests/integration/accounting.test.ts",
+        "tests/native/native-startup.test.ts",
+        "tests/business/budget.test.ts",
+        "tests/business/budget-policy.test.ts"
+      ],
       "legacyTestReferences": [
         "auth.test.ts",
         "budget.test.ts",
         "gateway.test.ts",
         "budget-policy.test.ts"
-      ]
+      ],
+      "verificationNote": "Layered evidence; native, controlled fault, browser and live-model scopes are distinguished in the execution report."
     },
     {
       "id": "A19-01",
@@ -676,13 +1113,23 @@
       "layer": "fault",
       "mandatory": true,
       "expected": "本机合成旧格式副本迁移，逐字段/ID/引用/hash/业务输出一致，不覆盖原输入",
-      "status": "not_run",
-      "evidence": [],
+      "status": "passed",
+      "evidence": [
+        "docs/testing/EXECUTION-20261102.md#a19",
+        "docs/testing/execution-20261102.json#offline-suite",
+        "docs/testing/execution-20261102.json#native-e2e",
+        "docs/testing/execution-20261102.json#native-queued",
+        "tests/integration/recovery-cli.test.ts",
+        "tests/business/recovery-readonly.test.ts",
+        "tests/business/recovery.test.ts",
+        "tests/native/recovery-owner.test.ts"
+      ],
       "legacyTestReferences": [
         "recovery.test.ts",
         "checkpoint.test.ts",
         "privacy-closure.test.ts"
-      ]
+      ],
+      "verificationNote": "Layered evidence; native, controlled fault, browser and live-model scopes are distinguished in the execution report."
     },
     {
       "id": "A19-02",
@@ -690,13 +1137,23 @@
       "layer": "fault",
       "mandatory": true,
       "expected": "协调备份业务/编排/会话/文件及账本，空目录恢复、hash/integrity校验",
-      "status": "not_run",
-      "evidence": [],
+      "status": "passed",
+      "evidence": [
+        "docs/testing/EXECUTION-20261102.md#a19",
+        "docs/testing/execution-20261102.json#offline-suite",
+        "docs/testing/execution-20261102.json#native-e2e",
+        "docs/testing/execution-20261102.json#native-queued",
+        "tests/integration/recovery-cli.test.ts",
+        "tests/business/recovery-readonly.test.ts",
+        "tests/business/recovery.test.ts",
+        "tests/native/recovery-owner.test.ts"
+      ],
       "legacyTestReferences": [
         "recovery.test.ts",
         "checkpoint.test.ts",
         "privacy-closure.test.ts"
-      ]
+      ],
+      "verificationNote": "Layered evidence; native, controlled fault, browser and live-model scopes are distinguished in the execution report."
     },
     {
       "id": "A19-03",
@@ -704,13 +1161,23 @@
       "layer": "fault",
       "mandatory": true,
       "expected": "最新删除/撤销及session/ticket denylist先重放，用量只合并不退款，迟到事件不复活",
-      "status": "not_run",
-      "evidence": [],
+      "status": "passed",
+      "evidence": [
+        "docs/testing/EXECUTION-20261102.md#a19",
+        "docs/testing/execution-20261102.json#offline-suite",
+        "docs/testing/execution-20261102.json#native-e2e",
+        "docs/testing/execution-20261102.json#native-queued",
+        "tests/integration/recovery-cli.test.ts",
+        "tests/business/recovery-readonly.test.ts",
+        "tests/business/recovery.test.ts",
+        "tests/native/recovery-owner.test.ts"
+      ],
       "legacyTestReferences": [
         "recovery.test.ts",
         "checkpoint.test.ts",
         "privacy-closure.test.ts"
-      ]
+      ],
+      "verificationNote": "Layered evidence; native, controlled fault, browser and live-model scopes are distinguished in the execution report."
     },
     {
       "id": "A20-01",
@@ -718,9 +1185,20 @@
       "layer": "native",
       "mandatory": true,
       "expected": "Windows原生路径/目录/进程行为通过，不把WSL存在命令当已验证环境",
-      "status": "not_run",
-      "evidence": [],
-      "legacyTestReferences": []
+      "status": "passed",
+      "evidence": [
+        "docs/testing/EXECUTION-20261102.md#a20",
+        "docs/testing/execution-20261102.json#offline-suite",
+        "docs/testing/execution-20261102.json#native-e2e",
+        "docs/testing/execution-20261102.json#isolation-audit",
+        "docs/testing/execution-20261102.json#handoff-network",
+        "docs/testing/execution-20261102.json#browser-final",
+        "tests/packaging/launcher.test.ts",
+        "tests/native/packaging.test.ts",
+        "tests/integration/recovery-cli.test.ts"
+      ],
+      "legacyTestReferences": [],
+      "verificationNote": "Layered evidence; native, controlled fault, browser and live-model scopes are distinguished in the execution report."
     },
     {
       "id": "A20-02",
@@ -728,9 +1206,20 @@
       "layer": "fault",
       "mandatory": true,
       "expected": "独立home/state/data/loopback端口/账户，拒绝目录逃逸及共享旧写入",
-      "status": "not_run",
-      "evidence": [],
-      "legacyTestReferences": []
+      "status": "passed",
+      "evidence": [
+        "docs/testing/EXECUTION-20261102.md#a20",
+        "docs/testing/execution-20261102.json#offline-suite",
+        "docs/testing/execution-20261102.json#native-e2e",
+        "docs/testing/execution-20261102.json#isolation-audit",
+        "docs/testing/execution-20261102.json#handoff-network",
+        "docs/testing/execution-20261102.json#browser-final",
+        "tests/packaging/launcher.test.ts",
+        "tests/native/packaging.test.ts",
+        "tests/integration/recovery-cli.test.ts"
+      ],
+      "legacyTestReferences": [],
+      "verificationNote": "Layered evidence; native, controlled fault, browser and live-model scopes are distinguished in the execution report."
     },
     {
       "id": "A20-03",
@@ -738,9 +1227,20 @@
       "layer": "handoff",
       "mandatory": true,
       "expected": "旧仓库工作区与自动任务未改，云端零连接零部署，有本机操作证据",
-      "status": "not_run",
-      "evidence": [],
-      "legacyTestReferences": []
+      "status": "passed",
+      "evidence": [
+        "docs/testing/EXECUTION-20261102.md#a20",
+        "docs/testing/execution-20261102.json#offline-suite",
+        "docs/testing/execution-20261102.json#native-e2e",
+        "docs/testing/execution-20261102.json#isolation-audit",
+        "docs/testing/execution-20261102.json#handoff-network",
+        "docs/testing/execution-20261102.json#browser-final",
+        "tests/packaging/launcher.test.ts",
+        "tests/native/packaging.test.ts",
+        "tests/integration/recovery-cli.test.ts"
+      ],
+      "legacyTestReferences": [],
+      "verificationNote": "Layered evidence; native, controlled fault, browser and live-model scopes are distinguished in the execution report."
     },
     {
       "id": "A17-04",
@@ -748,9 +1248,19 @@
       "layer": "fault",
       "mandatory": true,
       "expected": "普通业务事件/反馈存档/tick/助手Channel与工具回执不进入新Eval，不产生自触发Ticket或额外模型调用；只有认证human_request可准入",
-      "status": "not_run",
-      "evidence": [],
-      "legacyTestReferences": []
+      "status": "passed",
+      "evidence": [
+        "docs/testing/EXECUTION-20261102.md#a17",
+        "docs/testing/execution-20261102.json#offline-suite",
+        "docs/testing/execution-20261102.json#native-e2e",
+        "docs/testing/execution-20261102.json#core-provenance",
+        "tests/integration/source.test.ts",
+        "tests/integration/operations.test.ts",
+        "tests/business/operation-identity.test.ts",
+        "tests/native/operations-policy.test.ts"
+      ],
+      "legacyTestReferences": [],
+      "verificationNote": "Layered evidence; native, controlled fault, browser and live-model scopes are distinguished in the execution report."
     },
     {
       "id": "A17-05",
@@ -758,9 +1268,20 @@
       "layer": "fault",
       "mandatory": true,
       "expected": "同一原始消息逻辑操作换Assignment/重启/重新规划后沿用operationId并只写一次；相同payload的两次新用户请求分别生效；同intentSlot变payload冲突；同源多份需独立授权意图",
-      "status": "not_run",
-      "evidence": [],
-      "legacyTestReferences": []
+      "status": "passed",
+      "evidence": [
+        "docs/testing/EXECUTION-20261102.md#a17",
+        "docs/testing/execution-20261102.json#offline-suite",
+        "docs/testing/execution-20261102.json#native-e2e",
+        "docs/testing/execution-20261102.json#core-provenance",
+        "tests/integration/source.test.ts",
+        "tests/integration/operations.test.ts",
+        "tests/business/operation-identity.test.ts",
+        "tests/native/operations-policy.test.ts"
+      ],
+      "legacyTestReferences": [],
+      "verificationNote": "Layered evidence; native, controlled fault, browser and live-model scopes are distinguished in the execution report."
     }
-  ]
+  ],
+  "implementationSha": "b0afbdd088d1022b6fef53c8424cb73184543e1a"
 }

@@ -27,8 +27,8 @@
     "SA-RECOVERY-001"
   ],
   "acceptance": "All delivered domain/storage/learning behaviors migrated with pure queries, typed command handlers, task-owned types and event-driven learning; all relevant old behavior regressions rerun and new behavior Red/Green.",
-  "status": "integrated_pending_acceptance",
-  "repairCount": 0,
+  "status": "verified",
+  "repairCount": 4,
   "stopConditions": [
     "cloud_or_legacy_write",
     "credential_or_data_exposure",
@@ -40,5 +40,8 @@
   "followupWritePaths": [
     "packages/host/accounting.ts",
     "tests/integration/**"
-  ]
+  ],
+  "repairCountAtInitialDispatch": 0,
+  "repairCountMeaning": "Recorded product fix commits affecting this responsibility area; details in repairJournal.",
+  "verifiedImplementationSha": "b0afbdd088d1022b6fef53c8424cb73184543e1a"
 }

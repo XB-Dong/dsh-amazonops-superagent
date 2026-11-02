@@ -11,7 +11,8 @@
         "A01-01",
         "A01-02"
       ],
-      "implementationStatus": "not_started"
+      "implementationStatus": "implemented_verified",
+      "implementationStatusAtPreparation": "not_started"
     },
     {
       "id": "CC-HARNESS-001",
@@ -23,7 +24,8 @@
         "A02-02",
         "A02-03"
       ],
-      "implementationStatus": "not_started"
+      "implementationStatus": "implemented_verified",
+      "implementationStatusAtPreparation": "not_started"
     },
     {
       "id": "CC-TASK-001",
@@ -35,7 +37,8 @@
         "A03-02",
         "A03-03"
       ],
-      "implementationStatus": "not_started"
+      "implementationStatus": "implemented_verified",
+      "implementationStatusAtPreparation": "not_started"
     },
     {
       "id": "CC-TASK-COPY-001",
@@ -48,7 +51,8 @@
         "A04-03",
         "A04-04"
       ],
-      "implementationStatus": "not_started"
+      "implementationStatus": "implemented_verified",
+      "implementationStatusAtPreparation": "not_started"
     },
     {
       "id": "CC-WORKLOG-001",
@@ -59,7 +63,8 @@
         "A05-01",
         "A05-02"
       ],
-      "implementationStatus": "not_started"
+      "implementationStatus": "implemented_verified",
+      "implementationStatusAtPreparation": "not_started"
     },
     {
       "id": "CC-NOTES-001",
@@ -70,7 +75,8 @@
         "A06-01",
         "A06-02"
       ],
-      "implementationStatus": "not_started"
+      "implementationStatus": "implemented_verified",
+      "implementationStatusAtPreparation": "not_started"
     },
     {
       "id": "CC-ACT-001",
@@ -82,7 +88,8 @@
         "A07-02",
         "A07-03"
       ],
-      "implementationStatus": "not_started"
+      "implementationStatus": "implemented_verified",
+      "implementationStatusAtPreparation": "not_started"
     },
     {
       "id": "CC-DATA-001",
@@ -94,7 +101,8 @@
         "A08-02",
         "A08-03"
       ],
-      "implementationStatus": "not_started"
+      "implementationStatus": "implemented_verified",
+      "implementationStatusAtPreparation": "not_started"
     },
     {
       "id": "CC-INV-001",
@@ -106,7 +114,8 @@
         "A09-02",
         "A09-03"
       ],
-      "implementationStatus": "not_started"
+      "implementationStatus": "implemented_verified",
+      "implementationStatusAtPreparation": "not_started"
     },
     {
       "id": "CC-SHIP-001",
@@ -118,7 +127,8 @@
         "A10-02",
         "A10-03"
       ],
-      "implementationStatus": "not_started"
+      "implementationStatus": "implemented_verified",
+      "implementationStatusAtPreparation": "not_started"
     },
     {
       "id": "CC-ADS-001",
@@ -130,7 +140,8 @@
         "A11-02",
         "A11-03"
       ],
-      "implementationStatus": "not_started"
+      "implementationStatus": "implemented_verified",
+      "implementationStatusAtPreparation": "not_started"
     },
     {
       "id": "CC-FEEDBACK-001",
@@ -142,7 +153,8 @@
         "A12-02",
         "A12-03"
       ],
-      "implementationStatus": "not_started"
+      "implementationStatus": "implemented_verified",
+      "implementationStatusAtPreparation": "not_started"
     },
     {
       "id": "CC-MEMORY-001",
@@ -154,7 +166,8 @@
         "A13-02",
         "A13-03"
       ],
-      "implementationStatus": "not_started"
+      "implementationStatus": "implemented_verified",
+      "implementationStatusAtPreparation": "not_started"
     },
     {
       "id": "CC-SKILL-001",
@@ -166,7 +179,8 @@
         "A14-02",
         "A14-03"
       ],
-      "implementationStatus": "not_started"
+      "implementationStatus": "implemented_verified",
+      "implementationStatusAtPreparation": "not_started"
     },
     {
       "id": "CC-HISTORY-001",
@@ -177,7 +191,8 @@
         "A15-01",
         "A15-02"
       ],
-      "implementationStatus": "not_started"
+      "implementationStatus": "implemented_verified",
+      "implementationStatusAtPreparation": "not_started"
     },
     {
       "id": "CC-ANALYSIS-001",
@@ -188,7 +203,8 @@
         "A16-01",
         "A16-02"
       ],
-      "implementationStatus": "not_started"
+      "implementationStatus": "implemented_verified",
+      "implementationStatusAtPreparation": "not_started"
     },
     {
       "id": "SA-NATIVE-001",
@@ -202,7 +218,8 @@
         "A17-04",
         "A17-05"
       ],
-      "implementationStatus": "not_started"
+      "implementationStatus": "implemented_verified",
+      "implementationStatusAtPreparation": "not_started"
     },
     {
       "id": "SA-ACCESS-001",
@@ -215,7 +232,8 @@
         "A18-03",
         "A18-04"
       ],
-      "implementationStatus": "not_started"
+      "implementationStatus": "implemented_verified",
+      "implementationStatusAtPreparation": "not_started"
     },
     {
       "id": "SA-RECOVERY-001",
@@ -227,7 +245,8 @@
         "A19-02",
         "A19-03"
       ],
-      "implementationStatus": "not_started"
+      "implementationStatus": "implemented_verified",
+      "implementationStatusAtPreparation": "not_started"
     },
     {
       "id": "SA-LOCAL-001",
@@ -239,7 +258,8 @@
         "A20-02",
         "A20-03"
       ],
-      "implementationStatus": "not_started"
+      "implementationStatus": "implemented_verified",
+      "implementationStatusAtPreparation": "not_started"
     },
     {
       "id": "CC-CUSTOMER-001",
@@ -250,5 +270,6 @@
     }
   ],
   "legacyToolCount": 9,
-  "legacyTestSourceFiles": 34
+  "legacyTestSourceFiles": 34,
+  "currentExecution": "docs/waves/P0/state.json"
 }

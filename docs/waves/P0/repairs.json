@@ -1,0 +1,203 @@
+{
+  "schemaVersion": "1.0",
+  "date": "2026-11-02",
+  "countingRule": "Actual recorded product fix commits, not synthetic behavioral Reds; original dispatch counts retained. Regressions added for already-correct behavior are excluded.",
+  "sameCauseDiagnosis": "Repeated privacy findings caused a full consumed-source/entity/fact/Skill and epoch review; repairs were integrated after that diagnosis rather than resetting counters. Fixture mistakes are documented separately in the execution report.",
+  "fixes": [
+    {
+      "commit": "afb0b50900605ab1f436a1b504c94972887bbc25",
+      "subject": "fix: bind native RPC peers to restricted operator policy",
+      "responsibilityAreas": [
+        "P0-INTEGRATION"
+      ]
+    },
+    {
+      "commit": "6f988f10c230893c90544769d5567a79b7b28c9d",
+      "subject": "fix: retain current native request attribution during budget restore",
+      "responsibilityAreas": [
+        "P0-BACKEND"
+      ]
+    },
+    {
+      "commit": "174aab0011f6d07ec1a9097a468d9ec15fb438bd",
+      "subject": "fix: retire revoked native contexts and select the workbench on login",
+      "responsibilityAreas": [
+        "P0-FRONTEND",
+        "P0-INTEGRATION"
+      ]
+    },
+    {
+      "commit": "e083e0984341493242fb56b4ec38e4e9e0d66125",
+      "subject": "fix: register worker skills within the injected native service context",
+      "responsibilityAreas": [
+        "P0-INTEGRATION"
+      ]
+    },
+    {
+      "commit": "2e69067697916154ec361adce410e0dede570446",
+      "subject": "fix: retain lineage for native tool results and skill listings",
+      "responsibilityAreas": [
+        "P0-INTEGRATION"
+      ]
+    },
+    {
+      "commit": "8af2308693bec5f8f53eb0c23a8f335f86fdcf56",
+      "subject": "fix: reject linked recovery inputs and malformed ingress targets",
+      "responsibilityAreas": [
+        "P0-BACKEND",
+        "P0-INTEGRATION"
+      ]
+    },
+    {
+      "commit": "475dacd818c9835be93d55e24f4660ca4a7aec4d",
+      "subject": "fix: report model outcome by actual completion order",
+      "responsibilityAreas": [
+        "P0-INTEGRATION"
+      ]
+    },
+    {
+      "commit": "af140ee9b85d053edecdc3c40ae775b4d356bb76",
+      "subject": "fix: require recovery owner databases and define native privacy policy",
+      "responsibilityAreas": [
+        "P0-BACKEND",
+        "P0-INTEGRATION"
+      ]
+    },
+    {
+      "commit": "18714bb339de35e1b3a11b457e5bfaa2bc20cbfd",
+      "subject": "fix: retire private master histories across durable privacy epochs",
+      "responsibilityAreas": [
+        "P0-NATIVE"
+      ]
+    },
+    {
+      "commit": "bc94ead868631347c3a086c9f508a2815751f7be",
+      "subject": "fix: replace coding sidebar with native operations rail",
+      "responsibilityAreas": [
+        "P0-FRONTEND"
+      ]
+    },
+    {
+      "commit": "318dd6a20fc5bafded6ea27f6f867d6f21a4dd7b",
+      "subject": "fix: reject linked runtime and recovery paths before access",
+      "responsibilityAreas": [
+        "P0-INTEGRATION"
+      ]
+    },
+    {
+      "commit": "5eddd0fb3ea33e8e1585fe4fcd421aa74b11fe23",
+      "subject": "fix: validate native recovery owners through read only providers",
+      "responsibilityAreas": [
+        "P0-INTEGRATION"
+      ]
+    },
+    {
+      "commit": "6580b1924a82b48988006eb8206cab7e1f4e0a53",
+      "subject": "fix: publish native JSON tool results and document exact operations resources",
+      "responsibilityAreas": [
+        "P0-NATIVE",
+        "P0-INTEGRATION"
+      ]
+    },
+    {
+      "commit": "99818e42ed568407ad4ab04fd13d875efdb996da",
+      "subject": "fix: release host prompt and provider decorations with native sessions",
+      "responsibilityAreas": [
+        "P0-INTEGRATION"
+      ]
+    },
+    {
+      "commit": "b23bf987c58ba8c27b178483046ff768a971fd1a",
+      "subject": "fix: accept native listener disposer return values",
+      "responsibilityAreas": [
+        "P0-INTEGRATION"
+      ]
+    },
+    {
+      "commit": "573fed4eb13489f8e791a1051d4cd86ea03b0e44",
+      "subject": "fix: await native agent extension cleanup during checkpoint",
+      "responsibilityAreas": [
+        "P0-NATIVE"
+      ]
+    },
+    {
+      "commit": "9244a375a6f393ef92e01ec908b93e1bac01735f",
+      "subject": "fix: respect readonly native startup permissions and present the operations workbench",
+      "responsibilityAreas": [
+        "P0-NATIVE",
+        "P0-INTEGRATION"
+      ]
+    },
+    {
+      "commit": "272c49be1432cf40a6054ff2bfbe86677e9e9f40",
+      "subject": "fix: conclude successful native operations turns without model error",
+      "responsibilityAreas": [
+        "P0-NATIVE"
+      ]
+    },
+    {
+      "commit": "a676f0e0c76ab1d254e42f9664f5fb2a1cdc66e7",
+      "subject": "fix: retain committed business views during native privacy refresh",
+      "responsibilityAreas": [
+        "P0-FRONTEND",
+        "P0-INTEGRATION"
+      ]
+    },
+    {
+      "commit": "f24e02cf1d5498e91affbc588bafbf2c8c5ee4e3",
+      "subject": "fix: preserve native test provider limits and export confirmed report batches",
+      "responsibilityAreas": [
+        "P0-FRONTEND"
+      ]
+    },
+    {
+      "commit": "cfb792368ec2896adc65a7491ed9317318c4adad",
+      "subject": "fix: enable bounded native compaction for the operations model window",
+      "responsibilityAreas": [
+        "P0-NATIVE"
+      ]
+    },
+    {
+      "commit": "01b9aa770d7edbc102658c80fda174ba3b8977d6",
+      "subject": "fix: admit durable queued native assignments during recovery",
+      "responsibilityAreas": [
+        "P0-INTEGRATION"
+      ]
+    },
+    {
+      "commit": "c51f36b37c04b7efba338e91814e4609c8f2c133",
+      "subject": "fix: install native client CSS from module factory",
+      "responsibilityAreas": [
+        "P0-INTEGRATION"
+      ]
+    },
+    {
+      "commit": "f0378b985e70055dc41488be0da654899902a50d",
+      "subject": "fix: retain unsaved task minutes across list filters",
+      "responsibilityAreas": [
+        "P0-FRONTEND"
+      ]
+    },
+    {
+      "commit": "236792fb15fdf75880235304834dee4669d9a13f",
+      "subject": "fix: merge current usage from an isolated SQLite WAL copy",
+      "responsibilityAreas": [
+        "P0-BACKEND"
+      ]
+    },
+    {
+      "commit": "7bc08cf482074a536485981d1977335095eb3257",
+      "subject": "fix: anchor restored native execution to the current private home",
+      "responsibilityAreas": [
+        "P0-NATIVE"
+      ]
+    },
+    {
+      "commit": "b0afbdd088d1022b6fef53c8424cb73184543e1a",
+      "subject": "fix: contain upgrade socket resets at the ingress boundary",
+      "responsibilityAreas": [
+        "P0-INTEGRATION"
+      ]
+    }
+  ]
+}

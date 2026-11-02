@@ -1,0 +1,529 @@
+{
+  "schemaVersion": "1.0",
+  "date": "2026-11-02",
+  "implementationSha": "b0afbdd088d1022b6fef53c8424cb73184543e1a",
+  "localSuite": {
+    "command": "node scripts/test.mjs",
+    "exitCode": 0,
+    "tests": 231,
+    "passed": 231,
+    "failed": 0,
+    "skipped": 0,
+    "sourceDirty": true,
+    "uncommittedAtStart": [
+      "docs/README.md",
+      "docs/operations/LOCAL-RECOVERY.md",
+      "docs/testing/acceptance.json",
+      "docs/waves/P0/state.json",
+      "docs/architecture/IMPLEMENTED.zh.md",
+      "docs/testing/EXECUTION-20261102.md",
+      "docs/testing/execution-20261102.json"
+    ],
+    "note": "Only new documentation was uncommitted. Product sources and tests equal implementationSha; final clean CI validates the published commit.",
+    "productSourcesMatchCommit": true
+  },
+  "typecheck": {
+    "command": "node scripts/check.mjs",
+    "exitCode": 0
+  },
+  "build": {
+    "command": "node scripts/build.mjs",
+    "exitCode": 0
+  },
+  "liveModel": {
+    "scenarios": 2,
+    "requests": 20,
+    "verified": 20,
+    "verifiedInputTokens": 82777,
+    "verifiedOutputTokens": 4589,
+    "unknown": 0,
+    "acceptance": "sent final outbox/result callback and completed master/worker turns required",
+    "unknownReservedInputTokens": 0,
+    "unknownReservedOutputTokens": 0,
+    "implementationSha": "9558c4ae0f85e3dee7d78078c857eb6096511b16"
+  },
+  "allLiveRuns": {
+    "requests": 91,
+    "verified": 88,
+    "unknown": 3,
+    "verifiedInputTokens": 331006,
+    "verifiedOutputTokens": 14113,
+    "unknownReservedInputTokens": 65402,
+    "unknownReservedOutputTokens": 6144
+  },
+  "artifactGroups": [
+    {
+      "id": "offline-suite",
+      "artifacts": [
+        {
+          "id": "offline-suite/1",
+          "fileName": "final-tests.txt",
+          "bytes": 33526,
+          "sha256": "5a604e9e1f9b8f8c54d7c9d3bc509ffda7886a80add68ff4b98cb4bd9e88a583"
+        }
+      ]
+    },
+    {
+      "id": "browser-offline",
+      "artifacts": [
+        {
+          "id": "browser-offline/1",
+          "fileName": "offline-overview.txt",
+          "bytes": 4531,
+          "sha256": "1ef2c77be1dd909d0a223f86124117ea13057852a8419e7e04eb7e7f19508266"
+        },
+        {
+          "id": "browser-offline/2",
+          "fileName": "offline-guide.txt",
+          "bytes": 5793,
+          "sha256": "7c4724e4e4d63378aaa15c0e6007dae10566585a0c1e2cb427ed5c6432c7b8c6"
+        },
+        {
+          "id": "browser-offline/3",
+          "fileName": "offline-budget-before.json",
+          "bytes": 161,
+          "sha256": "2a6dcf074335086652420899f719f8e755355cb309a10419ccea7f065f08e22b"
+        },
+        {
+          "id": "browser-offline/4",
+          "fileName": "offline-budget-after.json",
+          "bytes": 161,
+          "sha256": "d1962caea9f0bb04d4e2539fc7a488b51f720190914e3a6ce87b0828f3deb22f"
+        }
+      ]
+    },
+    {
+      "id": "browser-task",
+      "artifacts": [
+        {
+          "id": "browser-task/1",
+          "fileName": "task-copy.txt",
+          "bytes": 4141,
+          "sha256": "fde5680c50d46e612faee95639fd6cdcd0a99346f4a9a5feacccd68edbe0085c"
+        },
+        {
+          "id": "browser-task/2",
+          "fileName": "task-empty-date.txt",
+          "bytes": 2342,
+          "sha256": "383117bfc9dda77cc3f397e4e4e28d2c3de471997f726969ff7ab48e3a88a9f1"
+        },
+        {
+          "id": "browser-task/3",
+          "fileName": "minutes-filter-before.txt",
+          "bytes": 5991,
+          "sha256": "f46ddd46ce1dd0d99717ffa0ed411e43e41d2f467981857fa20119256f971be7"
+        },
+        {
+          "id": "browser-task/4",
+          "fileName": "minutes-filter-final.txt",
+          "bytes": 13191,
+          "sha256": "ea038efbbdc58fd65d2bef351e01d3e02be27c672a4fb9d8b34401504547d97f"
+        },
+        {
+          "id": "browser-task/5",
+          "fileName": "copy-unpaired.txt",
+          "bytes": 7073,
+          "sha256": "7c9f1728a71dfda29d7555b18cd4ff38bda56b079b50094539959f2f7e90216b"
+        }
+      ]
+    },
+    {
+      "id": "browser-calendar",
+      "artifacts": [
+        {
+          "id": "browser-calendar/1",
+          "fileName": "calendar-corrected.txt",
+          "bytes": 2645,
+          "sha256": "f8f6415ca2af2604b4be3a3af39b0935879a1062ac812969bd5faddbe594952c"
+        },
+        {
+          "id": "browser-calendar/2",
+          "fileName": "calendar-missing.txt",
+          "bytes": 2644,
+          "sha256": "5a93f7c4020d706cef29968bbddb644e0f2e631d35fd35dc24b784933c118dfc"
+        },
+        {
+          "id": "browser-calendar/3",
+          "fileName": "calendar-zero.txt",
+          "bytes": 2643,
+          "sha256": "af4fb09247204a65e7c77d0caea216f1aaf9af7ec7d805a3859633981afbed3e"
+        }
+      ]
+    },
+    {
+      "id": "browser-notes",
+      "artifacts": [
+        {
+          "id": "browser-notes/1",
+          "fileName": "notes.txt",
+          "bytes": 2781,
+          "sha256": "4d4e4aa93facc0be32b111cddc3861b29c7a5bf2711b80c9958040d9092d97cb"
+        },
+        {
+          "id": "browser-notes/2",
+          "fileName": "notes-paused.txt",
+          "bytes": 3308,
+          "sha256": "4d2257ccfd2655397da1117d4d6b24e8af87c4727b5af2a2f953d9955e60aef8"
+        },
+        {
+          "id": "browser-notes/3",
+          "fileName": "notes-restarted.txt",
+          "bytes": 2163,
+          "sha256": "a8ae276c8420a7c48b0cca535a57a2cff72d8f11eb45359ca5e0e29bef4e9af6"
+        },
+        {
+          "id": "browser-notes/4",
+          "fileName": "notes-delete-final.txt",
+          "bytes": 1999,
+          "sha256": "c387f7017545132b3249c9d4560186dcc13dbd8e56badadb550f2d6383db42bc"
+        }
+      ]
+    },
+    {
+      "id": "browser-activity",
+      "artifacts": [
+        {
+          "id": "browser-activity/1",
+          "fileName": "activity.txt",
+          "bytes": 2916,
+          "sha256": "f84da69ad41dc45c5ff8cbe0bdf68c34037922dabc17ffe7ddfefe3a77f13349"
+        }
+      ]
+    },
+    {
+      "id": "browser-sales",
+      "artifacts": [
+        {
+          "id": "browser-sales/1",
+          "fileName": "sales-preview-final.txt",
+          "bytes": 4567,
+          "sha256": "d5cbf689fae5bb84cbf3b73a660293348dbd7c68c08a8b5c3531bd23515bbae6"
+        },
+        {
+          "id": "browser-sales/2",
+          "fileName": "sales-confirmed-final.txt",
+          "bytes": 3485,
+          "sha256": "ef9b4368ddbb1d307e9072a76462b9efe323cdcc461db5ecb2ccd5310191eac4"
+        },
+        {
+          "id": "browser-sales/3",
+          "fileName": "confirmed-sales.csv",
+          "bytes": 224,
+          "sha256": "70c760075180ac978a507c578ddc3eb7f3023c1e7ab496c833279e288fb21dc3"
+        },
+        {
+          "id": "browser-sales/4",
+          "fileName": "sales-export-repeat.txt",
+          "bytes": 37,
+          "sha256": "7bf01c6392a34afbb949c065f54cc8f1ae297f3507490d27182f0d2f99dcb82a"
+        }
+      ]
+    },
+    {
+      "id": "browser-inventory",
+      "artifacts": [
+        {
+          "id": "browser-inventory/1",
+          "fileName": "inventory.txt",
+          "bytes": 10773,
+          "sha256": "dbce8c05c0cc9bf668fcb52d0db18e8a8c48a1f8b14b8579714c421f8600dceb"
+        },
+        {
+          "id": "browser-inventory/2",
+          "fileName": "inventory-past-inbound.txt",
+          "bytes": 10403,
+          "sha256": "576bd5094b849928acf6424c70b3f173db486b84f270225f687dc78126057961"
+        },
+        {
+          "id": "browser-inventory/3",
+          "fileName": "inventory-invalid-inbound.txt",
+          "bytes": 10469,
+          "sha256": "3622b0eef0ae16a56717c7d9a70748f8e5244786cb8e2a3bc7f515d649a7fc2c"
+        }
+      ]
+    },
+    {
+      "id": "browser-shipping",
+      "artifacts": [
+        {
+          "id": "browser-shipping/1",
+          "fileName": "shipping.txt",
+          "bytes": 4076,
+          "sha256": "24a9e98dbff800ab3cf06c7f90c43f34b4d8f9a1695e7ed81e71bf9dc9122bb4"
+        }
+      ]
+    },
+    {
+      "id": "browser-ads",
+      "artifacts": [
+        {
+          "id": "browser-ads/1",
+          "fileName": "advertising.txt",
+          "bytes": 4735,
+          "sha256": "c40a68415a1cb36ab942c1fbd27dd773035e77ce23bab098754792a414d6bb8f"
+        },
+        {
+          "id": "browser-ads/2",
+          "fileName": "advertising-export.csv",
+          "bytes": 294,
+          "sha256": "8e132018fa11fce5502070400b4af0c629478c005c1f02fddbfb38cd62fa4d2c"
+        },
+        {
+          "id": "browser-ads/3",
+          "fileName": "advertising-export.txt",
+          "bytes": 4226,
+          "sha256": "0a3ea74d399be5836b6c80e1008c29a3878bc15913ca3a68917231e7b565772d"
+        }
+      ]
+    },
+    {
+      "id": "browser-feedback",
+      "artifacts": [
+        {
+          "id": "browser-feedback/1",
+          "fileName": "feedback.txt",
+          "bytes": 2952,
+          "sha256": "2bc9e0487d7c8f13abdec549e77966d21802c21c8bfbc56f6181c2b967f04339"
+        },
+        {
+          "id": "browser-feedback/2",
+          "fileName": "feedback-withdrawn.txt",
+          "bytes": 2398,
+          "sha256": "2d99b91a1bd98c49fc396414c987de164d13f9819e345c546f164dd8ecd0cc2c"
+        },
+        {
+          "id": "browser-feedback/3",
+          "fileName": "confirmed-feedback.md",
+          "bytes": 452,
+          "sha256": "38393d07b6cd57e134cdf4c4e1015ca2d91bb030aad7211718150a1bc0247362"
+        }
+      ]
+    },
+    {
+      "id": "browser-skill",
+      "artifacts": [
+        {
+          "id": "browser-skill/1",
+          "fileName": "skill-revoked.txt",
+          "bytes": 2309,
+          "sha256": "72e7a96073f13b7dcad98d2e8702e2f6840e0f9dcf670956e75f5533da42d97c"
+        }
+      ]
+    },
+    {
+      "id": "live-final",
+      "artifacts": [
+        {
+          "id": "live-final/1",
+          "fileName": "live-acceptance.json",
+          "bytes": 30656,
+          "sha256": "6e7060bf74c7a978738f41c267ca93d2952ec35d90f7aef6c3e821b3a387d541"
+        },
+        {
+          "id": "live-final/2",
+          "fileName": "session-events.jsonl",
+          "bytes": 185523,
+          "sha256": "6ff511d940d1f11d9f3619e37a2e0a86ee5aed0776f0c239e3c4b6b71938dee0"
+        },
+        {
+          "id": "live-final/3",
+          "fileName": "native-state.json",
+          "bytes": 15251,
+          "sha256": "6147ff7afcfb7aefc1545eb1e7962a67e5d8b390fb6af5151d2e3bbf9d29372f"
+        }
+      ]
+    },
+    {
+      "id": "compaction",
+      "artifacts": [
+        {
+          "id": "compaction/1",
+          "fileName": "red.json",
+          "bytes": 5746,
+          "sha256": "5a969bf7a10a8b80af9bd24597aeba67f515bef1cfdb071aa6b2a3e3b5a86725"
+        },
+        {
+          "id": "compaction/2",
+          "fileName": "green.json",
+          "bytes": 251,
+          "sha256": "1d8502dabf397d6e4869580207bc89735daac5e1ca0ea2d2b9cfba06231f73fe"
+        }
+      ]
+    },
+    {
+      "id": "recovery-budget-red",
+      "artifacts": [
+        {
+          "id": "recovery-budget-red/1",
+          "fileName": "recovery-budget-readonly-red.txt",
+          "bytes": 4733,
+          "sha256": "fd850402806c9c0d2998f4ffe559e226705e605daa1924e6c0767bca1f775912"
+        },
+        {
+          "id": "recovery-budget-red/2",
+          "fileName": "recovery-budget-readonly-green.txt",
+          "bytes": 1354,
+          "sha256": "78c27ead1f2937e423711b1e7bf4fa4af436a3224333e3ee4d01fbbcfab04a0c"
+        }
+      ]
+    },
+    {
+      "id": "core-provenance",
+      "artifacts": [
+        {
+          "id": "core-provenance/1",
+          "fileName": "patch-manifest.json",
+          "bytes": 7234,
+          "sha256": "91f81f2fad7ff9865df9f578e7cd38700e4e0d15fe63af33f65269a797cff461"
+        }
+      ]
+    },
+    {
+      "id": "handoff-network",
+      "artifacts": [
+        {
+          "id": "handoff-network/1",
+          "fileName": "handoff-verification.json",
+          "bytes": 1638,
+          "sha256": "03915a8f0761160860c7b2d1ad3e35b2a46505bc23a1d5e8b7d677dc6be3b952"
+        }
+      ]
+    },
+    {
+      "id": "browser-final",
+      "artifacts": [
+        {
+          "id": "browser-final/1",
+          "fileName": "final-workbench-20261102.png",
+          "bytes": 68100,
+          "sha256": "693773d75b84d52ad07b038988d3a62c9497409dc7b42101376a3631ab63bcc5"
+        },
+        {
+          "id": "browser-final/2",
+          "fileName": "final-workbench-20261102.txt",
+          "bytes": 3194,
+          "sha256": "df5f39f52acb68f51372207895929a210a233690cfc37d9bb96d1b2ada1fa65b"
+        }
+      ]
+    },
+    {
+      "id": "native-socket",
+      "artifacts": [
+        {
+          "id": "native-socket/1",
+          "fileName": "acceptance.json",
+          "bytes": 140,
+          "sha256": "e76f5dd6cd26a89973c48a310238ac77dedd243d2610c31f7a6f4265c8329552"
+        },
+        {
+          "id": "native-socket/2",
+          "fileName": "acceptance.json",
+          "bytes": 182,
+          "sha256": "3802d4c5e1f71487c009f8a064322bf2d9833d177a6266ef1fa0f3fbab25a998"
+        }
+      ]
+    },
+    {
+      "id": "native-e2e",
+      "artifacts": [
+        {
+          "id": "native-e2e/1",
+          "fileName": "acceptance.json",
+          "bytes": 5907,
+          "sha256": "bf17ae36a99ab5fcf376e954afaf896bde397802a05fb0e4e88df2fef5ed5222"
+        },
+        {
+          "id": "native-e2e/2",
+          "fileName": "checkpoint-recovery.json",
+          "bytes": 849,
+          "sha256": "a42478b33ddb473c653da1221a135ad9df229544f3a21983d3008ee655651ddd"
+        },
+        {
+          "id": "native-e2e/3",
+          "fileName": "restart-cancellation.json",
+          "bytes": 4717,
+          "sha256": "67adba26867947209519517dfdf8ec218824c56c6065f0a33b1d7b652b35cac7"
+        },
+        {
+          "id": "native-e2e/4",
+          "fileName": "privacy-recovery.json",
+          "bytes": 495,
+          "sha256": "2de7a2ccd5ad8ffd01e2eb6ab649070517d6bbcd8cad0dc266a0e190ee274c48"
+        },
+        {
+          "id": "native-e2e/5",
+          "fileName": "session-events.jsonl",
+          "bytes": 182453,
+          "sha256": "035563397207fe04bb461da4d0a9c34ed02fc74f62582cb106c440573c5b3793"
+        }
+      ]
+    },
+    {
+      "id": "native-paged-copy",
+      "artifacts": [
+        {
+          "id": "native-paged-copy/1",
+          "fileName": "paged-copy.json",
+          "bytes": 4995,
+          "sha256": "b728d9bac21804a9b20d4d6df674e17421f912347bdc54eb74879aa6e887931b"
+        }
+      ]
+    },
+    {
+      "id": "native-queued",
+      "artifacts": [
+        {
+          "id": "native-queued/1",
+          "fileName": "queued-acceptance.json",
+          "bytes": 41813,
+          "sha256": "4c854a94070bcc49762c564582a6f7bea5486bfce7a2f493fdc82e21fab4b2e9"
+        },
+        {
+          "id": "native-queued/2",
+          "fileName": "source-before.json",
+          "bytes": 10345,
+          "sha256": "8ebf78c41f057aac32c108fe810dd0b7fc4e773352f3a86ead48b75479934ed4"
+        },
+        {
+          "id": "native-queued/3",
+          "fileName": "source-after.json",
+          "bytes": 10345,
+          "sha256": "8ebf78c41f057aac32c108fe810dd0b7fc4e773352f3a86ead48b75479934ed4"
+        }
+      ]
+    },
+    {
+      "id": "master-privacy",
+      "artifacts": [
+        {
+          "id": "master-privacy/1",
+          "fileName": "acceptance.json",
+          "bytes": 238,
+          "sha256": "0588e9612093f4f3bc9926351332d5cc29cca78f63c6f498fcecf42d957acd14"
+        }
+      ]
+    },
+    {
+      "id": "native-skills",
+      "artifacts": [
+        {
+          "id": "native-skills/1",
+          "fileName": "acceptance.json",
+          "bytes": 1787,
+          "sha256": "09299e79a8305a49f7103f6f6c0abe924c7802a91c665527877ec558181769c7"
+        }
+      ]
+    },
+    {
+      "id": "isolation-audit",
+      "artifacts": [
+        {
+          "id": "isolation-audit/1",
+          "fileName": "isolation-audit.json",
+          "bytes": 343,
+          "sha256": "65f60f45ca1fc6137a51a53cebc8128e7cbbb5b23158f0e3413fb77fa490ce3b"
+        }
+      ]
+    }
+  ]
+}

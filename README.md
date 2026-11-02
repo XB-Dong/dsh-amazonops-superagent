@@ -2,7 +2,7 @@
 
 基于官方 DeepSeek Harness 与 dsh-superagent-prototype，重新组织并完整复现 ccagent 的中文运营工作台。
 
-P0 正在本机执行：已实现中文工作台、全部业务领域、真实 SuperAgent 路由/工单/执行器、认证和用量账本。目前继续完成隐私边界、浏览器、真实模型与最终审核验收；完整状态看 [P0状态](docs/waves/P0/state.json)，逐项结果看 [验收矩阵](docs/testing/acceptance.json)。云服务器、旧 ccagent 和旧自动任务保持不动。
+本机 P0 的产品实现和功能验收已通过：13个中文入口、9个业务工具、真实 SuperAgent 路由/工单/执行器、原生会话、认证、隐私闭包和用量账本。231项离线测试、59项分层验收及两个真实模型场景已有运行证据。当前最终审核与仓库同步状态看 [P0状态](docs/waves/P0/state.json)，细节见[验收报告](docs/testing/EXECUTION-20261102.md)。云服务器、旧 ccagent 和旧自动任务保持不动。
 
 项目主体是 TypeScript，页面使用 React，底座是固定版本的官方 DSH 与保留 core 的 SuperAgent 源码。业务能力通过 Source、agent-local 工具与 Skill Provider 装配，不另建对话循环。
 

@@ -16,8 +16,8 @@
     "SA-LOCAL-001"
   ],
   "acceptance": "Actual native Runtime/Engine/Store/Effects on Windows and documented operations-mode patches, compatible preset/tool/auth/LLM extension seams; native integration tests. Do not build a replacement loop.",
-  "status": "in_progress",
-  "repairCount": 0,
+  "status": "verified",
+  "repairCount": 7,
   "stopConditions": [
     "cloud_or_legacy_write",
     "credential_or_data_exposure",
@@ -28,6 +28,12 @@
   "dispatchHistory": "Original frozen packet retained; follow-up scopes below extend ownership.",
   "followupWritePaths": [
     "tests/integration/native-e2e*",
-    "vendor/superagent/src/app/*privacy*"
-  ]
+    "vendor/superagent/src/app/*privacy*",
+    "packages/host/boundary.ts",
+    "tests/integration/boundary.test.ts",
+    "tests/integration/*socket*"
+  ],
+  "repairCountAtInitialDispatch": 0,
+  "repairCountMeaning": "Recorded product fix commits affecting this responsibility area; details in repairJournal.",
+  "verifiedImplementationSha": "b0afbdd088d1022b6fef53c8424cb73184543e1a"
 }

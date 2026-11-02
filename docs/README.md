@@ -1,6 +1,7 @@
 # 文档导航
 
 - 当前执行：[P0计划](waves/P0/PLAN.md)、[P0状态](waves/P0/state.json)、[多Agent开发规则](engineering/MULTI-AGENT.zh.md)、[本机恢复](operations/LOCAL-RECOVERY.md)。
+- 当前实现：[已实现架构](architecture/IMPLEMENTED.zh.md)、[P0验收报告](testing/EXECUTION-20261102.md)、[脱敏运行工件索引](testing/execution-20261102.json)。
 
 - [需求总览](product/REQUIREMENTS.zh.md)与[2026-11-02 日期记录](product/changes/2026-11-02.md)。
 - [功能复现矩阵](discovery/FEATURE-PARITY.zh.md)、[旧代码重构分析](discovery/REFACTOR-ASSESSMENT.zh.md)、[上游接缝](discovery/UPSTREAM-SEAMS.zh.md)与[固定基线](discovery/upstream-baseline.json)。

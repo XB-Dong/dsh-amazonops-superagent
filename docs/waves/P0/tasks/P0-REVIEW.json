@@ -24,5 +24,8 @@
   "timeboxMinutes": 30,
   "deliverable": "Exact commit SHA, changed files, actual tests/commands/exit codes, Red/Green where applicable, unverified gaps and integration instructions",
   "dispatchHistory": "Original frozen packet retained; follow-up scopes below extend ownership.",
-  "followupWritePaths": []
+  "followupWritePaths": [],
+  "repairCountAtInitialDispatch": 0,
+  "repairCountMeaning": "Recorded product fix commits affecting this responsibility area; details in repairJournal.",
+  "verifiedImplementationSha": "b0afbdd088d1022b6fef53c8424cb73184543e1a"
 }

@@ -4,7 +4,7 @@ import type {} from '@deepseek-ai/dsh-session';
 import type {} from '@deepseek-ai/dsh-agent';
 import type { ModelBudget } from '../business/index.ts';
 
-export type AccountingState = { live: boolean; stopped: boolean; activeRequests: number; lastSuccess?: string; lastFailure?: string };
+export type AccountingState = { live: boolean; stopped: boolean; activeRequests: number; lastSuccess?: string; lastFailure?: string; lastOutcome?:'succeeded'|'failed' };
 export type AccountingOptions = { live?: boolean; maxRequestsPerTurn?: number; timeoutMs?: number; defaultOutputTokens?: number };
 export type AccountingDisposer = (() => void) & { state: AccountingState; setLive(value: boolean): void };
 
@@ -67,6 +67,7 @@ export function installAccounting(ctx: Context, budget: ModelBudget, options: Ac
       budget.settle(id);
       settled = true;
       state.lastFailure = new Date().toISOString();
+      state.lastOutcome='failed';
     };
     try {
       if (state.stopped) throw new Error('ACCOUNTING_STOPPED');
@@ -102,6 +103,7 @@ export function installAccounting(ctx: Context, budget: ModelBudget, options: Ac
     } catch (error) {
       failed = true;
       state.lastFailure = new Date().toISOString();
+      state.lastOutcome='failed';
       throw error;
     } finally {
       if (timer) clearTimeout(timer);
@@ -110,6 +112,7 @@ export function installAccounting(ctx: Context, budget: ModelBudget, options: Ac
         budget.settle(id, usage);
         settled = true;
         state.lastSuccess = new Date().toISOString();
+        state.lastOutcome='succeeded';
       } else settleUnknown();
       if (id) pending.delete(id);
       state.activeRequests = pending.size;

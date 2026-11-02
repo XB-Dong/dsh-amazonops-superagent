@@ -45,6 +45,19 @@ test('unit: verified native usage includes disjoint cache read and write input',
   } finally { f.close(); }
 });
 
+test('unit: last model outcome follows completion order even when timestamps tie',async t=>{
+  t.mock.method(Date.prototype,'toISOString',()=> '2026-11-02T00:00:00.000Z');
+  const f=fixture();
+  try{
+    await f.call(request(),[usage,finish]);
+    await assert.rejects(f.call(request(),[],new Error('SYNTHETIC_FAILURE')));
+    assert.equal(f.accounting.state.lastSuccess,f.accounting.state.lastFailure);
+    assert.equal(f.accounting.state.lastOutcome,'failed');
+    await f.call(request(),[usage,finish]);
+    assert.equal(f.accounting.state.lastOutcome,'succeeded');
+  }finally{f.close();}
+});
+
 test('unit: missing usage or terminal finish keeps the durable reservation unknown', async () => {
   const f = fixture();
   try {

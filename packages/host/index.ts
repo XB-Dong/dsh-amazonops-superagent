@@ -67,7 +67,7 @@ export function apply(ctx:Context,config:Config):void {
       if(path==='status'&&req.method==='GET'){
         const live=config.live===true&&!!source;
         json(res,{authenticated:true,scope,live,version:'0.1.0',modelState:!live?'disabled':budget.exhausted()?'budget_exhausted':
-          accounting.state.lastFailure&&(!accounting.state.lastSuccess||accounting.state.lastFailure>accounting.state.lastSuccess)?'last_failed':accounting.state.lastSuccess?'last_succeeded':'enabled_unverified',
+          accounting.state.lastOutcome==='failed'?'last_failed':accounting.state.lastOutcome==='succeeded'?'last_succeeded':'enabled_unverified',
           budget:{used:budget.snapshot(),limits:budget.limits,policy:budget.policy,lifetime:budget.lifetimeSnapshot()}});return;
       }
       if(path==='snapshot'&&req.method==='GET'){json(res,business.snapshot(scope));return;}

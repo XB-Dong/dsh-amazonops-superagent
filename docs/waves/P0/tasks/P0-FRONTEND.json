@@ -27,7 +27,7 @@
     "CC-SKILL-001"
   ],
   "acceptance": "Native DSH client panel with all 13 page entry points, login/settings, Chinese UX and preserved behavior; only shared DTO imports, no business implementation imports; native ticket/messages API rather than duplicated chat authority.",
-  "status": "verified",
+  "status": "completed",
   "repairCount": 5,
   "stopConditions": [
     "cloud_or_legacy_write",

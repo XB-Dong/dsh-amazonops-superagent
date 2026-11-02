@@ -30,7 +30,7 @@
     "CC-HARNESS-001"
   ],
   "acceptance": "Actual host/source/tools/provider/auth/accounting/restore integration, stable operation identity and no self-trigger; browser/live-model acceptance and honest evidence for all59 cases.",
-  "status": "verified",
+  "status": "completed",
   "repairCount": 17,
   "stopConditions": [
     "cloud_or_legacy_write",

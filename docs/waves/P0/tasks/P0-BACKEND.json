@@ -27,7 +27,7 @@
     "SA-RECOVERY-001"
   ],
   "acceptance": "All delivered domain/storage/learning behaviors migrated with pure queries, typed command handlers, task-owned types and event-driven learning; all relevant old behavior regressions rerun and new behavior Red/Green.",
-  "status": "verified",
+  "status": "completed",
   "repairCount": 4,
   "stopConditions": [
     "cloud_or_legacy_write",

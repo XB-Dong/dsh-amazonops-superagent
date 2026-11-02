@@ -14,7 +14,7 @@
     "SA-RECOVERY-001"
   ],
   "acceptance": "Independent read-only review of exact candidate and evidence; return actionable findings and verify accepted fixes without editing code.",
-  "status": "in_progress",
+  "status": "completed",
   "repairCount": 0,
   "stopConditions": [
     "cloud_or_legacy_write",

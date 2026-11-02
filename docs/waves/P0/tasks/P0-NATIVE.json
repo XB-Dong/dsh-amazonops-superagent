@@ -16,7 +16,7 @@
     "SA-LOCAL-001"
   ],
   "acceptance": "Actual native Runtime/Engine/Store/Effects on Windows and documented operations-mode patches, compatible preset/tool/auth/LLM extension seams; native integration tests. Do not build a replacement loop.",
-  "status": "verified",
+  "status": "completed",
   "repairCount": 8,
   "stopConditions": [
     "cloud_or_legacy_write",

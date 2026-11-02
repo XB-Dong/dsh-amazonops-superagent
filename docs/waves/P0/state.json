@@ -1,13 +1,13 @@
 {
   "schemaVersion": "0.2",
   "waveId": "P0",
-  "phase": "executing",
+  "phase": "completed",
   "authorization": "User explicitly started on 2026-11-02",
   "baselineSha": "a143ba7526fee88dd164930bfc158fdeffcef165",
   "plan": "docs/waves/P0/PLAN.md",
   "specVersion": "0.2.0",
   "goal": "Complete the full native SuperAgent refactor and functional acceptance",
-  "activeRound": "final_independent_review_and_ci",
+  "activeRound": "completed",
   "tasks": [
     {
       "id": "P0-NATIVE",
@@ -27,7 +27,7 @@
         "SA-LOCAL-001"
       ],
       "acceptance": "Actual native Runtime/Engine/Store/Effects on Windows and documented operations-mode patches, compatible preset/tool/auth/LLM extension seams; native integration tests. Do not build a replacement loop.",
-      "status": "verified",
+      "status": "completed",
       "repairCount": 8,
       "stopConditions": [
         "cloud_or_legacy_write",
@@ -77,7 +77,7 @@
         "SA-RECOVERY-001"
       ],
       "acceptance": "All delivered domain/storage/learning behaviors migrated with pure queries, typed command handlers, task-owned types and event-driven learning; all relevant old behavior regressions rerun and new behavior Red/Green.",
-      "status": "verified",
+      "status": "completed",
       "repairCount": 4,
       "stopConditions": [
         "cloud_or_legacy_write",
@@ -124,7 +124,7 @@
         "CC-SKILL-001"
       ],
       "acceptance": "Native DSH client panel with all 13 page entry points, login/settings, Chinese UX and preserved behavior; only shared DTO imports, no business implementation imports; native ticket/messages API rather than duplicated chat authority.",
-      "status": "verified",
+      "status": "completed",
       "repairCount": 5,
       "stopConditions": [
         "cloud_or_legacy_write",
@@ -179,7 +179,7 @@
         "CC-HARNESS-001"
       ],
       "acceptance": "Actual host/source/tools/provider/auth/accounting/restore integration, stable operation identity and no self-trigger; browser/live-model acceptance and honest evidence for all59 cases.",
-      "status": "verified",
+      "status": "completed",
       "repairCount": 17,
       "stopConditions": [
         "cloud_or_legacy_write",
@@ -210,7 +210,7 @@
         "SA-RECOVERY-001"
       ],
       "acceptance": "Independent read-only review of exact candidate and evidence; return actionable findings and verify accepted fixes without editing code.",
-      "status": "in_progress",
+      "status": "completed",
       "repairCount": 0,
       "stopConditions": [
         "cloud_or_legacy_write",
@@ -250,10 +250,7 @@
     "note": "Actual local suite; published clean commit is also validated by CI.",
     "productSourcesMatchCommit": true
   },
-  "pendingMandatoryValidation": [
-    "Final independent evidence review",
-    "New repository CI and branch synchronization"
-  ],
+  "pendingMandatoryValidation": [],
   "modelValidation": {
     "scenarios": 2,
     "requests": 20,
@@ -273,8 +270,14 @@
   "legacyProjectWrites": "not_performed",
   "completionBoundary": "Local refactor and synthetic/native/browser/live-model acceptance; no production migration or external Amazon/ERP writes.",
   "ci": {
-    "status": "pending",
+    "status": "passed",
+    "sha": "7d9ea2b424c2084dd5f5a9d18f85ebdfab125624",
+    "url": "https://github.com/XB-Dong/dsh-amazonops-superagent/actions/runs/41431801541",
+    "runId": 41431801541
+  },
+  "independentReview": {
+    "status": "accepted",
     "implementationSha": "d7a8d9ab9f9114ff8f466b824a22fceaf531c07b",
-    "note": "Awaiting the clean published candidate run; previous failed diagnostics remain recorded in the execution report."
+    "report": "docs/audit/reviews/P0-20261102.zh.md"
   }
 }

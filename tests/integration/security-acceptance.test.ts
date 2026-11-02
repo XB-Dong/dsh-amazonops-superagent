@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtempSync, mkdirSync, writeFileSync, renameSync, symlinkSync, rmSync, existsSync } from 'node:fs';
+import { mkdtempSync, mkdirSync, readFileSync, writeFileSync, renameSync, symlinkSync, rmSync, existsSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
@@ -49,3 +49,25 @@ test('unit acceptance: malformed HTTP request target fails closed without escapi
   });
   assert.ok(status === 400 || status === 401 || status === 403);
 });
+
+for (const missing of ['business.sqlite', 'model-budget.sqlite'])
+  test(`offline acceptance: a manifest missing ${missing} is rejected before restore creates an empty replacement`, async () => {
+    const dir = mkdtempSync(join(tmpdir(), 'amazonops-missing-backup-db-'));
+    const data = join(dir, 'data');
+    const business = new Business(data);
+    const budgetPath = join(data, 'model-budget.sqlite');
+    const budget = new ModelBudget(budgetPath,
+      { maxCalls: null, maxInputTokens: null, maxOutputTokens: null, maxTotalTokens: null });
+    try {
+      business.store.source('main', '这条业务数据不能在恢复时被静默丢失');
+      writeFileSync(business.store.ledgerPath, '');
+      const point = await createRecoveryPoint(business.store, budget, data, join(dir, 'backups'));
+      const manifestPath = join(point.directory, 'manifest.json');
+      const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'));
+      manifest.files = manifest.files.filter((file: { path: string }) => file.path !== missing);
+      writeFileSync(manifestPath, JSON.stringify(manifest));
+      const target = join(dir, 'restored');
+      assert.throws(() => restoreRecoveryPoint(point.directory, target, business.store.ledgerPath, budgetPath), /BACKUP_DATABASE_REQUIRED/);
+      assert.equal(existsSync(target), false);
+    } finally { budget.close(); business.close(); rmSync(dir, { recursive: true, force: true }); }
+  });

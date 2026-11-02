@@ -56,6 +56,7 @@ export class AgentTools {
         const write=['copy_task','prepare_task','capture_feedback'].includes(action);
         const operationId=write?this.operations.resolve(scope,sourceId,action,input):undefined;
         const value=this.business.tool(scope,sourceId,action,input,operationId);
+        this.rememberResult(scope,agent.id,value);
         if (action==='draft_checklist') {
           const skill=this.business.learning.activeSkills(scope).find(s=>s.id===input.skillId);
           if (skill) this.rememberSkill(scope,agent.id,skill);
@@ -67,6 +68,22 @@ export class AgentTools {
   private rememberSkill(scope:string,agentId:string,skill:{id:string;hash:string}):void {
     const binding=this.business.store.get<Binding>(scope,`native-binding:${agentId}`);
     this.business.store.update(binding,{skills:[...(binding.skills??[]).filter(row=>row.id!==skill.id),{id:skill.id,hash:skill.hash}]});
+  }
+  private rememberResult(scope:string,agentId:string,value:unknown):void {
+    const candidates=new Set<string>();
+    const walk=(item:unknown):void=>{
+      if(typeof item==='string')candidates.add(item);
+      else if(Array.isArray(item))item.forEach(walk);
+      else if(item&&typeof item==='object')Object.values(item).forEach(walk);
+    };
+    walk(value);
+    const ids=[...candidates].filter(id=>!!this.business.store.db.prepare('SELECT id FROM entities WHERE scope=? AND id=?').get(scope,id));
+    if(!ids.length)return;
+    const binding=this.business.store.get<Binding>(scope,`native-binding:${agentId}`);
+    const sources=[...new Set([...binding.sources,...ids])];
+    if(sources.length!==binding.sources.length)this.business.store.update(binding,{sources});
+    for(const skill of this.business.learning.activeSkills(scope))
+      if(candidates.has(skill.id))this.rememberSkill(scope,agentId,skill);
   }
   onAgent(agent:Agent,ticket?:Ticket):void {
     agent.ctx.systemPrompt.section({name:'amazonops-language',order:10001,interpolate:false,
@@ -108,8 +125,14 @@ export class AgentTools {
       const dispose=this.business.onChange(changed=>{if(changed===scope)control.invalidate();});
       control.signal.addEventListener('abort',dispose,{once:true});
       return {name:'cc-approved',
-        list:async()=>this.business.learning.activeSkills(scope).slice(0,6).map(skill=>({name:skill.name,description:skill.description,
-          invocation:{modelInvocable:true,userInvocable:true},source:'cc-approved',provider:'cc-approved',rank:100,locator:skill.id})),
+        list:async()=>{
+          this.context(ticket,agent);
+          return this.business.learning.activeSkills(scope).slice(0,6).map(skill=>{
+            this.rememberSkill(scope,agent.id,skill);
+            return {name:skill.name,description:skill.description,
+              invocation:{modelInvocable:true,userInvocable:true},source:'cc-approved',provider:'cc-approved',rank:100,locator:skill.id};
+          });
+        },
         get:async candidate=>{
           this.context(ticket,agent);
           const skill=this.business.learning.activeSkills(scope).find(row=>row.id===candidate.locator);

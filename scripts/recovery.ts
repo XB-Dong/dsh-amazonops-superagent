@@ -11,6 +11,19 @@ function within(root: string, path: string): boolean {
   const rel = relative(root, path);
   return rel === '' || (!rel.startsWith(`..${sep}`) && rel !== '..' && !isAbsolute(rel));
 }
+function unlinkedPath(path: string): void {
+  const ancestors: string[] = [];
+  for (let entry = resolve(path);; entry = dirname(entry)) {
+    ancestors.push(entry);
+    if (dirname(entry) === entry) break;
+  }
+  for (const entry of ancestors.reverse()) {
+    let stat;
+    try { stat = lstatSync(entry); }
+    catch (error) { if ((error as NodeJS.ErrnoException).code === 'ENOENT') continue; throw error; }
+    if (stat.isSymbolicLink()) throw new Error('RESTORE_PATH_LINK_FORBIDDEN');
+  }
+}
 function physical(path: string): string {
   let ancestor = resolve(path);
   while (!existsSync(ancestor)) {
@@ -30,6 +43,8 @@ function regular(root: string, file: string): void {
   if (!lstatSync(file).isFile()) throw new Error('BACKUP_FILE_REQUIRED');
 }
 export function restoreLocal(options: Options) {
+  // Preserve lexical link identity: realpath would otherwise hide linked roots/ancestors.
+  for (const path of [options.backup, options.current, options.destination]) unlinkedPath(path);
   const backup = realpathSync(resolve(options.backup)), current = realpathSync(resolve(options.current));
   const destination = physical(options.destination);
   if ([backup, current].some(input => within(input, destination) || within(destination, input))) throw new Error('RESTORE_INPUT_OVERLAP');
@@ -49,10 +64,13 @@ export function restoreLocal(options: Options) {
     if (bytes.length !== item.bytes || createHash('sha256').update(bytes).digest('hex') !== item.sha256) throw new Error('BACKUP_HASH_MISMATCH');
   }
   if (!names.has('business.sqlite') || !names.has('model-budget.sqlite')) throw new Error('BACKUP_DATABASE_REQUIRED');
-  const parent = dirname(destination); mkdirSync(parent, { recursive: true, mode: 0o700 });
+  const parent = dirname(destination);
+  for (const path of [options.backup, options.current, options.destination]) unlinkedPath(path);
+  mkdirSync(parent, { recursive: true, mode: 0o700 });
   const stage = mkdtempSync(join(parent, '.amazonops-restore-'));
   let published = false;
   try {
+    unlinkedPath(stage);
     const result = restoreRecoveryPoint(backup, stage, ledger, budget);
     const db = new DatabaseSync(join(stage, 'business.sqlite'), { readOnly: true });
     let entities: number, entityDigest: string;
@@ -65,12 +83,16 @@ export function restoreLocal(options: Options) {
     let modelRequests: number;
     try { modelRequests = Number(usage.prepare('SELECT COUNT(*) AS n FROM model_requests').get()?.n); }
     finally { usage.close(); }
+    unlinkedPath(options.destination);
     if (existsSync(destination)) rmdirSync(destination);
     renameSync(stage, destination); published = true;
     return { ok: true, files: result.files, entities, entityDigest, modelRequests, privacyLedgerReapplied: true };
   } finally {
     // Stage is a known direct child of the explicit destination parent, never an input directory.
-    if (!published && dirname(resolve(stage)) === resolve(parent) && stage.startsWith(join(parent, '.amazonops-restore-'))) rmSync(stage, { recursive: true, force: true });
+    if (!published && dirname(resolve(stage)) === resolve(parent) && stage.startsWith(join(parent, '.amazonops-restore-'))) {
+      unlinkedPath(stage);
+      rmSync(stage, { recursive: true, force: true });
+    }
   }
 }
 export function parseRecoveryArguments(args: string[]): Options {

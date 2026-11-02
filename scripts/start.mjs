@@ -1,6 +1,6 @@
 /** Launch official DSH with a separate private local home and scrubbed environment. */
 import { randomBytes } from 'node:crypto';
-import { existsSync, mkdirSync, readFileSync, readdirSync, unlinkSync, writeFileSync } from 'node:fs';
+import { existsSync, lstatSync, mkdirSync, readFileSync, readdirSync, unlinkSync, writeFileSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { dirname, isAbsolute, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -10,12 +10,40 @@ import { localPatch } from '../profiles/local.ts';
 
 const PROJECT = 'dsh-amazonops-superagent';
 const projectRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
+function unlinkedPath(path) {
+  const ancestors = [];
+  for (let entry = resolve(path);; entry = dirname(entry)) {
+    ancestors.push(entry);
+    if (dirname(entry) === entry) break;
+  }
+  for (const entry of ancestors.reverse()) {
+    let stat;
+    try { stat = lstatSync(entry); }
+    catch (error) { if (error.code === 'ENOENT') continue; throw error; }
+    if (stat.isSymbolicLink()) throw new Error('RUNTIME_PATH_LINK_FORBIDDEN');
+  }
+}
+function validateHome(home) {
+  // Inspect lexical ancestors before any filesystem operation can follow a junction.
+  unlinkedPath(home);
+  const visit = path => {
+    let stat;
+    try { stat = lstatSync(path); }
+    catch (error) { if (error.code === 'ENOENT') return; throw error; }
+    if (stat.isSymbolicLink()) throw new Error('RUNTIME_PATH_LINK_FORBIDDEN');
+    if (stat.isDirectory()) for (const name of readdirSync(path)) visit(join(path, name));
+  };
+  // Includes settings.json, data/harness, data/superagent and nested state files.
+  visit(home);
+}
 export function loadSettings(home, env = process.env) {
   if (!isAbsolute(home)) throw new Error('AMAZONOPS_HOME must be an absolute directory');
+  validateHome(home);
   const path = join(home, 'settings.json');
   if (!existsSync(path)) {
     if (existsSync(home) && readdirSync(home).length) throw new Error('Refusing a non-empty home without this project settings');
     mkdirSync(home, { recursive: true, mode: 0o700 });
+    validateHome(home);
     writeFileSync(path, `${JSON.stringify({ project: PROJECT, password: randomBytes(24).toString('base64url'),
       port: 4315, modelAccount: 'test' }, null, 2)}\n`, { encoding: 'utf8', mode: 0o600, flag: 'wx' });
   }
@@ -74,9 +102,12 @@ export function start(options = {}) {
     if (!existsSync(join(root, file))) throw new Error('Build artifacts missing; run node scripts/build.mjs first');
   }
   const apiKey = env.AMAZONOPS_API_KEY;
+  validateHome(home);
   mkdirSync(join(home, 'data'), { recursive: true, mode: 0o700 });
+  validateHome(home);
   mkdirSync(join(home, 'data', 'superagent'), { recursive: true, mode: 0o700 });
   const patch = join(home, `launch-${process.pid}-${randomBytes(6).toString('hex')}.json`);
+  validateHome(home);
   writeFileSync(patch, `${JSON.stringify(localPatch({ root, home, password: settings.password,
     port: settings.port, live: !!apiKey, modelAccount: settings.modelAccount }), null, 2)}\n`, { mode: 0o600, flag: 'wx' });
   const output = options.stdout ?? (value => process.stdout.write(value));
@@ -84,6 +115,7 @@ export function start(options = {}) {
   output(`本机工作台：http://127.0.0.1:${settings.port}/amazonops/login\n登录密码保存在：${settings.settingsPath}\n`);
   const require = createRequire(join(root, 'package.json'));
   const cli = require.resolve('@deepseek-ai/dsh/lib/bin.js');
+  validateHome(home);
   const child = (options.spawn ?? spawn)(process.execPath, [cli, 'web', '--patch', patch, '--no-open'],
     { cwd: root, env: scrubEnvironment(env, home, apiKey), windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'] });
   const secrets = [settings.password, apiKey];
@@ -94,6 +126,7 @@ export function start(options = {}) {
   const cleanup = () => {
     if (cleaned) return; cleaned = true;
     if (dirname(resolve(patch)) !== resolve(home)) throw new Error('Unsafe launch patch path');
+    unlinkedPath(patch);
     if (existsSync(patch)) unlinkSync(patch);
   };
   const stop = () => child.kill();

@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { DatabaseSync } from 'node:sqlite';
-import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, copyFileSync, existsSync, readdirSync, symlinkSync } from 'node:fs';
+import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, copyFileSync, existsSync, readdirSync, symlinkSync, lstatSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { createHash } from 'node:crypto';
@@ -11,6 +11,12 @@ import { Business } from '../../packages/business/application.ts';
 import { restoreLocal } from '../../scripts/recovery.ts';
 
 const hash = (value: Buffer | string) => createHash('sha256').update(value).digest('hex');
+function treeSnapshot(root: string): unknown {
+  return readdirSync(root).sort().map(name => {
+    const path = join(root, name), stat = lstatSync(path);
+    return [name, stat.isSymbolicLink() ? 'link' : stat.isDirectory() ? treeSnapshot(path) : hash(readFileSync(path))];
+  });
+}
 function fixture() {
   const root = mkdtempSync(join(tmpdir(), 'amazonops-recovery-cli-'));
   const backup = join(root, 'backup'), current = join(root, 'current'), destination = join(root, 'new-home', 'data');
@@ -134,4 +140,26 @@ test('manifest traversal and directory links cannot read outside the selected ba
   writeFileSync(join(g.backup, 'manifest.json'), JSON.stringify(linkedManifest));
   assert.throws(() => restoreLocal(g), /BACKUP_SYMLINK_FORBIDDEN/);
   assert.equal(existsSync(g.destination), false);
+});
+
+test('original input and destination junctions are rejected before realpath can erase their identity', async t => {
+  for (const kind of ['backup-root', 'backup-ancestor', 'current-root', 'current-ancestor', 'destination-root', 'destination-ancestor']) {
+    await t.test(kind, () => {
+      const f = fixture(); const options = { ...f };
+      const key = kind.split('-')[0] as 'backup' | 'current' | 'destination';
+      const alias = join(f.root, 'alias');
+      if (kind.endsWith('-root')) {
+        const target = key === 'destination' ? join(f.root, 'empty-target') : f[key];
+        if (key === 'destination') mkdirSync(target);
+        symlinkSync(target, alias, 'junction'); options[key] = alias;
+      } else {
+        symlinkSync(f.root, alias, 'junction');
+        options[key] = join(alias, key === 'destination' ? 'new-home/data' : key);
+      }
+      const before = treeSnapshot(f.root);
+      assert.throws(() => restoreLocal(options), /RESTORE_PATH_LINK_FORBIDDEN/);
+      assert.deepEqual(treeSnapshot(f.root), before);
+      assert.equal(existsSync(f.destination), false);
+    });
+  }
 });

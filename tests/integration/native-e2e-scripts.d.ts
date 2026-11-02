@@ -6,6 +6,15 @@ declare module '*scripts/build.mjs' {
   }>;
 }
 declare module '*scripts/start.mjs' {
+  export function loadSettings(home: string, env?: NodeJS.ProcessEnv): {
+    project: string; password: string; port: number; modelAccount: 'test' | 'runtime'; settingsPath: string;
+  };
+  export function start(options?: {
+    env?: NodeJS.ProcessEnv; root?: string; stdout?: (text: string) => void; stderr?: (text: string) => void;
+    spawn?: (command: string, args: string[], options: import('node:child_process').SpawnOptions) =>
+      Pick<import('node:child_process').ChildProcess, 'stdout' | 'stderr' | 'once' | 'kill'>;
+  }): { child: Pick<import('node:child_process').ChildProcess, 'stdout' | 'stderr' | 'once' | 'kill'>;
+    home: string; port: number; cleanup(): void };
   export function scrubEnvironment(env: NodeJS.ProcessEnv, home: string, apiKey?: string): NodeJS.ProcessEnv;
   export function lineWriter(write: (text: string) => void, secrets?: string[]): { push(text: string): void; flush(): void };
 }

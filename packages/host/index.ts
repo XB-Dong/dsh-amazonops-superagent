@@ -13,6 +13,7 @@ import { installNativeAccess } from './native-access.ts';
 import { installAccounting } from './accounting.ts';
 import { AgentTools } from './agent-tools.ts';
 import { WorkbenchSource } from './source.ts';
+import { privacyHooks,privacyEpoch } from './privacy.ts';
 import { json,readBody,failure,loginPage } from './http.ts';
 
 export const name='amazonops-workbench';
@@ -31,8 +32,10 @@ export function apply(ctx:Context,config:Config):void {
   const server=(ctx.webServer as unknown as {server:Server}).server;
   const offBoundary=installBoundary(server,origin,auth);
   let runtime:Runtime|undefined;let source:WorkbenchSource|undefined;let maintenance=false;
-  const tools=new AgentTools(business,()=>{if(!runtime)throw new Error('RUNTIME_NOT_READY');return runtime;});
-  const hooks:OperationsExtensions={tools:(agent,ticket)=>tools.tools(agent,ticket),onAgent:(agent,ticket)=>tools.onAgent(agent,ticket)};
+  const currentRuntime=()=>runtime??ctx.get('orchestrator') as unknown as Runtime|undefined;
+  const tools=new AgentTools(business,()=>{const current=currentRuntime();if(!current)throw new Error('RUNTIME_NOT_READY');return current;});
+  const hooks:OperationsExtensions={privacy:privacyHooks(business,currentRuntime,()=>source,tools),
+    tools:(agent,ticket)=>tools.tools(agent,ticket),onAgent:(agent,ticket)=>tools.onAgent(agent,ticket)};
   ctx.provide('amazonopsHooks',hooks);
   let offAccess:(()=>void)|undefined;
   ctx.inject(['connection','remoteAccess'],child=>{
@@ -48,7 +51,20 @@ export function apply(ctx:Context,config:Config):void {
     runtime=next;source=attached;
     child.effect(()=>()=>{offSource();if(runtime===next){runtime=undefined;source=undefined;}});
   });
-  const offChange=business.onChange(()=>{source?.revokeDeleted();ctx.get('remoteAccess')?.invalidate();});
+  async function awaitReplacement(previous:Runtime):Promise<void>{
+    const deadline=Date.now()+15000;
+    while((!runtime||runtime===previous||!source)&&Date.now()<deadline)await delay(25);
+    maintenance=!runtime||runtime===previous||!source;
+    if(maintenance)ctx.logger.error('Native recovery is not ready; workbench remains in maintenance.');
+  }
+  const offChange=business.onChange(()=>{
+    source?.revokeDeleted();ctx.get('remoteAccess')?.invalidate();
+    if(runtime&&!maintenance&&runtime.privacyEpoch!==privacyEpoch(business)){
+      const previous=runtime;maintenance=true;
+      void previous.checkpoint(async()=>undefined).finally(()=>awaitReplacement(previous))
+        .catch(()=>ctx.logger.error('Privacy context refresh failed; workbench remains in maintenance.'));
+    }
+  });
   ctx.effect(()=>ctx.webServer.register({kind:'exact',path:'/amazonops/login',handler:(_req,res)=>loginPage(res)}));
   ctx.effect(()=>ctx.webServer.register({kind:'prefix',path:'/amazonops/api',handler:async(req,res)=>{
     try{
@@ -99,10 +115,7 @@ export function apply(ctx:Context,config:Config):void {
           }) as Awaited<ReturnType<typeof createRecoveryPoint>>;
           json(res,{id:value.directory.split(/[/\\]/).at(-1),files:value.manifest.files.length});
         }finally{
-          const deadline=Date.now()+15000;
-          while((!runtime||runtime===previous||!source)&&Date.now()<deadline)await delay(25);
-          maintenance=!runtime||runtime===previous||!source;
-          if(maintenance)ctx.logger.error('Native recovery is not ready; workbench remains in maintenance.');
+          await awaitReplacement(previous);
         }
         return;
       }

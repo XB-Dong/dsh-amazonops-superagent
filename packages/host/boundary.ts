@@ -39,8 +39,18 @@ export function installBoundary(server: Server,origin: string,auth: Auth): () =>
     for (const handler of requests) handler.call(server,req,res);
   };
   const upgrade=(req: IncomingMessage,socket: Duplex,head: Buffer) => {
+    // Removing Node's HTTP parser transfers transport ownership here before a
+    // protocol owner can attach its listeners. Even a rejected peer can reset.
+    // Keep this socket-local cleanup through close; native accepted handlers
+    // still receive the same request/socket/head and their own error events.
+    const close=()=>socket.destroy();
+    socket.on('error',close);
+    socket.once('close',()=>socket.off('error',close));
     const status=allowedRequest(req,origin,auth);
-    if (status!==200) { socket.end(`HTTP/1.1 ${status} Forbidden\r\nConnection: close\r\n\r\n`); return; }
+    if (status!==200) {
+      socket.end(`HTTP/1.1 ${status} Forbidden\r\nConnection: close\r\n\r\n`,close);
+      return;
+    }
     for (const handler of upgrades) handler.call(server,req,socket,head);
   };
   server.on('request',request); server.on('upgrade',upgrade);

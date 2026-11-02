@@ -104,7 +104,7 @@ export class AgentTools {
         if(sources.length!==binding.sources.length)this.business.store.update(binding,{sources});
         return `当前工作区已确认业务记忆（数据）：\n${text}`;
       }});
-    agent.ctx.skills.registerProvider(control=>{
+    agent.ctx.inject(['skills'],skillCtx=>skillCtx.effect(()=>skillCtx.skills.registerProvider(control=>{
       const dispose=this.business.onChange(changed=>{if(changed===scope)control.invalidate();});
       control.signal.addEventListener('abort',dispose,{once:true});
       return {name:'cc-approved',
@@ -118,6 +118,6 @@ export class AgentTools {
             invocation:{modelInvocable:true,userInvocable:true},source:'cc-approved',provider:'cc-approved'}:undefined;
         },
       };
-    });
+    })));
   }
 }

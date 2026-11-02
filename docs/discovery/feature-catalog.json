@@ -1,0 +1,252 @@
+{
+  "schemaVersion": "0.1",
+  "sourceSha": "bc964298d49ad399ae325f57068c9149502b8c62",
+  "requirements": [
+    {
+      "id": "CC-ENTRY-001",
+      "title": "中文入口",
+      "scope": "p0_parity",
+      "logicalOwner": "workbench-client",
+      "acceptanceIds": [
+        "A01-01",
+        "A01-02"
+      ],
+      "implementationStatus": "not_started"
+    },
+    {
+      "id": "CC-HARNESS-001",
+      "title": "原生助手",
+      "scope": "p0_parity",
+      "logicalOwner": "superagent-integration",
+      "acceptanceIds": [
+        "A02-01",
+        "A02-02",
+        "A02-03"
+      ],
+      "implementationStatus": "not_started"
+    },
+    {
+      "id": "CC-TASK-001",
+      "title": "任务管理",
+      "scope": "p0_parity",
+      "logicalOwner": "operations",
+      "acceptanceIds": [
+        "A03-01",
+        "A03-02",
+        "A03-03"
+      ],
+      "implementationStatus": "not_started"
+    },
+    {
+      "id": "CC-TASK-COPY-001",
+      "title": "复制清单",
+      "scope": "p0_parity",
+      "logicalOwner": "operations",
+      "acceptanceIds": [
+        "A04-01",
+        "A04-02",
+        "A04-03",
+        "A04-04"
+      ],
+      "implementationStatus": "not_started"
+    },
+    {
+      "id": "CC-WORKLOG-001",
+      "title": "工作日历",
+      "scope": "p0_parity",
+      "logicalOwner": "operations",
+      "acceptanceIds": [
+        "A05-01",
+        "A05-02"
+      ],
+      "implementationStatus": "not_started"
+    },
+    {
+      "id": "CC-NOTES-001",
+      "title": "学习笔记",
+      "scope": "p0_parity",
+      "logicalOwner": "operations",
+      "acceptanceIds": [
+        "A06-01",
+        "A06-02"
+      ],
+      "implementationStatus": "not_started"
+    },
+    {
+      "id": "CC-ACT-001",
+      "title": "活动四阶段",
+      "scope": "p0_parity",
+      "logicalOwner": "operations",
+      "acceptanceIds": [
+        "A07-01",
+        "A07-02",
+        "A07-03"
+      ],
+      "implementationStatus": "not_started"
+    },
+    {
+      "id": "CC-DATA-001",
+      "title": "已交付CSV子集",
+      "scope": "p0_parity",
+      "logicalOwner": "analysis",
+      "acceptanceIds": [
+        "A08-01",
+        "A08-02",
+        "A08-03"
+      ],
+      "implementationStatus": "not_started"
+    },
+    {
+      "id": "CC-INV-001",
+      "title": "库存补货",
+      "scope": "p0_parity",
+      "logicalOwner": "analysis",
+      "acceptanceIds": [
+        "A09-01",
+        "A09-02",
+        "A09-03"
+      ],
+      "implementationStatus": "not_started"
+    },
+    {
+      "id": "CC-SHIP-001",
+      "title": "共享分配与发货",
+      "scope": "p0_parity",
+      "logicalOwner": "analysis",
+      "acceptanceIds": [
+        "A10-01",
+        "A10-02",
+        "A10-03"
+      ],
+      "implementationStatus": "not_started"
+    },
+    {
+      "id": "CC-ADS-001",
+      "title": "广告分析",
+      "scope": "p0_parity",
+      "logicalOwner": "analysis",
+      "acceptanceIds": [
+        "A11-01",
+        "A11-02",
+        "A11-03"
+      ],
+      "implementationStatus": "not_started"
+    },
+    {
+      "id": "CC-FEEDBACK-001",
+      "title": "反馈",
+      "scope": "p0_parity",
+      "logicalOwner": "learning",
+      "acceptanceIds": [
+        "A12-01",
+        "A12-02",
+        "A12-03"
+      ],
+      "implementationStatus": "not_started"
+    },
+    {
+      "id": "CC-MEMORY-001",
+      "title": "业务记忆",
+      "scope": "p0_parity",
+      "logicalOwner": "learning",
+      "acceptanceIds": [
+        "A13-01",
+        "A13-02",
+        "A13-03"
+      ],
+      "implementationStatus": "not_started"
+    },
+    {
+      "id": "CC-SKILL-001",
+      "title": "经验Skill",
+      "scope": "p0_parity",
+      "logicalOwner": "learning",
+      "acceptanceIds": [
+        "A14-01",
+        "A14-02",
+        "A14-03"
+      ],
+      "implementationStatus": "not_started"
+    },
+    {
+      "id": "CC-HISTORY-001",
+      "title": "需求历史",
+      "scope": "p0_parity",
+      "logicalOwner": "learning",
+      "acceptanceIds": [
+        "A15-01",
+        "A15-02"
+      ],
+      "implementationStatus": "not_started"
+    },
+    {
+      "id": "CC-ANALYSIS-001",
+      "title": "已有运营摘要",
+      "scope": "p0_parity",
+      "logicalOwner": "analysis",
+      "acceptanceIds": [
+        "A16-01",
+        "A16-02"
+      ],
+      "implementationStatus": "not_started"
+    },
+    {
+      "id": "SA-NATIVE-001",
+      "title": "真实SuperAgent底座",
+      "scope": "p0_parity",
+      "logicalOwner": "superagent-integration",
+      "acceptanceIds": [
+        "A17-01",
+        "A17-02",
+        "A17-03"
+      ],
+      "implementationStatus": "not_started"
+    },
+    {
+      "id": "SA-ACCESS-001",
+      "title": "访问与模型边界",
+      "scope": "p0_parity",
+      "logicalOwner": "storage-policy",
+      "acceptanceIds": [
+        "A18-01",
+        "A18-02",
+        "A18-03",
+        "A18-04"
+      ],
+      "implementationStatus": "not_started"
+    },
+    {
+      "id": "SA-RECOVERY-001",
+      "title": "迁移恢复",
+      "scope": "p0_parity",
+      "logicalOwner": "storage-policy",
+      "acceptanceIds": [
+        "A19-01",
+        "A19-02",
+        "A19-03"
+      ],
+      "implementationStatus": "not_started"
+    },
+    {
+      "id": "SA-LOCAL-001",
+      "title": "本机独立运行",
+      "scope": "p0_parity",
+      "logicalOwner": "superagent-integration",
+      "acceptanceIds": [
+        "A20-01",
+        "A20-02",
+        "A20-03"
+      ],
+      "implementationStatus": "not_started"
+    },
+    {
+      "id": "CC-CUSTOMER-001",
+      "title": "客户反馈重设计",
+      "scope": "deferred",
+      "reason": "旧系统未交付，需重新确认，不因重构扩大范围",
+      "acceptanceIds": []
+    }
+  ],
+  "legacyToolCount": 9,
+  "legacyTestSourceFiles": 34
+}

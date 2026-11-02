@@ -1,0 +1,35 @@
+{
+  "recordedDate": "2026-11-02",
+  "timeZone": "Asia/Shanghai",
+  "ccagent": {
+    "repository": "https://github.com/XB-Dong/ccagent",
+    "sha": "bc964298d49ad399ae325f57068c9149502b8c62",
+    "usage": "read_only_delivered_behavior_reference",
+    "testsRerun": false
+  },
+  "superagent": {
+    "repository": "https://github.com/deepseek-ai/dsh-superagent-prototype",
+    "sha": "6337fc823ce20251c8de8085948165c81aaa701e",
+    "branch": "main",
+    "license": "MIT",
+    "role": "actual_runtime_engine_store_effects_foundation",
+    "sourceInspected": true,
+    "runtimeStatus": "not_run",
+    "packageDevelopmentBaseline": "0.2.1-alpha.2"
+  },
+  "harness": {
+    "repository": "https://github.com/deepseek-ai/deepseek-harness",
+    "sha": "ce7073d51254c26cd63b22a60835b8f948deb447",
+    "branch": "master",
+    "license": "MIT",
+    "role": "native_host_agent_session_client",
+    "runtimeStatus": "not_run"
+  },
+  "localObserved": {
+    "os": "Windows",
+    "node": "24.22.1",
+    "pnpm": "11.25.0"
+  },
+  "compatibilityStatus": "source_inspected_not_runtime_verified",
+  "productDependenciesInstalled": false
+}

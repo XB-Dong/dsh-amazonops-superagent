@@ -1,0 +1,121 @@
+{
+  "schemaVersion": "0.1",
+  "tasks": [
+    {
+      "id": "PREP-INVENTORY",
+      "rootTask": "SUPERAGENT-REFACTOR-PREPARATION",
+      "owner": "parity_inventory",
+      "baselineSha": "aa386f7de576a95e21feb51a05486ca7ac7774d9",
+      "specVersion": "0.1.0",
+      "inputBaselines": {
+        "ccagent": "bc964298d49ad399ae325f57068c9149502b8c62",
+        "superagent": "6337fc823ce20251c8de8085948165c81aaa701e",
+        "harness": "ce7073d51254c26cd63b22a60835b8f948deb447"
+      },
+      "allowedWritePaths": [],
+      "dependencies": [],
+      "status": "completed",
+      "acceptance": "完整功能/工具/测试盘点，带位置的重构发现，零写入及零产品测试",
+      "repairCount": 0,
+      "repairCondition": "After two same-root-cause repairs, diagnose and record a revised decision; never reset by renaming",
+      "timeboxMinutes": 15,
+      "stopConditions": [
+        "production_or_credential_access_needed",
+        "unauthorized_write",
+        "scope_exceeds_pre_p0_plan"
+      ],
+      "deliverable": "Chinese source-grounded findings; no fabricated runtime results"
+    },
+    {
+      "id": "PREP-NATIVE",
+      "rootTask": "SUPERAGENT-REFACTOR-PREPARATION",
+      "owner": "native_architecture",
+      "baselineSha": "aa386f7de576a95e21feb51a05486ca7ac7774d9",
+      "specVersion": "0.1.0",
+      "inputBaselines": {
+        "ccagent": "bc964298d49ad399ae325f57068c9149502b8c62",
+        "superagent": "6337fc823ce20251c8de8085948165c81aaa701e",
+        "harness": "ce7073d51254c26cd63b22a60835b8f948deb447"
+      },
+      "allowedWritePaths": [],
+      "dependencies": [],
+      "status": "completed",
+      "acceptance": "固定上游真实接缝，Windows/权限/认证/重试风险，区分源码事实和未验证",
+      "repairCount": 0,
+      "repairCondition": "After two same-root-cause repairs, diagnose and record a revised decision; never reset by renaming",
+      "timeboxMinutes": 15,
+      "stopConditions": [
+        "production_or_credential_access_needed",
+        "unauthorized_write",
+        "scope_exceeds_pre_p0_plan"
+      ],
+      "deliverable": "Chinese source-grounded findings; no fabricated runtime results"
+    },
+    {
+      "id": "PREP-DESIGN",
+      "rootTask": "SUPERAGENT-REFACTOR-PREPARATION",
+      "owner": "Leader",
+      "baselineSha": "aa386f7de576a95e21feb51a05486ca7ac7774d9",
+      "specVersion": "0.1.0",
+      "inputBaselines": {
+        "ccagent": "bc964298d49ad399ae325f57068c9149502b8c62",
+        "superagent": "6337fc823ce20251c8de8085948165c81aaa701e",
+        "harness": "ce7073d51254c26cd63b22a60835b8f948deb447"
+      },
+      "allowedWritePaths": [
+        "docs/**",
+        "specs/**",
+        "scripts/verify_preparation.py",
+        ".github/workflows/preparation.yml",
+        "README.md",
+        "AGENTS.md",
+        "CONSTITUTION.md",
+        "NEXT-WAVES.md",
+        "THIRD-PARTY-NOTICES.md",
+        ".gitattributes"
+      ],
+      "dependencies": [
+        "PREP-INVENTORY",
+        "PREP-NATIVE"
+      ],
+      "status": "in_progress",
+      "acceptance": "规格/完整矩阵/状态一致，准备检查通过，未创建P0计划或产品实现",
+      "repairCount": 0,
+      "repairCondition": "After two same-root-cause repairs, diagnose and record a revised decision; never reset by renaming",
+      "timeboxMinutes": 15,
+      "stopConditions": [
+        "production_or_credential_access_needed",
+        "unauthorized_write",
+        "scope_exceeds_pre_p0_plan"
+      ],
+      "deliverable": "Chinese source-grounded findings; no fabricated runtime results"
+    },
+    {
+      "id": "PREP-REVIEW",
+      "rootTask": "SUPERAGENT-REFACTOR-PREPARATION",
+      "owner": "prep_review",
+      "baselineSha": "aa386f7de576a95e21feb51a05486ca7ac7774d9",
+      "specVersion": "0.1.0",
+      "inputBaselines": {
+        "ccagent": "bc964298d49ad399ae325f57068c9149502b8c62",
+        "superagent": "6337fc823ce20251c8de8085948165c81aaa701e",
+        "harness": "ce7073d51254c26cd63b22a60835b8f948deb447"
+      },
+      "allowedWritePaths": [],
+      "dependencies": [
+        "PREP-DESIGN"
+      ],
+      "status": "not_started",
+      "acceptance": "独立审阅准确候选，逐项发现处置和复验，产品not_run保持",
+      "repairCount": 0,
+      "repairCondition": "After two same-root-cause repairs, diagnose and record a revised decision; never reset by renaming",
+      "timeboxMinutes": 15,
+      "stopConditions": [
+        "production_or_credential_access_needed",
+        "unauthorized_write",
+        "scope_exceeds_pre_p0_plan"
+      ],
+      "deliverable": "Chinese source-grounded findings; no fabricated runtime results"
+    }
+  ]
+}

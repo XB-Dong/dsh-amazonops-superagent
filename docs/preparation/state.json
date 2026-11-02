@@ -1,0 +1,41 @@
+{
+  "schemaVersion": "0.1",
+  "project": "dsh-amazonops-superagent",
+  "timeZone": "Asia/Shanghai",
+  "phase": "preparation_before_p0_plan",
+  "preparationStatus": "drafting",
+  "p0Goal": "Complete the entire ccagent refactor on native SuperAgent and pass functional acceptance",
+  "p0PlanStatus": "not_created",
+  "p0ExecutionStatus": "not_started",
+  "productImplementationStatus": "not_started",
+  "productAcceptanceStatus": "not_run",
+  "upstreamRuntimeVerification": "not_run",
+  "modelApiStatus": "not_run",
+  "cloudAccess": "not_performed",
+  "productionDeployment": "not_performed",
+  "productionMigration": "not_performed",
+  "legacyProjectWrites": "not_performed",
+  "legacyAutomationChanges": "not_performed",
+  "laterWaves": [],
+  "github": {
+    "repository": "XB-Dong/dsh-amazonops-superagent",
+    "visibility": "private",
+    "syncStatus": "pending"
+  },
+  "independentReview": {
+    "status": "not_started",
+    "reviewer": "prep_review"
+  },
+  "preparationChecks": "not_run",
+  "bootstrapSha": "aa386f7de576a95e21feb51a05486ca7ac7774d9",
+  "runtimeRisks": [
+    "SP-01_operations_mode",
+    "SP-02_windows",
+    "SP-03_tools",
+    "SP-04_retries",
+    "SP-05_reporting",
+    "SP-06_exports",
+    "SP-07_all_route_auth",
+    "SP-08_accounting"
+  ]
+}

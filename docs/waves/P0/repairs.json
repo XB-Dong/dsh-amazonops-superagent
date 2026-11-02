@@ -198,6 +198,13 @@
       "responsibilityAreas": [
         "P0-INTEGRATION"
       ]
+    },
+    {
+      "commit": "34ff4ce3585210f435b82162fb4d46350bf860af",
+      "subject": "fix: pin native workspace authority to physical Windows paths",
+      "responsibilityAreas": [
+        "P0-NATIVE"
+      ]
     }
   ]
 }

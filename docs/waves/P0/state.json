@@ -28,7 +28,7 @@
       ],
       "acceptance": "Actual native Runtime/Engine/Store/Effects on Windows and documented operations-mode patches, compatible preset/tool/auth/LLM extension seams; native integration tests. Do not build a replacement loop.",
       "status": "verified",
-      "repairCount": 7,
+      "repairCount": 8,
       "stopConditions": [
         "cloud_or_legacy_write",
         "credential_or_data_exposure",
@@ -46,7 +46,7 @@
       ],
       "repairCountAtInitialDispatch": 0,
       "repairCountMeaning": "Recorded product fix commits affecting this responsibility area; details in repairJournal.",
-      "verifiedImplementationSha": "b0afbdd088d1022b6fef53c8424cb73184543e1a"
+      "verifiedImplementationSha": "d7a8d9ab9f9114ff8f466b824a22fceaf531c07b"
     },
     {
       "id": "P0-BACKEND",
@@ -93,7 +93,7 @@
       ],
       "repairCountAtInitialDispatch": 0,
       "repairCountMeaning": "Recorded product fix commits affecting this responsibility area; details in repairJournal.",
-      "verifiedImplementationSha": "b0afbdd088d1022b6fef53c8424cb73184543e1a"
+      "verifiedImplementationSha": "d7a8d9ab9f9114ff8f466b824a22fceaf531c07b"
     },
     {
       "id": "P0-FRONTEND",
@@ -145,7 +145,7 @@
       ],
       "repairCountAtInitialDispatch": 0,
       "repairCountMeaning": "Recorded product fix commits affecting this responsibility area; details in repairJournal.",
-      "verifiedImplementationSha": "b0afbdd088d1022b6fef53c8424cb73184543e1a"
+      "verifiedImplementationSha": "d7a8d9ab9f9114ff8f466b824a22fceaf531c07b"
     },
     {
       "id": "P0-INTEGRATION",
@@ -192,7 +192,7 @@
       "followupWritePaths": [],
       "repairCountAtInitialDispatch": 0,
       "repairCountMeaning": "Recorded product fix commits affecting this responsibility area; details in repairJournal.",
-      "verifiedImplementationSha": "b0afbdd088d1022b6fef53c8424cb73184543e1a"
+      "verifiedImplementationSha": "d7a8d9ab9f9114ff8f466b824a22fceaf531c07b"
     },
     {
       "id": "P0-REVIEW",
@@ -223,7 +223,7 @@
       "followupWritePaths": [],
       "repairCountAtInitialDispatch": 0,
       "repairCountMeaning": "Recorded product fix commits affecting this responsibility area; details in repairJournal.",
-      "verifiedImplementationSha": "b0afbdd088d1022b6fef53c8424cb73184543e1a"
+      "verifiedImplementationSha": "d7a8d9ab9f9114ff8f466b824a22fceaf531c07b"
     }
   ],
   "acceptanceStatus": "passed",
@@ -231,23 +231,21 @@
   "productionDeployment": "not_performed",
   "legacyAutomationChanges": "not_performed",
   "laterWaves": [],
-  "lastVerifiedCommit": "b0afbdd088d1022b6fef53c8424cb73184543e1a",
+  "lastVerifiedCommit": "d7a8d9ab9f9114ff8f466b824a22fceaf531c07b",
   "offlineTestsLastRun": {
     "command": "node scripts/test.mjs",
     "exitCode": 0,
-    "tests": 231,
-    "passed": 231,
+    "tests": 237,
+    "passed": 237,
     "failed": 0,
     "skipped": 0,
     "sourceDirty": true,
     "uncommittedAtStart": [
-      "docs/README.md",
-      "docs/operations/LOCAL-RECOVERY.md",
-      "docs/testing/acceptance.json",
-      "docs/waves/P0/state.json",
-      "docs/architecture/IMPLEMENTED.zh.md",
       "docs/testing/EXECUTION-20261102.md",
-      "docs/testing/execution-20261102.json"
+      "docs/testing/acceptance.json",
+      "docs/testing/execution-20261102.json",
+      "docs/waves/P0/state.json",
+      "docs/audit/reviews/P0-20261102.zh.md"
     ],
     "note": "Actual local suite; published clean commit is also validated by CI.",
     "productSourcesMatchCommit": true
@@ -273,5 +271,10 @@
   "repairJournal": "docs/waves/P0/repairs.json",
   "productionMigration": "not_performed",
   "legacyProjectWrites": "not_performed",
-  "completionBoundary": "Local refactor and synthetic/native/browser/live-model acceptance; no production migration or external Amazon/ERP writes."
+  "completionBoundary": "Local refactor and synthetic/native/browser/live-model acceptance; no production migration or external Amazon/ERP writes.",
+  "ci": {
+    "status": "pending",
+    "implementationSha": "d7a8d9ab9f9114ff8f466b824a22fceaf531c07b",
+    "note": "Awaiting the clean published candidate run; previous failed diagnostics remain recorded in the execution report."
+  }
 }

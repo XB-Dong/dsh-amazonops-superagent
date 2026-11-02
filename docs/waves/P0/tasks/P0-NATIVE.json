@@ -17,7 +17,7 @@
   ],
   "acceptance": "Actual native Runtime/Engine/Store/Effects on Windows and documented operations-mode patches, compatible preset/tool/auth/LLM extension seams; native integration tests. Do not build a replacement loop.",
   "status": "verified",
-  "repairCount": 7,
+  "repairCount": 8,
   "stopConditions": [
     "cloud_or_legacy_write",
     "credential_or_data_exposure",
@@ -35,5 +35,5 @@
   ],
   "repairCountAtInitialDispatch": 0,
   "repairCountMeaning": "Recorded product fix commits affecting this responsibility area; details in repairJournal.",
-  "verifiedImplementationSha": "b0afbdd088d1022b6fef53c8424cb73184543e1a"
+  "verifiedImplementationSha": "d7a8d9ab9f9114ff8f466b824a22fceaf531c07b"
 }

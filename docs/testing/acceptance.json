@@ -1193,8 +1193,11 @@
         "docs/testing/execution-20261102.json#isolation-audit",
         "docs/testing/execution-20261102.json#handoff-network",
         "docs/testing/execution-20261102.json#browser-final",
+        "docs/testing/execution-20261102.json#windows-physical",
+        "docs/testing/execution-20261102.json#ci-diagnostic",
         "tests/packaging/launcher.test.ts",
         "tests/native/packaging.test.ts",
+        "tests/native/windows-workspace.test.ts",
         "tests/integration/recovery-cli.test.ts"
       ],
       "legacyTestReferences": [],
@@ -1214,8 +1217,11 @@
         "docs/testing/execution-20261102.json#isolation-audit",
         "docs/testing/execution-20261102.json#handoff-network",
         "docs/testing/execution-20261102.json#browser-final",
+        "docs/testing/execution-20261102.json#windows-physical",
+        "docs/testing/execution-20261102.json#ci-diagnostic",
         "tests/packaging/launcher.test.ts",
         "tests/native/packaging.test.ts",
+        "tests/native/windows-workspace.test.ts",
         "tests/integration/recovery-cli.test.ts"
       ],
       "legacyTestReferences": [],
@@ -1235,8 +1241,11 @@
         "docs/testing/execution-20261102.json#isolation-audit",
         "docs/testing/execution-20261102.json#handoff-network",
         "docs/testing/execution-20261102.json#browser-final",
+        "docs/testing/execution-20261102.json#windows-physical",
+        "docs/testing/execution-20261102.json#ci-diagnostic",
         "tests/packaging/launcher.test.ts",
         "tests/native/packaging.test.ts",
+        "tests/native/windows-workspace.test.ts",
         "tests/integration/recovery-cli.test.ts"
       ],
       "legacyTestReferences": [],
@@ -1283,5 +1292,5 @@
       "verificationNote": "Layered evidence; native, controlled fault, browser and live-model scopes are distinguished in the execution report."
     }
   ],
-  "implementationSha": "b0afbdd088d1022b6fef53c8424cb73184543e1a"
+  "implementationSha": "d7a8d9ab9f9114ff8f466b824a22fceaf531c07b"
 }

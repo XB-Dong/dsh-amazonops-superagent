@@ -2,11 +2,11 @@
 
 2026-11-02。最终统一验证及独立复核正在收尾；完成状态以[执行状态](../waves/P0/state.json)为准。[59项矩阵](acceptance.json)记录逐项结果，[脱敏工件索引](execution-20261102.json)记录命令、基准与原始工件哈希。原始数据库、日志、截图、用户配置及凭据全部保存在仓库之外。
 
-产品代码冻结 `b0afbdd088d1022b6fef53c8424cb73184543e1a`：严格类型检查及构建成功，完整离线测试231通过、0失败、0跳过；59项矩阵均有分层证据。该次本机运行仅有文档待提交，索引逐项记录了实际脏状态，未把它写成干净构建；发布提交另由干净CI验证。
+代码及夹具冻结 `d7a8d9ab9f9114ff8f466b824a22fceaf531c07b`：严格类型检查及构建成功，完整离线测试237通过、0失败、0跳过；59项矩阵均有分层证据。该次本机运行仅有文档待提交，索引逐项记录了实际脏状态，未把它写成干净构建；发布提交另由干净CI验证。
 
 ## 范围和证据口径
 
-复现旧系统已交付的20组需求，使用真实 SuperAgent Runtime/Engine/Store/Effects 与 DSH 原生会话。本机 Windows 实现，无云连接、部署、生产数据迁移或旧自动任务修改。原项目 HEAD 及原有3项未提交文档状态与开始时相同。
+复现旧系统已交付的20组需求，使用真实 SuperAgent Runtime/Engine/Store/Effects 与 DSH 原生会话。本机 Windows 实现，未连接旧云服务器、部署、迁移生产数据或修改旧自动任务；GitHub同步及必要模型HTTPS调用属于本轮单独授权范围。原项目 HEAD 及原有3项未提交文档状态与开始时相同。
 
 域层测试验证确定性规则与事务；带 `unit` 的集成测试使用受控端口模拟故障。原生集成测试实际启动官方 DSH、调用本地 Anthropic SSE fixture，并读取官方 Session owner 和真实 Store；网络围栏拒绝外部地址。真实模型验收另行调用官方服务。浏览器验收通过实际登录、表单操作和文件下载进行，不以源码、DOM节点存在或按钮可见替代操作成功。
 
@@ -126,10 +126,14 @@ A19-01至03：合成旧格式覆盖完整业务实体、来源/ID/revision及查
 
 A20-01至03：实际Windows Node24、官方DSH子进程、Windows绝对路径和junction负例；独立home/state/data/loopback端口/账号。launcher在写入或spawn前拒绝链接祖先及状态树；恢复拒绝重叠目录、恶意manifest和输入链接。旧仓库只读，原有3项文档改动保留；本轮没有SSH/云端命令、部署或旧自动任务变更。证据：`launcher`、`packaging`、`recovery-cli`、`isolation-audit`。
 
+首轮干净Windows CI因真实8.3 TEMP别名与长路径被词法guard误判而失败，日志保留。修复固定物理root及dev/ino身份，原路径与标准路径逐祖先拒绝链接，创建目录前后和每步调用都检查。真实短路径下启动master、排队worker和恢复既有worker通过；共同指向外部的junction、同名普通root替换、旧目录回落与缺失目录仍拒绝。CI在全套之前增加实际原生启动门槛。证据：`windows-physical`、`ci-diagnostic`；不以放宽授权或延长超时代替修复。
+
 ## 修复与复核记录
 
 保留的真实产品 Red/Green 包括来源策略未初始化、Skill注入scope、读取来源/经验lineage、master隐私epoch、原生RPC授权边界、用量归因恢复、重复prompt清理、工具可选字段JSON传输、成功报告后的TICKET_ENDED、默认压缩阈值不触发、只读页面默认workspace写入、CSS未挂载、分钟草稿筛选丢失、恢复旧工作目录、SQLite输入sidecar写入及拒绝升级后socket RST导致宿主退出。假模型接线或预期写错只记fixture修正，不充当产品Red。后补shipping/工作日历/旧格式覆盖是已有行为回归，不声称先失败。
 
 前端、后端、原生、集成与只读独立复核使用分离写入worktree与明确路径包；共享契约/依赖由Leader维护。发生同类隐私授权问题后先扩大来源闭包与每步检查诊断，再集成，未以重置repairCount规避。规则已沉淀在[多Agent开发规则](../engineering/MULTI-AGENT.zh.md)。独立复核的实际运行与读取Leader日志分别记载，不把读取日志写成独立重跑。
+
+`34ff4ce`整套中的一次Unexpected end JSON来自测试observer跨进程读取truncate/write窗口；保留该失败日志，改为完整JSON写同目录临时文件后rename发布。产品Store、Session及原断言未改变。随后排队恢复1/1及新完整237/237通过，不把该夹具修正记为产品行为Red。
 
 本次不证明真实公司数据质量或业务收益，也没有迁移真实旧数据、云部署、通用Excel/BI或Amazon/ERP自动写入。所需本机凭据不入Git，后续使用继续保留请求级实际记账。

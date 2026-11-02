@@ -4,6 +4,7 @@ import { requestId } from './api.ts';
 import type { Mutate } from './TasksPage.tsx';
 import { timeZones } from './display.ts';
 import { localFields, scheduleChanges, timeOptions } from './task-time.ts';
+import { minutesUpdate, type MinutesDraft } from './tasks-draft.ts';
 import './p41-tasks.css';
 
 type Schedule = { date: string; time: string };
@@ -225,6 +226,8 @@ export function ActualMinutesForm({
   completion = false,
   onSaved,
   onCancel,
+  draft,
+  onDraftChange,
 }: {
   task: Task;
   mutate: Mutate;
@@ -232,28 +235,21 @@ export function ActualMinutesForm({
   completion?: boolean;
   onSaved?: () => void;
   onCancel?: () => void;
+  draft?: MinutesDraft;
+  onDraftChange?: (value: string) => void;
 }) {
   const id = useId();
-  const [initial] = useState(task);
-  const [value, setValue] = useState(task.actualMinutes?.toString() ?? '');
+  const [localInitial] = useState(task);
+  const [localValue, setLocalValue] = useState(task.actualMinutes?.toString() ?? '');
+  const initial = draft?.initialTaskSnapshot ?? localInitial;
+  const value = draft?.value ?? localValue;
   const [error, setError] = useState('');
   async function submit(event: FormEvent) {
     event.preventDefault();
     if (busy) return;
     setError('');
     try {
-      const actualMinutes = value === '' ? null : Number(value);
-      if (
-        actualMinutes !== null &&
-        (!Number.isInteger(actualMinutes) || actualMinutes < 0 || actualMinutes > 1440)
-      )
-        throw new Error('实际用时请填写 0 到 1440 之间的整数分钟。');
-      await mutate('task-update', {
-        id: initial.id,
-        revision: initial.revision,
-        actualMinutes,
-        ...(completion ? { status: 'done', confirmedSuccess: true } : {}),
-      });
+      await mutate('task-update', minutesUpdate({ initialTaskSnapshot: initial, value }, completion));
       onSaved?.();
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : '保存未完成，请重试。');
@@ -276,7 +272,7 @@ export function ActualMinutesForm({
           step={1}
           value={value}
           disabled={busy}
-          onChange={(event) => setValue(event.target.value)}
+          onChange={(event) => draft ? onDraftChange?.(event.target.value) : setLocalValue(event.target.value)}
           placeholder="未记录"
         />
       </label>

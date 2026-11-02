@@ -6,6 +6,7 @@ import { TaskForm, ActualMinutesForm } from './TaskForm.tsx';
 import { plannedLabel } from './task-time.ts';
 import { taskListGroups, listTimeZone } from './task-list-view.ts';
 import { TaskCopyForm } from './TaskCopyForm.tsx';
+import { openMinutesDraft, changeMinutesDraft, closeMinutesDraft, type MinutesDraft, type MinutesDrafts } from './tasks-draft.ts';
 import './p43-tasks.css';
 import './p41-tasks.css';
 import './p42-tasks.css';
@@ -25,6 +26,8 @@ export function TasksPage({
   const [selectedDate, setSelectedDate] = useState('');
   const [copyTask, setCopyTask] = useState<Task | null>(null);
   const [copyNotice, setCopyNotice] = useState('');
+  // Keep drafts above filtered cards so unmounting a card never rebases or discards edits.
+  const [minutesDrafts, setMinutesDrafts] = useState<MinutesDrafts>({});
   const rows = data.tasks.filter(
     (row) => filter === 'all' || !['done', 'cancelled'].includes(row.status),
   );
@@ -145,6 +148,10 @@ export function TasksPage({
                 busy={busy}
                 editDisabled={editorOpen}
                 onEdit={() => setEditor({ task })}
+                minutesDraft={minutesDrafts[task.id]}
+                onMinutesOpen={() => setMinutesDrafts(drafts => openMinutesDraft(drafts, task))}
+                onMinutesChange={value => setMinutesDrafts(drafts => changeMinutesDraft(drafts, task.id, value))}
+                onMinutesClose={() => setMinutesDrafts(drafts => closeMinutesDraft(drafts, task.id))}
                 onCopy={() => {
                   setCopyNotice('');
                   setCopyTask(task);
@@ -164,6 +171,10 @@ function TaskCard({
   editDisabled,
   onEdit,
   onCopy,
+  minutesDraft,
+  onMinutesOpen,
+  onMinutesChange,
+  onMinutesClose,
 }: {
   task: Task;
   mutate: Mutate;
@@ -171,8 +182,11 @@ function TaskCard({
   editDisabled: boolean;
   onEdit: () => void;
   onCopy: () => void;
+  minutesDraft?: MinutesDraft;
+  onMinutesOpen: () => void;
+  onMinutesChange: (value: string) => void;
+  onMinutesClose: () => void;
 }) {
-  const [minutesOpen, setMinutesOpen] = useState(false);
   const active = !['done', 'cancelled'].includes(task.status);
   return (
     <article className="panel task-card">
@@ -238,7 +252,7 @@ function TaskCard({
               <button
                 className="secondary small"
                 disabled={busy || !task.checked.every(Boolean)}
-                onClick={() => setMinutesOpen(true)}
+                onClick={onMinutesOpen}
               >
                 记录完成
               </button>
@@ -248,7 +262,7 @@ function TaskCard({
             <button
               className="text-button"
               disabled={busy}
-              onClick={() => setMinutesOpen(!minutesOpen)}
+              onClick={onMinutesOpen}
             >
               补记或修改实际用时
             </button>
@@ -270,14 +284,16 @@ function TaskCard({
           )}
         </div>
       </div>
-      {minutesOpen && (task.status === 'done' || (active && task.status !== 'draft')) && (
+      {minutesDraft && (task.status === 'done' || (active && task.status !== 'draft')) && (
         <ActualMinutesForm
           task={task}
+          draft={minutesDraft}
+          onDraftChange={onMinutesChange}
           mutate={mutate}
           busy={busy || (active && !task.checked.every(Boolean))}
-          completion={task.status !== 'done'}
-          onSaved={() => setMinutesOpen(false)}
-          onCancel={() => setMinutesOpen(false)}
+          completion={minutesDraft.initialTaskSnapshot.status !== 'done'}
+          onSaved={onMinutesClose}
+          onCancel={onMinutesClose}
         />
       )}
     </article>

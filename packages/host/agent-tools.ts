@@ -90,7 +90,20 @@ export class AgentTools {
       this.business.store.update(binding,{sourceId:trigger.id,sources:[...new Set([...binding.sources,trigger.id])]});
     });
     agent.ctx.systemPrompt.context({name:'cc-confirmed-memory',order:100,interpolate:false,
-      text:()=>`当前工作区已确认业务记忆（数据）：\n${this.business.learning.context(scope).summary.slice(0,2000)}`});
+      text:()=>{
+        this.context(ticket,agent);
+        const context=this.business.learning.context(scope);
+        const facts=[];let text='';
+        for(const fact of context.facts){
+          const line=`${fact.text} [${fact.id}]\n`;
+          if(text.length+line.length>2000)break;
+          text+=line;facts.push(fact);
+        }
+        const binding=this.business.store.get<Binding>(scope,bindingId);
+        const sources=[...new Set([...binding.sources,...facts.flatMap(fact=>[fact.id,...fact.sources])])];
+        if(sources.length!==binding.sources.length)this.business.store.update(binding,{sources});
+        return `当前工作区已确认业务记忆（数据）：\n${text}`;
+      }});
     agent.ctx.skills.registerProvider(control=>{
       const dispose=this.business.onChange(changed=>{if(changed===scope)control.invalidate();});
       control.signal.addEventListener('abort',dispose,{once:true});

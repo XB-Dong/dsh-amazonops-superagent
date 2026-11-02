@@ -11,6 +11,12 @@ type OutboxMessage={id:string;channel:{source:string;thread:string;address:Recor
 export class WorkbenchSource {
   runtime:Runtime; business:Business;
   constructor(runtime:Runtime,business:Business){this.runtime=runtime;this.business=business;}
+  async initializePolicy():Promise<void> {
+    const policy=this.runtime.store.settings().policy;
+    if(policy.sources.amazonops)return;
+    await this.runtime.settings.save('policy',{...policy,sources:{...policy.sources,amazonops:{allowed:[{id:'cc',name:'cc'}]}}},
+      this.runtime.store.blockRevision('policy'),'sync');
+  }
   register():()=>void {
     const kind:SourceKind = {kind:'amazonops',title:{zh:'cc运营工作台',en:'Operations workbench'},
       description:{zh:'认证的本机运营请求',en:'Authenticated local requests'},schema:z.object({}),fields:[],health:[],
@@ -65,9 +71,11 @@ export class WorkbenchSource {
     const ticket=this.runtime.store.tickets.get(id);
     if(!ticket)return false;
     const trigger=this.runtime.store.triggers.get(ticket.origin.triggerId);
+    const binding=this.business.store.list<Base&{skills?:{id:string;hash:string}[]}>(scope,'native-binding').find(row=>row.id===`native-binding:worker-${ticket.id}`);
     const lineage=[...ticket.origin.triggerIds,...ticket.inputs.flatMap(input=>input.kind==='trigger'?[input.triggerId]:[])];
     return trigger?.source==='amazonops' && trigger.meta.scope===scope &&
       !this.business.store.isDeleted(scope,`native-binding:worker-${ticket.id}`) &&
+      (binding?.skills??[]).every(skill=>this.business.learning.activeSkills(scope).some(active=>active.id===skill.id&&active.hash===skill.hash)) &&
       !lineage.some(source=>this.business.store.isDeleted(scope,source));
   }
   sessions(scope:string):ReadonlySet<string> {

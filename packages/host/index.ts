@@ -42,8 +42,10 @@ export function apply(ctx:Context,config:Config):void {
   ctx.inject(['orchestrator'],async child=>{
     const next=child.get('orchestrator') as unknown as Runtime;
     await next.ready;
-    runtime=next;source=new WorkbenchSource(next,business);
-    const offSource=source.register();
+    const attached=new WorkbenchSource(next,business);
+    const offSource=attached.register();
+    await attached.initializePolicy();
+    runtime=next;source=attached;
     child.effect(()=>()=>{offSource();if(runtime===next){runtime=undefined;source=undefined;}});
   });
   const offChange=business.onChange(()=>{source?.revokeDeleted();ctx.get('remoteAccess')?.invalidate();});

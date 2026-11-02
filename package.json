@@ -11,8 +11,8 @@
   "scripts": {
     "build": "node scripts/build.mjs",
     "start": "node scripts/start.mjs",
-    "check": "tsc --noEmit",
-    "test": "node --test tests/business/*.test.ts tests/integration/*.test.ts tests/client/*.test.ts",
+    "check": "node scripts/check.mjs",
+    "test": "node scripts/test.mjs",
     "test:business": "node --test tests/business/*.test.ts",
     "test:native": "node --test tests/native/*.test.ts",
     "verify": "python scripts/verify_preparation.py"

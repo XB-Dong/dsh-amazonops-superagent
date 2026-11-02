@@ -66,10 +66,24 @@ try{
       if(failed)throw new Error('LIVE_WORKER_FAILED');
       if(snapshot.tasks?.some((task:any)=>task.title===expected)&&work.messages?.some((message:any)=>
         message.threadId===submitted.value.threadId&&message.role==='assistant'&&work.tickets.some((ticket:any)=>
-          ticket.id===message.ticketId&&ticket.latestReport?.status==='ready')))return {snapshot,work};
+          ticket.id===message.ticketId&&ticket.latestReport?.status==='ready'))){
+        const reply=work.messages.find((message:any)=>message.threadId===submitted.value.threadId&&message.role==='assistant'&&
+          work.tickets.some((ticket:any)=>ticket.id===message.ticketId&&ticket.latestReport?.status==='ready'));
+        const events=readFileSync(join(evidence,'session-events.jsonl'),'utf8').trim().split('\n').map(line=>JSON.parse(line));
+        const end=events.findLast(event=>event.sessionId===`worker-${reply.ticketId}`&&event.event.type==='turn/end');
+        if(!end)return;
+        if(end.event.data.reason.kind!=='completed')throw new Error('LIVE_NATIVE_TURN_FAILED');
+        return {snapshot,work,nativeTurnEnd:end};
+      }
     });
     const task=result.snapshot.tasks.find((row:any)=>row.title===expected);
     assert.equal(task.status,'draft');assert.equal(task.checklist.length,2);
+    if(index===1){
+      const original=(report.scenarios[0] as {task:any}).task;
+      assert.deepEqual(result.snapshot.tasks.find((row:any)=>row.id===original.id),original);
+      assert.deepEqual(task.checklist,original.checklist);
+      assert.notEqual(task.id,original.id);
+    }
     report.scenarios.push({request:submitted.value,task,result});
     writeFileSync(join(evidence,'live-acceptance.json'),JSON.stringify(report,null,2));
     console.log(`Live scenario ${index+1} passed; persisted draft and native ready reply verified.`);

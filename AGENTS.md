@@ -10,6 +10,8 @@ Do not start product implementation, dependency installation, model tests, produ
 
 ## Read first
 
+Execution rules by frontend, backend, native, integration and independent-review role are in [MULTI-AGENT.zh.md](docs/engineering/MULTI-AGENT.zh.md). Apply these current execution rules after startup authorization; preparation documents remain historical evidence.
+
 Read CONSTITUTION.md, NEXT-WAVES.md, docs/product/REQUIREMENTS.zh.md, docs/preparation/state.json, docs/discovery/upstream-baseline.json and specs/architecture.md before further work. A missing preparation artifact is a pending deliverable, not permission to invent implementation results.
 
 ## Engineering

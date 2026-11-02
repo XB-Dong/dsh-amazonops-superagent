@@ -10,6 +10,7 @@ import { DatabaseSync } from 'node:sqlite';
 import { localPatch } from '../profiles/local.ts';
 import { scrubEnvironment,lineWriter } from './start.mjs';
 import assert from 'node:assert/strict';
+import { liveDeliveryProof } from './live-proof.ts';
 
 const apiKey=process.env.AMAZONOPS_API_KEY;
 if(!apiKey)throw new Error('AMAZONOPS_API_KEY_REQUIRED');
@@ -67,13 +68,10 @@ try{
       if(snapshot.tasks?.some((task:any)=>task.title===expected)&&work.messages?.some((message:any)=>
         message.threadId===submitted.value.threadId&&message.role==='assistant'&&work.tickets.some((ticket:any)=>
           ticket.id===message.ticketId&&ticket.latestReport?.status==='ready'))){
-        const reply=work.messages.find((message:any)=>message.threadId===submitted.value.threadId&&message.role==='assistant'&&
-          work.tickets.some((ticket:any)=>ticket.id===message.ticketId&&ticket.latestReport?.status==='ready'));
         const events=readFileSync(join(evidence,'session-events.jsonl'),'utf8').trim().split('\n').map(line=>JSON.parse(line));
-        const end=events.findLast(event=>event.sessionId===`worker-${reply.ticketId}`&&event.event.type==='turn/end');
-        if(!end)return;
-        if(end.event.data.reason.kind!=='completed')throw new Error('LIVE_NATIVE_TURN_FAILED');
-        return {snapshot,work,nativeTurnEnd:end};
+        const native=JSON.parse(readFileSync(join(evidence,'native-state.json'),'utf8'));
+        const proof=liveDeliveryProof(work,events,native.outbox,submitted.value.threadId,submitted.value.messageId);
+        if(proof)return {snapshot,work,...proof};
       }
     });
     const task=result.snapshot.tasks.find((row:any)=>row.title===expected);

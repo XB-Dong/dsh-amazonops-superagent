@@ -4,7 +4,8 @@ import type { Agent } from '@deepseek-ai/dsh-agent'
 import type { MessageId } from '@deepseek-ai/dsh-llm'
 import { scopeParentOf } from '@deepseek-ai/dsh-scope'
 import type { SessionId } from '@deepseek-ai/dsh-session'
-import { dirname } from 'node:path'
+import { dirname, resolve } from 'node:path'
+import { mkdir } from 'node:fs/promises'
 import { z } from 'zod'
 import { key, liveTicket, type Ticket } from '../core/index.ts'
 import { mandateInstructions, ticketOfSession } from '../executor/dsh.ts'
@@ -40,6 +41,8 @@ export interface SessionsHost {
   closing(): boolean
   /** Execution environment variables for `ticket`, rendered into its worker's system prompt. */
   environment(ticket: Ticket): Variable[]
+  /** Authoritative current deployment directory, independent of persisted Session headers. */
+  workspace(ticket?: Ticket): string
   /** Tools to register on the main Session (`ticket === undefined`) or on `ticket`'s worker Session. */
   tools(agent: Agent, ticket?: Ticket): Tool[]
 }
@@ -124,7 +127,7 @@ export class Sessions {
     // histories, compactors and tools which scheduled another step without a new input.
     const sessions = this
     ctx.on('llm/stream', async function* (request, next) {
-      if (sessions.host.privacy && request.sessionId) {
+      if ((sessions.host.operationsMode || sessions.host.privacy) && request.sessionId) {
         if (request.sessionId.startsWith('orchestrator-') && request.sessionId !== sessions.host.masterId)
           throw new Error('RETIRED_MASTER_SESSION')
         const agent = ctx.agents.get(request.sessionId as SessionId)
@@ -231,10 +234,23 @@ export class Sessions {
     return !privacy || (this.host.privacyEpoch !== undefined && privacy.epoch() === this.host.privacyEpoch && privacy.allowMasterInput(input))
   }
   private authorizeAgent(agent: Agent): void {
+    if (this.host.operationsMode) this.assertWorkspace(agent)
     const privacy = this.host.privacy
     if (!privacy) return
     if (this.host.privacyEpoch === undefined || privacy.epoch() !== this.host.privacyEpoch) throw new Error('PRIVACY_EPOCH_CHANGED')
     privacy.authorizeAgent?.(agent, agent.id === this.host.masterId ? undefined : this.ticketOf(agent))
+  }
+  private workingDirectory(): { get(session: Agent['session']): string; set(agent: Agent, path: string, signal?: AbortSignal): Promise<string> } {
+    // Versioned public DSH rc.3 service. The client directory-changing tool stays disabled.
+    const service = this.ctx.get('workingDirectory')
+    if (!service) throw new Error('WORKING_DIRECTORY_SERVICE_REQUIRED')
+    return service as ReturnType<Sessions['workingDirectory']>
+  }
+  private assertWorkspace(agent: Agent): void {
+    const ticket = agent.id === this.host.masterId ? undefined : this.ticketOf(agent)
+    const expected = resolve(this.host.workspace(ticket)), current = resolve(this.workingDirectory().get(agent.session))
+    const normalize = (path: string) => process.platform === 'win32' ? path.toLowerCase() : path
+    if (normalize(expected) !== normalize(current)) throw new Error('OPERATIONS_WORKSPACE_CHANGED')
   }
   private authorizeTool(agent: Agent, name: string, args: unknown): void {
     this.authorizeAgent(agent)
@@ -311,6 +327,14 @@ export class Sessions {
     if (!master && !ticket) { this.limitSubagent(agent); return }
     const binding: SessionBinding = { disposers: [] }
     this.bindings.set(agent, binding)
+    if (host.operationsMode) {
+      const directory = host.workspace(ticket)
+      await mkdir(directory, { recursive: true })
+      // agent/created is awaited before restored inbox work is released. Preserve
+      // immutable header/history and relocate current execution via the official event.
+      await this.workingDirectory().set(agent, directory, host.lifetime)
+      this.assertWorkspace(agent)
+    }
     this.retryHealth.restore(agent.id, agent.session.snapshotEvents())
     if (agent.status === 'idle') this.retryHealth.clear(agent.id)
     this.updateModelHealth()

@@ -3,7 +3,7 @@ import type { Context } from '@deepseek-ai/cordis'
 import type { SessionId } from '@deepseek-ai/dsh-session'
 import type { Agent } from '@deepseek-ai/dsh-agent'
 import { mkdir, rmdir, stat } from 'node:fs/promises'
-import { dirname, join } from 'node:path'
+import { dirname, join, resolve } from 'node:path'
 import { key, latestAssignment, latestReport, liveTicket, runningAssignment, threadKey, waitsForPerson } from '../core/index.ts'
 import type { AssessmentOutcome, Assignment, EngineForExecutor, Execution, Executor, Mandate, PolicyEffect, Ticket, TicketInput, Trigger }
   from '../core/index.ts'
@@ -56,6 +56,14 @@ export function transient(error: unknown): boolean {
 }
 /** Appends a stable 12-character ticket ID suffix to a validated English worktree name. */
 const ticketWorktreeName = (name: string, id: string): string => `${WorktreeNameSchema.parse(name)}-${id.slice(0, 12)}`
+/** Operations workspaces are local deployment state, never authority copied from a backup path. */
+export function operationsWorkspace(ticket: Ticket, stateDir: string): string {
+  const name = ticket.execution?.name, suffix = `-${ticket.id.slice(0, 12)}`
+  if (!/^[a-f0-9]{32}$/.test(ticket.id) || !name?.endsWith(suffix)) throw new Error('INVALID_OPERATIONS_WORKSPACE')
+  const prefix = name.slice(0, -suffix.length)
+  if (ticketWorktreeName(prefix, ticket.id) !== name) throw new Error('INVALID_OPERATIONS_WORKSPACE')
+  return join(resolve(stateDir), 'work', name)
+}
 /** Host dependencies used by `DshExecutor`. */
 export interface ExecutorHost {
   /** DSH Cordis context: agents and their events, and the subprocess service used to run prepare commands. */
@@ -237,7 +245,20 @@ export class DshExecutor implements Executor {
   }
   /** Populates a newly accepted ticket's `execution` attributes (worktree name, workspace directory, and assignment text). */
   prepare(ticket: Ticket, outcome: Extract<AssessmentOutcome, { kind: 'accept' }>): Ticket {
-    return { ...ticket, execution: ticketExecution(ticket, outcome, this.host.store.settings(), this.host.machine.stateDir) }
+    const prepared = { ...ticket, execution: ticketExecution(ticket, outcome, this.host.store.settings(), this.host.machine.stateDir) }
+    if (operationsMode(this.host.machine)) prepared.execution.directory = operationsWorkspace(prepared, this.host.machine.stateDir)
+    return prepared
+  }
+  /** Rebase restored projections before Sessions, prompts, resources or dispatch observe them. */
+  rebaseOperationsWorkspaces(): void {
+    if (!operationsMode(this.host.machine)) return
+    for (const ticket of this.host.store.tickets.list()) {
+      const directory = this.workspace(ticket)
+      if (ticket.execution?.directory !== directory) this.host.store.tickets.save({ ...ticket, execution: { ...ticket.execution!, directory } })
+    }
+  }
+  workspace(ticket: Ticket): string {
+    return operationsMode(this.host.machine) ? operationsWorkspace(ticket, this.host.machine.stateDir) : ticket.execution?.directory ?? ''
   }
   /**
    * Runs the configured `executor.prepare` command for a new ticket workspace in its parent directory with the ticket's
@@ -246,7 +267,7 @@ export class DshExecutor implements Executor {
    * @throws PrepareFailed with the command's output when the prepare command fails.
    */
   private async prepareDirectory(ticket: Ticket): Promise<void> {
-    const directory = ticket.execution?.directory ?? ''
+    const directory = this.workspace(ticket)
     if (operationsMode(this.host.machine)) { await mkdir(directory, { recursive: true }); return }
     await mkdir(dirname(directory), { recursive: true })
     const command = this.host.store.settings().executor.prepare.trim()
@@ -314,7 +335,7 @@ export class DshExecutor implements Executor {
         try {
           // Recreate the worker session if it was externally deleted.
           if (!this.host.context.agents.get(sessionId as SessionId)) {
-            await this.host.sessions.ensure(sessionId, ticket.execution?.directory ?? '', ticket.title, 'worker')
+            await this.host.sessions.ensure(sessionId, this.workspace(ticket), ticket.title, 'worker')
           }
           if (input) await this.deliverInput(ticket, assignment, input)
         } catch (error) {
@@ -431,7 +452,7 @@ export class DshExecutor implements Executor {
       return !!stored && liveTicket(stored) && latestAssignment(stored)?.id === assignment.id
     }
     const source = sourceTrigger(this.host, ticket)
-    const workspace = ticket.execution?.directory ?? ''
+    const workspace = this.workspace(ticket)
     if (!current()) return
     // Prepare the workspace directory once; an existing directory counts as already prepared, including worktrees created before `prepare` commands existed.
     if (!await stat(workspace).then(() => true, () => false)) {

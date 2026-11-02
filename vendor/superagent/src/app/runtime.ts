@@ -146,6 +146,7 @@ export class Runtime extends Service implements SourceHost {
         lifetime: this.lifetime, operationsMode: operationsMode(machine), onAgent: extensions.onAgent,
         privacyEpoch, get privacy() { return extensions.privacy },
         closing: () => this.closing(), environment,
+        workspace: ticket => ticket ? this.executor.workspace(ticket) : machine.stateDir,
         tools: (agent, ticket) => {
           const built = ticket ? executorTools(this.toolHost, ticket) : mainTools(this.toolHost, agent)
           const selected = operationsMode(machine) ? built.filter(tool => operationToolAllowed(tool.name, ticket ? 'worker' : 'orchestrator') &&
@@ -245,6 +246,7 @@ export class Runtime extends Service implements SourceHost {
   /** Hold evaluation, dispatch, and outbound delivery while paused or awaiting setup; sources still record incoming triggers. */
   private paused(): boolean { return !this.setup.configured() || this.store.settings().paused }
   private async initialize(): Promise<void> {
+    this.executor.rebaseOperationsWorkspaces()
     // Register management HTTP routes before setup completes so operators can fix setup problems in the UI.
     if (!operationsMode(this.machine)) this.disposers.push(registerHttp(this.ctx, this.httpHost()))
     if (!await this.setup.run(this.store.settings())) {

@@ -131,6 +131,7 @@ export function restoreRecoveryPoint(
     )
       throw new Error('BACKUP_HASH_MISMATCH');
   }
+  if(!names.has('business.sqlite')||!names.has('model-budget.sqlite'))throw new Error('BACKUP_DATABASE_REQUIRED');
   mkdirSync(destination, { recursive: true, mode: 0o700 });
   for (const file of manifest.files) {
     const path = join(destination, file.path);

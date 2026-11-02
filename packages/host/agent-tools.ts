@@ -27,6 +27,7 @@ export class AgentTools {
   constructor(business: Business,runtime:()=>Runtime) {
     this.business=business;this.runtime=runtime;this.operations=new StableOperations(business.store);
   }
+  authorize(agent:Agent,ticket:Ticket):void {this.context(ticket,agent);}
   private context(ticket: Ticket,agent?:Agent): {scope:string;sourceId:string} {
     const runtime=this.runtime();
     const current=runtime.store.tickets.get(ticket.id);

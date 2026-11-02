@@ -1,0 +1,26 @@
+{
+  "id": "P0-REVIEW",
+  "rootTask": "P0-COMPLETE-REFACTOR",
+  "baselineSha": "a143ba7526fee88dd164930bfc158fdeffcef165",
+  "specVersion": "0.2.0",
+  "owner": "p0_review",
+  "allowedWritePaths": [],
+  "dependencies": [
+    "integration_candidate"
+  ],
+  "requirements": [
+    "SA-NATIVE-001",
+    "SA-ACCESS-001",
+    "SA-RECOVERY-001"
+  ],
+  "acceptance": "Independent read-only review of exact candidate and evidence; return actionable findings and verify accepted fixes without editing code.",
+  "status": "pending_dependency",
+  "repairCount": 0,
+  "stopConditions": [
+    "cloud_or_legacy_write",
+    "credential_or_data_exposure",
+    "two_same_root_cause_repairs_require_diagnosis"
+  ],
+  "timeboxMinutes": 30,
+  "deliverable": "Exact commit SHA, changed files, actual tests/commands/exit codes, Red/Green where applicable, unverified gaps and integration instructions"
+}

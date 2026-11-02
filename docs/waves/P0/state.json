@@ -1,0 +1,192 @@
+{
+  "schemaVersion": "0.2",
+  "waveId": "P0",
+  "phase": "executing",
+  "authorization": "User explicitly started on 2026-11-02",
+  "baselineSha": "a143ba7526fee88dd164930bfc158fdeffcef165",
+  "plan": "docs/waves/P0/PLAN.md",
+  "specVersion": "0.2.0",
+  "goal": "Complete the full native SuperAgent refactor and functional acceptance",
+  "activeRound": "R0",
+  "tasks": [
+    {
+      "id": "P0-NATIVE",
+      "rootTask": "P0-COMPLETE-REFACTOR",
+      "baselineSha": "a143ba7526fee88dd164930bfc158fdeffcef165",
+      "specVersion": "0.2.0",
+      "owner": "p0_native",
+      "allowedWritePaths": [
+        "vendor/superagent/**",
+        "profiles/**",
+        "tests/native/**"
+      ],
+      "dependencies": [],
+      "requirements": [
+        "SA-NATIVE-001",
+        "SA-ACCESS-001",
+        "SA-LOCAL-001"
+      ],
+      "acceptance": "Actual native Runtime/Engine/Store/Effects on Windows and documented operations-mode patches, compatible preset/tool/auth/LLM extension seams; native integration tests. Do not build a replacement loop.",
+      "status": "ready",
+      "repairCount": 0,
+      "stopConditions": [
+        "cloud_or_legacy_write",
+        "credential_or_data_exposure",
+        "two_same_root_cause_repairs_require_diagnosis"
+      ],
+      "timeboxMinutes": 30,
+      "deliverable": "Exact commit SHA, changed files, actual tests/commands/exit codes, Red/Green where applicable, unverified gaps and integration instructions"
+    },
+    {
+      "id": "P0-BACKEND",
+      "rootTask": "P0-COMPLETE-REFACTOR",
+      "baselineSha": "a143ba7526fee88dd164930bfc158fdeffcef165",
+      "specVersion": "0.2.0",
+      "owner": "p0_backend",
+      "allowedWritePaths": [
+        "packages/business/**",
+        "tests/business/**"
+      ],
+      "dependencies": [],
+      "requirements": [
+        "CC-TASK-001",
+        "CC-TASK-COPY-001",
+        "CC-WORKLOG-001",
+        "CC-NOTES-001",
+        "CC-ACT-001",
+        "CC-DATA-001",
+        "CC-INV-001",
+        "CC-SHIP-001",
+        "CC-ADS-001",
+        "CC-FEEDBACK-001",
+        "CC-MEMORY-001",
+        "CC-SKILL-001",
+        "CC-HISTORY-001",
+        "CC-ANALYSIS-001",
+        "SA-RECOVERY-001"
+      ],
+      "acceptance": "All delivered domain/storage/learning behaviors migrated with pure queries, typed command handlers, task-owned types and event-driven learning; all relevant old behavior regressions rerun and new behavior Red/Green.",
+      "status": "ready",
+      "repairCount": 0,
+      "stopConditions": [
+        "cloud_or_legacy_write",
+        "credential_or_data_exposure",
+        "two_same_root_cause_repairs_require_diagnosis"
+      ],
+      "timeboxMinutes": 30,
+      "deliverable": "Exact commit SHA, changed files, actual tests/commands/exit codes, Red/Green where applicable, unverified gaps and integration instructions"
+    },
+    {
+      "id": "P0-FRONTEND",
+      "rootTask": "P0-COMPLETE-REFACTOR",
+      "baselineSha": "a143ba7526fee88dd164930bfc158fdeffcef165",
+      "specVersion": "0.2.0",
+      "owner": "p0_frontend",
+      "allowedWritePaths": [
+        "packages/client/**",
+        "tests/client/**"
+      ],
+      "dependencies": [
+        "P0-NATIVE:client-seam"
+      ],
+      "requirements": [
+        "CC-ENTRY-001",
+        "CC-TASK-001",
+        "CC-TASK-COPY-001",
+        "CC-WORKLOG-001",
+        "CC-NOTES-001",
+        "CC-ACT-001",
+        "CC-DATA-001",
+        "CC-INV-001",
+        "CC-SHIP-001",
+        "CC-ADS-001",
+        "CC-FEEDBACK-001",
+        "CC-MEMORY-001",
+        "CC-SKILL-001"
+      ],
+      "acceptance": "Native DSH client panel with all 13 page entry points, login/settings, Chinese UX and preserved behavior; only shared DTO imports, no business implementation imports; native ticket/messages API rather than duplicated chat authority.",
+      "status": "pending_dependency",
+      "repairCount": 0,
+      "stopConditions": [
+        "cloud_or_legacy_write",
+        "credential_or_data_exposure",
+        "two_same_root_cause_repairs_require_diagnosis"
+      ],
+      "timeboxMinutes": 30,
+      "deliverable": "Exact commit SHA, changed files, actual tests/commands/exit codes, Red/Green where applicable, unverified gaps and integration instructions"
+    },
+    {
+      "id": "P0-INTEGRATION",
+      "rootTask": "P0-COMPLETE-REFACTOR",
+      "baselineSha": "a143ba7526fee88dd164930bfc158fdeffcef165",
+      "specVersion": "0.2.0",
+      "owner": "Leader",
+      "allowedWritePaths": [
+        "packages/contracts/**",
+        "packages/host/**",
+        "tests/integration/**",
+        "scripts/**",
+        "package.json",
+        "pnpm-lock.yaml",
+        "pnpm-workspace.yaml",
+        "tsconfig.json",
+        "docs/**",
+        "specs/**",
+        ".github/**"
+      ],
+      "dependencies": [
+        "P0-NATIVE",
+        "P0-BACKEND",
+        "P0-FRONTEND"
+      ],
+      "requirements": [
+        "SA-NATIVE-001",
+        "SA-ACCESS-001",
+        "SA-RECOVERY-001",
+        "SA-LOCAL-001",
+        "CC-HARNESS-001"
+      ],
+      "acceptance": "Actual host/source/tools/provider/auth/accounting/restore integration, stable operation identity and no self-trigger; browser/live-model acceptance and honest evidence for all59 cases.",
+      "status": "pending_dependency",
+      "repairCount": 0,
+      "stopConditions": [
+        "cloud_or_legacy_write",
+        "credential_or_data_exposure",
+        "two_same_root_cause_repairs_require_diagnosis"
+      ],
+      "timeboxMinutes": 30,
+      "deliverable": "Exact commit SHA, changed files, actual tests/commands/exit codes, Red/Green where applicable, unverified gaps and integration instructions"
+    },
+    {
+      "id": "P0-REVIEW",
+      "rootTask": "P0-COMPLETE-REFACTOR",
+      "baselineSha": "a143ba7526fee88dd164930bfc158fdeffcef165",
+      "specVersion": "0.2.0",
+      "owner": "p0_review",
+      "allowedWritePaths": [],
+      "dependencies": [
+        "integration_candidate"
+      ],
+      "requirements": [
+        "SA-NATIVE-001",
+        "SA-ACCESS-001",
+        "SA-RECOVERY-001"
+      ],
+      "acceptance": "Independent read-only review of exact candidate and evidence; return actionable findings and verify accepted fixes without editing code.",
+      "status": "pending_dependency",
+      "repairCount": 0,
+      "stopConditions": [
+        "cloud_or_legacy_write",
+        "credential_or_data_exposure",
+        "two_same_root_cause_repairs_require_diagnosis"
+      ],
+      "timeboxMinutes": 30,
+      "deliverable": "Exact commit SHA, changed files, actual tests/commands/exit codes, Red/Green where applicable, unverified gaps and integration instructions"
+    }
+  ],
+  "acceptanceStatus": "not_run",
+  "cloudAccess": "not_performed",
+  "productionDeployment": "not_performed",
+  "legacyAutomationChanges": "not_performed",
+  "laterWaves": []
+}

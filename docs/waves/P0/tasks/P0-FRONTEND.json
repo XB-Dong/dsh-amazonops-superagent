@@ -1,0 +1,39 @@
+{
+  "id": "P0-FRONTEND",
+  "rootTask": "P0-COMPLETE-REFACTOR",
+  "baselineSha": "a143ba7526fee88dd164930bfc158fdeffcef165",
+  "specVersion": "0.2.0",
+  "owner": "p0_frontend",
+  "allowedWritePaths": [
+    "packages/client/**",
+    "tests/client/**"
+  ],
+  "dependencies": [
+    "P0-NATIVE:client-seam"
+  ],
+  "requirements": [
+    "CC-ENTRY-001",
+    "CC-TASK-001",
+    "CC-TASK-COPY-001",
+    "CC-WORKLOG-001",
+    "CC-NOTES-001",
+    "CC-ACT-001",
+    "CC-DATA-001",
+    "CC-INV-001",
+    "CC-SHIP-001",
+    "CC-ADS-001",
+    "CC-FEEDBACK-001",
+    "CC-MEMORY-001",
+    "CC-SKILL-001"
+  ],
+  "acceptance": "Native DSH client panel with all 13 page entry points, login/settings, Chinese UX and preserved behavior; only shared DTO imports, no business implementation imports; native ticket/messages API rather than duplicated chat authority.",
+  "status": "pending_dependency",
+  "repairCount": 0,
+  "stopConditions": [
+    "cloud_or_legacy_write",
+    "credential_or_data_exposure",
+    "two_same_root_cause_repairs_require_diagnosis"
+  ],
+  "timeboxMinutes": 30,
+  "deliverable": "Exact commit SHA, changed files, actual tests/commands/exit codes, Red/Green where applicable, unverified gaps and integration instructions"
+}

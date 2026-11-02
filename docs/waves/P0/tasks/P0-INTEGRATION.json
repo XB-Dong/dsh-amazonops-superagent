@@ -1,0 +1,42 @@
+{
+  "id": "P0-INTEGRATION",
+  "rootTask": "P0-COMPLETE-REFACTOR",
+  "baselineSha": "a143ba7526fee88dd164930bfc158fdeffcef165",
+  "specVersion": "0.2.0",
+  "owner": "Leader",
+  "allowedWritePaths": [
+    "packages/contracts/**",
+    "packages/host/**",
+    "tests/integration/**",
+    "scripts/**",
+    "package.json",
+    "pnpm-lock.yaml",
+    "pnpm-workspace.yaml",
+    "tsconfig.json",
+    "docs/**",
+    "specs/**",
+    ".github/**"
+  ],
+  "dependencies": [
+    "P0-NATIVE",
+    "P0-BACKEND",
+    "P0-FRONTEND"
+  ],
+  "requirements": [
+    "SA-NATIVE-001",
+    "SA-ACCESS-001",
+    "SA-RECOVERY-001",
+    "SA-LOCAL-001",
+    "CC-HARNESS-001"
+  ],
+  "acceptance": "Actual host/source/tools/provider/auth/accounting/restore integration, stable operation identity and no self-trigger; browser/live-model acceptance and honest evidence for all59 cases.",
+  "status": "pending_dependency",
+  "repairCount": 0,
+  "stopConditions": [
+    "cloud_or_legacy_write",
+    "credential_or_data_exposure",
+    "two_same_root_cause_repairs_require_diagnosis"
+  ],
+  "timeboxMinutes": 30,
+  "deliverable": "Exact commit SHA, changed files, actual tests/commands/exit codes, Red/Green where applicable, unverified gaps and integration instructions"
+}

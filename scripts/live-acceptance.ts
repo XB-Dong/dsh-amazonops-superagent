@@ -84,6 +84,11 @@ finally{
   }catch{}
   if(child&&child.exitCode===null){child.send('native-e2e-graceful-stop');await new Promise<void>(done=>{
     child!.once('exit',()=>done());setTimeout(()=>{child?.kill();done();},10000).unref();});}
+  // Shutdown can cancel an already dispatched final router stream. Read the durable
+  // ledger after all middleware disposers settle, retaining every unknown attempt.
+  const finalBudget=new DatabaseSync(join(home,'data','model-budget.sqlite'),{readOnly:true});
+  try{report.requests=finalBudget.prepare(`SELECT r.*,a.session_id,a.turn_seq,a.purpose,a.provider,a.model FROM model_requests r
+    LEFT JOIN model_request_attribution a ON a.request_id=r.id ORDER BY r.created_at`).all();}finally{finalBudget.close();}
   writeFileSync(join(evidence,'live-acceptance.json'),JSON.stringify(report,null,2));
   console.log(JSON.stringify({evidence,passed:report.scenarios.length,error:report.error??null,
     requests:Array.isArray(report.requests)?report.requests.length:null}));

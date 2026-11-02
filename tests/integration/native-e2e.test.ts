@@ -56,10 +56,13 @@ test('offline real DSH routes, executes scoped task tool, reports and delivers e
   await build({ entryPoints: [join(root, 'tests/integration/native-e2e-probe.ts')], outfile: probe,
     bundle: true, packages: 'external', platform: 'node', format: 'esm', target: 'node24' });
   const patch = join(home, 'profile.json');
-  function writeProfile(runHome: string) { writeFileSync(patch, JSON.stringify([
+  function writeProfile(runHome: string) {
+    const profile=localPatch({ root, home:runHome, password, port, live:true,modelAccount:'test' });
+    const provider=(profile.find((item:any)=>item.id==='llm-deepseek') as {config:Record<string,unknown>}).config;
+    writeFileSync(patch, JSON.stringify([
     { insert: [{ id: 'native-e2e-observer', name: probe.replaceAll('\\', '/'), config: { evidence } }] },
-    ...localPatch({ root, home: runHome, password, port, live: true, modelAccount: 'test' }),
-    { id: 'llm-deepseek', config: { baseURL: model.url, apiKeyEnv: 'AMAZONOPS_API_KEY' } },
+    ...profile,
+    { id: 'llm-deepseek', config: { ...provider,baseURL: model.url, apiKeyEnv: 'AMAZONOPS_API_KEY' } },
   ])); }
   async function api(path: string, body?: unknown) {
     const response = await fetch(`${origin}/amazonops/api/${path}`, { method: body === undefined ? 'GET' : 'POST',
@@ -264,6 +267,9 @@ test('offline real DSH routes, executes scoped task tool, reports and delivers e
     const beforeErase = JSON.parse(readFileSync(join(evidence, 'native-state.json'), 'utf8'));
     const erased = await api('actions/delete', { id: submitted.value.messageId });
     assert.equal(erased.response.status, 200, JSON.stringify(erased.value));
+    const committedView=await api('snapshot');
+    assert.equal(committedView.response.status,200,'A committed privacy deletion must remain readable while native context restarts');
+    assert.equal(committedView.value.tasks.length,0);
     const afterErase = await until('business privacy checkpoint and clean master', async () => {
       const next = JSON.parse(readFileSync(join(evidence, 'native-state.json'), 'utf8'));
       const current = await api('snapshot');

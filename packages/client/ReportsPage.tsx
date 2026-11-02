@@ -5,6 +5,8 @@ import type { Mutate } from './TasksPage.tsx';
 import { Badge, Empty } from './components.tsx';
 import { reportLabels, siteLabel } from './display.ts';
 import { SitePicker } from './SitePicker.tsx';
+import { download } from './api.ts';
+import { csvCell } from './csv.ts';
 
 const columns = {
   sales: ['date', 'listing', 'units'],
@@ -254,6 +256,12 @@ export function ReportsPage({
           <p>
             截至 {r.asOf} · {r.rows.length} 行 · 第{index + 1}份报表
           </p>
+          <button onClick={()=>{
+            const fields=Object.keys(r.rows[0]??{});
+            const content=[fields.map(key=>csvCell(reportLabels[key]??key)).join(','),
+              ...r.rows.map(row=>fields.map(key=>csvCell(row[key])).join(','))].join('\r\n');
+            download(`report-${r.reportKind}-${r.asOf}-${r.id}.csv`,content,'text/csv;charset=utf-8');
+          }}>导出本批CSV</button>
         </section>
       ))}
     </>

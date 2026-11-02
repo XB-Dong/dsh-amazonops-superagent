@@ -59,6 +59,10 @@ test('feedback correction survives export and reconfirmation creates a new stabl
     const source = store.source('a', 'Original suggestion');
     let feedback = business.learning.feedback('a', source.id, { text: source.text })!;
     const first = confirmChange(store, 'a', feedback.id, 'CC-FEEDBACK-001');
+    const originalConfirmed = store.get<typeof first>('a', first.id);
+    const initialPack = exportChanges(store, 'a', dir);
+    assert.deepEqual(initialPack.changes, [originalConfirmed]);
+    assert.deepEqual(initialPack.pendingAmendments, []);
     business.mutate('a', 'feedback-append', {
       id: feedback.id,
       revision: feedback.revision,
@@ -66,12 +70,46 @@ test('feedback correction survives export and reconfirmation creates a new stabl
       requestId: 'amendment-1',
     });
     let pack = exportChanges(store, 'a', dir);
-    assert.ok(JSON.stringify(pack).includes('Correction: use a different order'));
+    assert.deepEqual(store.get('a', first.id), originalConfirmed, 'Unconfirmed feedback amendments cannot modify the confirmed snapshot');
+    assert.deepEqual(pack.changes, [originalConfirmed]);
+    assert.equal(pack.changes[0].changeId, first.changeId);
+    assert.equal(pack.changes[0].text, 'Original suggestion');
+    assert.deepEqual(pack.changes[0].amendments, []);
+    assert.deepEqual(pack.history, []);
+    assert.equal(pack.pendingAmendments.length, 1);
+    assert.equal(pack.pendingAmendments[0].id, feedback.id);
+    assert.equal(pack.pendingAmendments[0].amendments?.[0].text, 'Correction: use a different order');
+    assert.ok(pack.markdown.includes('候选附录 · 新补充尚待重新确认'));
+    const pendingAgain = exportChanges(store, 'a', dir);
+    assert.equal(pendingAgain.exportBatchId, pack.exportBatchId);
+    assert.deepEqual(pendingAgain.changes, pack.changes);
+    assert.deepEqual(pendingAgain.pendingAmendments, pack.pendingAmendments);
+    assert.equal(pendingAgain.markdown, pack.markdown);
     feedback = store.get('a', feedback.id);
     const second = confirmChange(store, 'a', feedback.id, 'CC-FEEDBACK-001');
     assert.notEqual(second.changeId, first.changeId);
+    assert.notEqual(second.id, first.id);
+    assert.equal(second.supersedes, first.changeId);
+    assert.equal(second.text, originalConfirmed.text);
+    assert.deepEqual(second.amendments, feedback.amendments);
+    assert.equal(second.feedbackRevision, feedback.revision);
+    assert.deepEqual(confirmChange(store, 'a', feedback.id, 'CC-FEEDBACK-001'), second);
     pack = exportChanges(store, 'a', dir);
+    assert.deepEqual(pack.changes, [second]);
+    assert.deepEqual(pack.pendingAmendments, []);
+    assert.equal(pack.history.length, 1);
+    assert.equal(pack.history[0].status, 'superseded');
+    assert.equal(pack.history[0].changeId, first.changeId);
+    assert.equal(pack.history[0].text, originalConfirmed.text);
+    assert.deepEqual(pack.history[0].amendments, originalConfirmed.amendments);
+    assert.deepEqual(pack.history[0].sources, originalConfirmed.sources);
     assert.match(pack.markdown, /Correction: use a different order/);
+    const confirmedAgain = exportChanges(store, 'a', dir);
+    assert.equal(confirmedAgain.exportBatchId, pack.exportBatchId);
+    assert.deepEqual(confirmedAgain.changes, pack.changes);
+    assert.deepEqual(confirmedAgain.history, pack.history);
+    assert.deepEqual(confirmedAgain.pendingAmendments, []);
+    assert.equal(confirmedAgain.markdown, pack.markdown);
   } finally {
     store.close();
     rmSync(dir, { recursive: true, force: true });

@@ -9,6 +9,8 @@ import {
   existsSync,
   statSync,
   lstatSync,
+  mkdtempSync,
+  rmSync,
 } from 'node:fs';
 import { join, relative, resolve, dirname } from 'node:path';
 import { randomUUID, createHash } from 'node:crypto';
@@ -140,7 +142,33 @@ export function restoreRecoveryPoint(
   }
   copyFileSync(currentLedger, join(destination, 'privacy-ledger.jsonl'));
   // Restoring business data must never refund attempts or uncertain usage.
-  const current = new DatabaseSync(currentBudget, { readOnly: true });
+  // SQLite readOnly may create WAL/SHM and modify read marks in the input tree.
+  // Read a private db+WAL copy instead; never use immutable on a nonempty WAL,
+  // which would silently discard later charged requests. The CLI is offline:
+  // callers must stop source owners before recovery, not use this as hot backup.
+  const scratch = mkdtempSync(join(destination, '.current-budget-'));
+  let current: DatabaseSync | undefined;
+  try {
+    const copiedBudget = join(scratch, 'model-budget.sqlite');
+    for (const suffix of ['', '-wal']) {
+      const input = `${currentBudget}${suffix}`;
+      noLinks(input);
+      if (existsSync(input)) {
+        if (!lstatSync(input).isFile()) throw new Error('CURRENT_MODEL_BUDGET_FILE_REQUIRED');
+        copyFileSync(input, `${copiedBudget}${suffix}`);
+      }
+    }
+    current = new DatabaseSync(copiedBudget);
+    if (current.prepare('PRAGMA integrity_check').get()?.integrity_check !== 'ok')
+      throw new Error('CURRENT_MODEL_BUDGET_INVALID');
+    return mergeCurrentBudget(current);
+  } finally {
+    current?.close();
+    if (dirname(resolve(scratch)) !== destination) throw new Error('RESTORE_SCRATCH_PATH_FORBIDDEN');
+    noLinks(scratch);
+    rmSync(scratch, { recursive: true, force: true });
+  }
+  function mergeCurrentBudget(current: DatabaseSync) {
   const merged = new DatabaseSync(join(destination, 'model-budget.sqlite'));
   try {
     ensureBudgetSchema(merged);
@@ -168,7 +196,6 @@ export function restoreRecoveryPoint(
     merged.exec('ROLLBACK');
     throw error;
   } finally {
-    current.close();
     merged.close();
   }
   const restored = new Store(join(destination, 'business.sqlite'));
@@ -178,5 +205,6 @@ export function restoreRecoveryPoint(
     return { target: destination, files: manifest.files.length, privacyLedgerReapplied: true };
   } finally {
     restored.close();
+  }
   }
 }

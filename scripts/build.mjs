@@ -29,12 +29,39 @@ export async function buildProject(options = {}) {
   await build({ ...common, entryPoints: [options.hostEntry ?? join(root, 'packages/host/index.ts')],
     outfile: join(outDir, 'index.js'), plugins: [nativeExternal] });
   const name = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8')).name;
+  const styles = new Map();
+  // DSH loads the JavaScript module only. Match its official CSS-to-JS installation seam.
+  const nativeStyles = { name: 'native-plugin-styles', setup(builder) {
+    builder.onLoad({ filter: /\.css$/ }, async args => {
+      const compiled = await build({ entryPoints: [args.path], bundle: true, write: false,
+        outfile: 'plugin.css', minify: true, target: 'es2022', logLevel: 'warning', metafile: true });
+      if (compiled.outputFiles.length !== 1 || !compiled.outputFiles[0].path.endsWith('.css')) {
+        throw new Error('Native plugin CSS must be self-contained');
+      }
+      const css = compiled.outputFiles[0].text;
+      const tagId = `${name}/${relative(root, args.path).replaceAll('\\', '/')}`;
+      styles.set(tagId, css);
+      return { loader: 'js', watchFiles: Object.keys(compiled.metafile.inputs).map(path => resolve(path)), contents: `
+        const tagId = ${JSON.stringify(tagId)};
+        if (typeof document !== 'undefined') {
+          const existing = document.querySelector('style[data-plugin-css=' + JSON.stringify(tagId) + ']');
+          const tag = existing ?? document.createElement('style');
+          tag.dataset.plugin = ${JSON.stringify(name)};
+          tag.dataset.pluginCss = tagId;
+          tag.textContent = ${JSON.stringify(css)};
+          if (!existing) document.head.appendChild(tag);
+        }` };
+    });
+  } };
   await build({ entryPoints: [options.clientEntry ?? join(root, 'packages/client/index.tsx')],
     outfile: join(outDir, 'client.js'), bundle: true, format: 'cjs', platform: 'browser', target: 'es2022',
     jsx: 'automatic', external: ['react', 'react/jsx-runtime', 'react-dom', 'react-dom/client'], logLevel: 'warning',
+    plugins: [nativeStyles],
     banner: { js: `window.__ModuleLoader__.load({id:${JSON.stringify(name)},factory:(require)=>{var module={exports:{}};var exports=module.exports;` },
     footer: { js: 'return module.exports;}});' },
   });
+  // Keep an audit artifact; browser loading is owned by the native JS factory.
+  writeFileSync(join(outDir, 'client.css'), [...styles].sort(([a], [b]) => a.localeCompare(b)).map(([, css]) => css).join('\n'));
   const outputs = ['index.js', 'client.js', 'client.css'].map(path => {
     const bytes = readFileSync(join(outDir, path));
     return { path, bytes: bytes.length, sha256: createHash('sha256').update(bytes).digest('hex') };

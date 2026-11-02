@@ -16,6 +16,22 @@ function files(path) {
     return entry.isDirectory() ? files(item) : [item];
   });
 }
+function needsWorkerSession(ticket, launches) {
+  const assignments = ticket.assignments ?? [];
+  // These facts are recorded after native session creation and input acceptance.
+  // Keep history required even when a later assignment is pending or launch failed.
+  const ran = assignments.some(assignment => assignment.state === 'running' ||
+    ['startedAt', 'deliveredAt', 'idleAt'].some(field => Object.hasOwn(assignment, field)) ||
+    (assignment.report && assignment.report.state !== 'failed')) ||
+    (ticket.inputs ?? []).some(input => ['deliveredTo', 'deliveredAt', 'readAt'].some(field => Object.hasOwn(input, field)));
+  if (ran) return true;
+  const latest = assignments.at(-1);
+  const neverStartedTerminal = !!ticket.ended || latest?.state === 'ended' || latest?.report?.state === 'failed';
+  const queued = latest?.state === 'pending' && launches.has(JSON.stringify([ticket.id, latest.id]));
+  // Accept the native pre-session lifecycle only with a durable launch or a
+  // recorded pre-launch failure/stop. An orphan pending ticket still fails closed.
+  return !neverStartedTerminal && !queued;
+}
 export async function validateNativeRecovery(dataDir) {
   const root = resolve(dataDir);
   if (!existsSync(root) || !lstatSync(root).isDirectory() || lstatSync(root).isSymbolicLink()) throw new Error('NATIVE_RECOVERY_DIRECTORY_REQUIRED');
@@ -37,7 +53,12 @@ export async function validateNativeRecovery(dataDir) {
       if (JSON.parse(String(db.prepare("SELECT value FROM kv WHERE key='schema'").get()?.value)) !== 11) throw new Error();
       for (const table of ['kv', 'trigger', 'disposition', 'thread', 'ticket', 'decision', 'outbox', 'effect'])
         for (const row of db.prepare(`SELECT value FROM ${table}`).all()) JSON.parse(String(row.value));
-      for (const row of db.prepare('SELECT id FROM ticket').all()) ticketIds.add(`worker-${row.id}`);
+      const launches = new Set(db.prepare("SELECT key,value FROM effect WHERE kind='launch'").all().flatMap(row => {
+        const payload = JSON.parse(String(row.value));
+        return row.key === payload.assignmentId ? [JSON.stringify([payload.ticketId, payload.assignmentId])] : [];
+      }));
+      for (const row of db.prepare('SELECT id,value FROM ticket').all())
+        if (needsWorkerSession(JSON.parse(String(row.value)), launches)) ticketIds.add(`worker-${row.id}`);
       databases++;
     } catch { throw new Error('NATIVE_DATABASE_INVALID'); }
     finally { db?.close(); }

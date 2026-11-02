@@ -30,7 +30,7 @@
     "CC-HARNESS-001"
   ],
   "acceptance": "Actual host/source/tools/provider/auth/accounting/restore integration, stable operation identity and no self-trigger; browser/live-model acceptance and honest evidence for all59 cases.",
-  "status": "pending_dependency",
+  "status": "in_progress",
   "repairCount": 0,
   "stopConditions": [
     "cloud_or_legacy_write",
@@ -38,5 +38,7 @@
     "two_same_root_cause_repairs_require_diagnosis"
   ],
   "timeboxMinutes": 30,
-  "deliverable": "Exact commit SHA, changed files, actual tests/commands/exit codes, Red/Green where applicable, unverified gaps and integration instructions"
+  "deliverable": "Exact commit SHA, changed files, actual tests/commands/exit codes, Red/Green where applicable, unverified gaps and integration instructions",
+  "dispatchHistory": "Original frozen packet retained; follow-up scopes below extend ownership.",
+  "followupWritePaths": []
 }

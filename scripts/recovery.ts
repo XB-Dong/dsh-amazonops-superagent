@@ -4,6 +4,7 @@ import { dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
 import { DatabaseSync } from 'node:sqlite';
+import { spawnSync } from 'node:child_process';
 import { restoreRecoveryPoint } from '../packages/business/core/recovery.ts';
 
 type Options = { backup: string; destination: string; current: string };
@@ -72,6 +73,9 @@ export function restoreLocal(options: Options) {
   try {
     unlinkedPath(stage);
     const result = restoreRecoveryPoint(backup, stage, ledger, budget);
+    const native=spawnSync(process.execPath,[fileURLToPath(new URL('./validate-native-recovery.mjs',import.meta.url)),stage],
+      {encoding:'utf8',windowsHide:true,timeout:30000});
+    if(native.status!==0||native.error)throw new Error('NATIVE_RECOVERY_INVALID');
     const db = new DatabaseSync(join(stage, 'business.sqlite'), { readOnly: true });
     let entities: number, entityDigest: string;
     try {

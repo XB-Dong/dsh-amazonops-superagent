@@ -16,7 +16,7 @@
     "SA-LOCAL-001"
   ],
   "acceptance": "Actual native Runtime/Engine/Store/Effects on Windows and documented operations-mode patches, compatible preset/tool/auth/LLM extension seams; native integration tests. Do not build a replacement loop.",
-  "status": "ready",
+  "status": "in_progress",
   "repairCount": 0,
   "stopConditions": [
     "cloud_or_legacy_write",
@@ -24,5 +24,10 @@
     "two_same_root_cause_repairs_require_diagnosis"
   ],
   "timeboxMinutes": 30,
-  "deliverable": "Exact commit SHA, changed files, actual tests/commands/exit codes, Red/Green where applicable, unverified gaps and integration instructions"
+  "deliverable": "Exact commit SHA, changed files, actual tests/commands/exit codes, Red/Green where applicable, unverified gaps and integration instructions",
+  "dispatchHistory": "Original frozen packet retained; follow-up scopes below extend ownership.",
+  "followupWritePaths": [
+    "tests/integration/native-e2e*",
+    "vendor/superagent/src/app/*privacy*"
+  ]
 }

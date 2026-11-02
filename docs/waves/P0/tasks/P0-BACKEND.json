@@ -27,7 +27,7 @@
     "SA-RECOVERY-001"
   ],
   "acceptance": "All delivered domain/storage/learning behaviors migrated with pure queries, typed command handlers, task-owned types and event-driven learning; all relevant old behavior regressions rerun and new behavior Red/Green.",
-  "status": "ready",
+  "status": "integrated_pending_acceptance",
   "repairCount": 0,
   "stopConditions": [
     "cloud_or_legacy_write",
@@ -35,5 +35,10 @@
     "two_same_root_cause_repairs_require_diagnosis"
   ],
   "timeboxMinutes": 30,
-  "deliverable": "Exact commit SHA, changed files, actual tests/commands/exit codes, Red/Green where applicable, unverified gaps and integration instructions"
+  "deliverable": "Exact commit SHA, changed files, actual tests/commands/exit codes, Red/Green where applicable, unverified gaps and integration instructions",
+  "dispatchHistory": "Original frozen packet retained; follow-up scopes below extend ownership.",
+  "followupWritePaths": [
+    "packages/host/accounting.ts",
+    "tests/integration/**"
+  ]
 }

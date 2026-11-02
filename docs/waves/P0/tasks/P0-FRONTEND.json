@@ -27,7 +27,7 @@
     "CC-SKILL-001"
   ],
   "acceptance": "Native DSH client panel with all 13 page entry points, login/settings, Chinese UX and preserved behavior; only shared DTO imports, no business implementation imports; native ticket/messages API rather than duplicated chat authority.",
-  "status": "pending_dependency",
+  "status": "integrated_pending_acceptance",
   "repairCount": 0,
   "stopConditions": [
     "cloud_or_legacy_write",
@@ -35,5 +35,13 @@
     "two_same_root_cause_repairs_require_diagnosis"
   ],
   "timeboxMinutes": 30,
-  "deliverable": "Exact commit SHA, changed files, actual tests/commands/exit codes, Red/Green where applicable, unverified gaps and integration instructions"
+  "deliverable": "Exact commit SHA, changed files, actual tests/commands/exit codes, Red/Green where applicable, unverified gaps and integration instructions",
+  "dispatchHistory": "Original frozen packet retained; follow-up scopes below extend ownership.",
+  "followupWritePaths": [
+    "packages/host/native-access.ts",
+    "scripts/**",
+    "tests/packaging/**",
+    ".github/workflows/**",
+    "tests/integration/recovery-cli.test.ts"
+  ]
 }

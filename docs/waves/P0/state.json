@@ -7,7 +7,7 @@
   "plan": "docs/waves/P0/PLAN.md",
   "specVersion": "0.2.0",
   "goal": "Complete the full native SuperAgent refactor and functional acceptance",
-  "activeRound": "R0",
+  "activeRound": "integration_acceptance",
   "tasks": [
     {
       "id": "P0-NATIVE",
@@ -27,7 +27,7 @@
         "SA-LOCAL-001"
       ],
       "acceptance": "Actual native Runtime/Engine/Store/Effects on Windows and documented operations-mode patches, compatible preset/tool/auth/LLM extension seams; native integration tests. Do not build a replacement loop.",
-      "status": "ready",
+      "status": "in_progress",
       "repairCount": 0,
       "stopConditions": [
         "cloud_or_legacy_write",
@@ -35,7 +35,12 @@
         "two_same_root_cause_repairs_require_diagnosis"
       ],
       "timeboxMinutes": 30,
-      "deliverable": "Exact commit SHA, changed files, actual tests/commands/exit codes, Red/Green where applicable, unverified gaps and integration instructions"
+      "deliverable": "Exact commit SHA, changed files, actual tests/commands/exit codes, Red/Green where applicable, unverified gaps and integration instructions",
+      "dispatchHistory": "Original frozen packet retained; follow-up scopes below extend ownership.",
+      "followupWritePaths": [
+        "tests/integration/native-e2e*",
+        "vendor/superagent/src/app/*privacy*"
+      ]
     },
     {
       "id": "P0-BACKEND",
@@ -66,7 +71,7 @@
         "SA-RECOVERY-001"
       ],
       "acceptance": "All delivered domain/storage/learning behaviors migrated with pure queries, typed command handlers, task-owned types and event-driven learning; all relevant old behavior regressions rerun and new behavior Red/Green.",
-      "status": "ready",
+      "status": "integrated_pending_acceptance",
       "repairCount": 0,
       "stopConditions": [
         "cloud_or_legacy_write",
@@ -74,7 +79,12 @@
         "two_same_root_cause_repairs_require_diagnosis"
       ],
       "timeboxMinutes": 30,
-      "deliverable": "Exact commit SHA, changed files, actual tests/commands/exit codes, Red/Green where applicable, unverified gaps and integration instructions"
+      "deliverable": "Exact commit SHA, changed files, actual tests/commands/exit codes, Red/Green where applicable, unverified gaps and integration instructions",
+      "dispatchHistory": "Original frozen packet retained; follow-up scopes below extend ownership.",
+      "followupWritePaths": [
+        "packages/host/accounting.ts",
+        "tests/integration/**"
+      ]
     },
     {
       "id": "P0-FRONTEND",
@@ -105,7 +115,7 @@
         "CC-SKILL-001"
       ],
       "acceptance": "Native DSH client panel with all 13 page entry points, login/settings, Chinese UX and preserved behavior; only shared DTO imports, no business implementation imports; native ticket/messages API rather than duplicated chat authority.",
-      "status": "pending_dependency",
+      "status": "integrated_pending_acceptance",
       "repairCount": 0,
       "stopConditions": [
         "cloud_or_legacy_write",
@@ -113,7 +123,15 @@
         "two_same_root_cause_repairs_require_diagnosis"
       ],
       "timeboxMinutes": 30,
-      "deliverable": "Exact commit SHA, changed files, actual tests/commands/exit codes, Red/Green where applicable, unverified gaps and integration instructions"
+      "deliverable": "Exact commit SHA, changed files, actual tests/commands/exit codes, Red/Green where applicable, unverified gaps and integration instructions",
+      "dispatchHistory": "Original frozen packet retained; follow-up scopes below extend ownership.",
+      "followupWritePaths": [
+        "packages/host/native-access.ts",
+        "scripts/**",
+        "tests/packaging/**",
+        ".github/workflows/**",
+        "tests/integration/recovery-cli.test.ts"
+      ]
     },
     {
       "id": "P0-INTEGRATION",
@@ -147,7 +165,7 @@
         "CC-HARNESS-001"
       ],
       "acceptance": "Actual host/source/tools/provider/auth/accounting/restore integration, stable operation identity and no self-trigger; browser/live-model acceptance and honest evidence for all59 cases.",
-      "status": "pending_dependency",
+      "status": "in_progress",
       "repairCount": 0,
       "stopConditions": [
         "cloud_or_legacy_write",
@@ -155,7 +173,9 @@
         "two_same_root_cause_repairs_require_diagnosis"
       ],
       "timeboxMinutes": 30,
-      "deliverable": "Exact commit SHA, changed files, actual tests/commands/exit codes, Red/Green where applicable, unverified gaps and integration instructions"
+      "deliverable": "Exact commit SHA, changed files, actual tests/commands/exit codes, Red/Green where applicable, unverified gaps and integration instructions",
+      "dispatchHistory": "Original frozen packet retained; follow-up scopes below extend ownership.",
+      "followupWritePaths": []
     },
     {
       "id": "P0-REVIEW",
@@ -173,7 +193,7 @@
         "SA-RECOVERY-001"
       ],
       "acceptance": "Independent read-only review of exact candidate and evidence; return actionable findings and verify accepted fixes without editing code.",
-      "status": "pending_dependency",
+      "status": "in_progress",
       "repairCount": 0,
       "stopConditions": [
         "cloud_or_legacy_write",
@@ -181,12 +201,27 @@
         "two_same_root_cause_repairs_require_diagnosis"
       ],
       "timeboxMinutes": 30,
-      "deliverable": "Exact commit SHA, changed files, actual tests/commands/exit codes, Red/Green where applicable, unverified gaps and integration instructions"
+      "deliverable": "Exact commit SHA, changed files, actual tests/commands/exit codes, Red/Green where applicable, unverified gaps and integration instructions",
+      "dispatchHistory": "Original frozen packet retained; follow-up scopes below extend ownership.",
+      "followupWritePaths": []
     }
   ],
-  "acceptanceStatus": "not_run",
+  "acceptanceStatus": "partial",
   "cloudAccess": "not_performed",
   "productionDeployment": "not_performed",
   "legacyAutomationChanges": "not_performed",
-  "laterWaves": []
+  "laterWaves": [],
+  "lastVerifiedCommit": "af140ee",
+  "offlineTestsLastRun": {
+    "passed": 144,
+    "failed": 0,
+    "note": "Before latest recovery/native E2E additions; final suite will run again."
+  },
+  "pendingMandatoryValidation": [
+    "Native master privacy epoch and queued history guard",
+    "Launcher/recovery junction refusal",
+    "Remaining browser cases",
+    "Necessary real-model scenarios with actual accounting",
+    "Final independent review and CI"
+  ]
 }

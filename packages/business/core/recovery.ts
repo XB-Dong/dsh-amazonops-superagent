@@ -36,6 +36,23 @@ function inventory(root: string, directory = root): Manifest['files'] {
     ];
   });
 }
+
+function mergeAttribution(current: DatabaseSync, merged: DatabaseSync): void {
+  if (!current.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='model_request_attribution'").get()) return;
+  merged.exec(`CREATE TABLE IF NOT EXISTS model_request_attribution (
+    request_id TEXT PRIMARY KEY, session_id TEXT, turn_seq INTEGER,
+    purpose TEXT NOT NULL, provider TEXT NOT NULL, model TEXT NOT NULL
+  );`);
+  const columns = 'request_id,session_id,turn_seq,purpose,provider,model';
+  for (const row of current.prepare(`SELECT ${columns} FROM model_request_attribution`).all()) {
+    if (!merged.prepare('SELECT id FROM model_requests WHERE id=?').get(row.request_id))
+      throw new Error('MODEL_ATTRIBUTION_ORPHAN');
+    const previous = merged.prepare(`SELECT ${columns} FROM model_request_attribution WHERE request_id=?`).get(row.request_id);
+    if (previous && JSON.stringify(previous) !== JSON.stringify(row)) throw new Error('MODEL_ATTRIBUTION_CONFLICT');
+    if (!previous) merged.prepare('INSERT INTO model_request_attribution VALUES (?,?,?,?,?,?)')
+      .run(row.request_id, row.session_id, row.turn_seq, row.purpose, row.provider, row.model);
+  }
+}
 export async function createRecoveryPoint(
   store: Store,
   budget: ModelBudget,
@@ -125,6 +142,8 @@ export function restoreRecoveryPoint(
           row.budget_account ?? 'legacy',
         );
     }
+    // Attribution is immutable audit state and follows request rows, never a refunded snapshot.
+    mergeAttribution(current, merged);
     merged.exec('COMMIT');
   } catch (error) {
     merged.exec('ROLLBACK');

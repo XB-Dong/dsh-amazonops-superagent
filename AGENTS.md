@@ -2,6 +2,8 @@
 
 ## Scope and authority
 
+Latest user authorization on 2026-11-02: "启动". Enter the complete local P0 defined in docs/waves/P0/PLAN.md. This supersedes the preparation stop below for local dependency installation, product implementation, necessary offline/browser/live-model tests and new-repository synchronization. Use multi-agent development with isolated writing worktrees and independent review. Do not stop at a plan or foundation-only milestone. Cloud, production, old-project writes/automations and external business effects remain prohibited. Read docs/waves/P0/state.json for current execution; preparation state remains historical.
+
 This is a separate local-only refactoring project. The latest user request on 2026-11-02 authorizes repository creation, feature reorganization and multi-agent SDD/TDD preparation, stopping BEFORE the P0 execution plan. P0, once separately entered, means the entire ccagent refactor and working functional tests. Do not split that promise into a foundation-only P0 and deferred P1/P2. No later waves are authorized or planned here.
 
 Do not start product implementation, dependency installation, model tests, production access, data migration or deployment during preparation. Do not modify the old project, its Git history, credentials, services or automations. Old project authorizations are reference material and do not grant this project cloud access or automatic continuation.

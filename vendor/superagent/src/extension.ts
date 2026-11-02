@@ -1,0 +1,11 @@
+/** Versioned integration seam; business bundles must not deep-import upstream internals. */
+export { Runtime, type OperationsExtensions } from './app/runtime.ts'
+export { Config, machineOf, type Machine, type DeploymentConfig } from './deployment.ts'
+export { Store } from './app/store.ts'
+export { SourceRegistry } from './sources/registry.ts'
+export type { SourceKind, ContextMessage, ContextPart } from './sources/kind.ts'
+export type { SourceHost, SourceContext } from './sources/host.ts'
+export type { Tool } from './app/tools/tool.ts'
+export { KV, record, family } from './kv.ts'
+export { OPERATOR_PERMISSION, BUSINESS_TOOLS, operationToolAllowed, modelRetryLimit } from './operations.ts'
+export * from './core/index.ts'

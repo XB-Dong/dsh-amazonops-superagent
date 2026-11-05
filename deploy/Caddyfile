@@ -1,0 +1,7 @@
+# Example only. Preserve the established production listener/certificate policy.
+ops.example.test {
+    reverse_proxy 127.0.0.1:4315 {
+        header_up Host {http.request.host}
+        flush_interval -1
+    }
+}

@@ -7,6 +7,7 @@ import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
 import { spawn } from 'node:child_process';
 import { localPatch } from '../profiles/local.ts';
+import { configuredOrigin, migrationSetting, verifyRelease } from '../packages/host/production.ts';
 
 const PROJECT = 'dsh-amazonops-superagent';
 const projectRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -55,12 +56,16 @@ export function loadSettings(home, env = process.env) {
   if (!Number.isInteger(port) || port < 0 || port > 65535) throw new Error('Invalid AMAZONOPS_PORT');
   const modelAccount = settings.modelAccount ?? 'test';
   if (!['test', 'runtime'].includes(modelAccount)) throw new Error('Invalid model account');
-  return { ...settings, port, modelAccount, settingsPath: path };
+  const publicOrigin = settings.publicOrigin;
+  configuredOrigin('http://127.0.0.1', publicOrigin);
+  const migrationMode = migrationSetting(settings.migrationMode);
+  return { ...settings, port, modelAccount, publicOrigin, migrationMode, settingsPath: path };
 }
 
 export function scrubEnvironment(env, home, apiKey) {
   const clean = Object.fromEntries(Object.entries(env).filter(([key]) =>
-    /^(PATH|PATHEXT|SYSTEMROOT|WINDIR|COMSPEC|TEMP|TMP|USERPROFILE|APPDATA|LOCALAPPDATA)$/i.test(key)));
+    /^(PATH|PATHEXT|SYSTEMROOT|WINDIR|COMSPEC|TEMP|TMP|TMPDIR|USERPROFILE|APPDATA|LOCALAPPDATA)$/i.test(key)));
+  if (env.HOME !== undefined || process.platform !== 'win32') clean.HOME = home;
   clean.DSH_HOME = join(home, 'data', 'harness');
   if (apiKey) clean.AMAZONOPS_API_KEY = apiKey;
   return clean;
@@ -101,7 +106,8 @@ export function start(options = {}) {
   for (const file of ['lib/index.js', 'lib/client.js', 'vendor/superagent/lib/index.js', 'vendor/superagent/lib/extension.js']) {
     if (!existsSync(join(root, file))) throw new Error('Build artifacts missing; run node scripts/build.mjs first');
   }
-  const apiKey = env.AMAZONOPS_API_KEY;
+  const apiKey = settings.migrationMode ? undefined : env.AMAZONOPS_API_KEY;
+  const releaseIdentity = settings.publicOrigin ? verifyRelease(root) : undefined;
   validateHome(home);
   mkdirSync(join(home, 'data'), { recursive: true, mode: 0o700 });
   validateHome(home);
@@ -109,10 +115,12 @@ export function start(options = {}) {
   const patch = join(home, `launch-${process.pid}-${randomBytes(6).toString('hex')}.json`);
   validateHome(home);
   writeFileSync(patch, `${JSON.stringify(localPatch({ root, home, password: settings.password,
-    port: settings.port, live: !!apiKey, modelAccount: settings.modelAccount }), null, 2)}\n`, { mode: 0o600, flag: 'wx' });
+    port: settings.port, live: !!apiKey, modelAccount: settings.modelAccount,
+    publicOrigin: settings.publicOrigin, migrationMode: settings.migrationMode, releaseIdentity }), null, 2)}\n`, { mode: 0o600, flag: 'wx' });
   const output = options.stdout ?? (value => process.stdout.write(value));
   const errorOutput = options.stderr ?? (value => process.stderr.write(value));
-  output(`本机工作台：http://127.0.0.1:${settings.port}/amazonops/login\n登录密码保存在：${settings.settingsPath}\n`);
+  const origin = configuredOrigin(`http://127.0.0.1:${settings.port}`, settings.publicOrigin);
+  output(`工作台：${origin}/amazonops/login\n登录密码保存在：${settings.settingsPath}\n`);
   const require = createRequire(join(root, 'package.json'));
   const cli = require.resolve('@deepseek-ai/dsh/lib/bin.js');
   validateHome(home);

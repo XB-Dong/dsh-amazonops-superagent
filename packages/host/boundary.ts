@@ -12,6 +12,7 @@ export function allowedRequest(req: Pick<IncomingMessage,'headers'|'method'|'url
     if(url.origin!==origin)return 403;
     path=url.pathname;
   }catch{return 400;}
+  if ((path==='/health' || path==='/ready') && (req.method==='GET' || req.method==='HEAD')) return 200;
   if (path==='/amazonops/login' || path==='/amazonops/api/login') return 200;
   if (!auth.identity(req)) return 401;
   if (path.startsWith('/orchestrator') || path==='/api/file') return 403;

@@ -1,0 +1,8 @@
+{
+  "project": "dsh-amazonops-superagent",
+  "password": "replace-with-a-private-random-password",
+  "port": 4315,
+  "modelAccount": "runtime",
+  "publicOrigin": "https://ops.example.test",
+  "migrationMode": true
+}

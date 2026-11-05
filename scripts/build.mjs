@@ -1,7 +1,7 @@
 /** Build the actual native vendor, host bundle and shared-React native client. */
 import { build } from 'esbuild';
 import { createHash } from 'node:crypto';
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import { dirname, isAbsolute, join, relative, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { execFileSync } from 'node:child_process';
@@ -72,6 +72,28 @@ export async function buildProject(options = {}) {
     superagentSha: JSON.parse(readFileSync(join(root, 'vendor/superagent/UPSTREAM.json'), 'utf8')).sha,
     builtAt: new Date().toISOString(), artifacts: outputs };
   writeFileSync(join(outDir, 'build-manifest.json'), `${JSON.stringify(manifest, null, 2)}\n`);
+  const files = [];
+  function collect(directory, prefix) {
+    for (const entry of readdirSync(directory, { withFileTypes: true })) {
+      if (entry.isSymbolicLink()) throw new Error('Release input must not be a symbolic link');
+      const path = join(directory, entry.name), label = `${prefix}/${entry.name}`;
+      if (entry.isDirectory()) collect(path, label);
+      else files.push([label, path]);
+    }
+  }
+  for (const path of ['index.js', 'client.js', 'client.css']) files.push([`lib/${path}`, join(outDir, path)]);
+  for (const path of ['index.js', 'extension.js']) files.push([`vendor/superagent/lib/${path}`, join(nativeDir, path)]);
+  for (const path of ['package.json', 'pnpm-lock.yaml', 'tsconfig.json', 'THIRD-PARTY-NOTICES.md',
+    'vendor/superagent/package.json', 'vendor/superagent/LICENSE', 'vendor/superagent/UPSTREAM.json', 'vendor/superagent/patch-manifest.json'])
+    files.push([path, join(root, path)]);
+  for (const directory of ['profiles', 'patches', 'scripts', 'packages']) collect(join(root, directory), directory);
+  const release = { schemaVersion: '0.3', sourceSha: manifest.sourceSha, sourceDirty: manifest.sourceDirty,
+    superagentSha: manifest.superagentSha, builtAt: manifest.builtAt,
+    artifacts: files.sort(([a], [b]) => a.localeCompare(b)).map(([path, file]) => {
+      const bytes = readFileSync(file);
+      return { path, bytes: bytes.length, sha256: createHash('sha256').update(bytes).digest('hex') };
+    }) };
+  writeFileSync(join(outDir, 'release-manifest.json'), `${JSON.stringify(release, null, 2)}\n`);
   return manifest;
 }
 

@@ -1,6 +1,7 @@
 import { Followups, type Business, type Base } from '../business/index.ts';
 import type { FollowupEvent, InventoryWatch } from '../contracts/followups.ts';
 import type { Runtime, Ticket, Trigger } from '../../vendor/superagent/src/extension.ts';
+import { liveEntity } from '../business/followups/risk.ts';
 
 export const RISK_RULE_ID='inventory-risk-review';
 export const RISK_BOT='inventory-risk';
@@ -27,18 +28,22 @@ export function currentEvent(business:Business,scope:string,eventId:string):Foll
   }
   return event;
 }
-export function permittedBusinessTrigger(business:Business,trigger:Trigger):boolean {
+/** Historical context is readable provenance, never a fresh authorization to act. */
+export function readableBusinessTrigger(business:Business,trigger:Trigger):boolean {
   if(trigger.source!=='amazonops'||trigger.meta.scope!=='main'||business.store.isDeleted('main',trigger.id))return false;
-  if(trigger.human){
-    try{const source=business.store.get<Base&{origin?:string;text?:string}>('main',trigger.id);
-      return trigger.meta.eventClass==='human_request'&&trigger.actor.id==='cc'&&source.kind==='source'&&source.origin==='user'&&source.text===trigger.text;
-    }catch{return false;}
-  }
   try{
-    const event=currentEvent(business,'main',String(trigger.meta.eventId));
+    const source=liveEntity<Base&{origin?:string;text?:string}>(business.store,'main',trigger.id,'source');
+    if(source.text!==trigger.text||trigger.actor.source!=='amazonops')return false;
+    if(trigger.human)return trigger.meta.eventClass==='human_request'&&trigger.actor.id==='cc'&&source.origin==='user';
+    const event=liveEntity<FollowupEvent>(business.store,'main',String(trigger.meta.eventId),'followup-event');
     return trigger.id===`event-${event.id}`&&trigger.meta.eventClass===event.eventClass&&
-      trigger.actor.id===(event.watchId?'inventory-update':RISK_BOT);
+      source.origin==='tool'&&trigger.actor.id===(event.watchId?'inventory-update':RISK_BOT);
   }catch{return false;}
+}
+export function permittedBusinessTrigger(business:Business,trigger:Trigger):boolean {
+  if(!readableBusinessTrigger(business,trigger))return false;
+  if(trigger.human)return true;
+  try{currentEvent(business,'main',String(trigger.meta.eventId));return true;}catch{return false;}
 }
 export function ticketWatch(business:Business,runtime:Runtime,ticket:Ticket,requireActive=true):InventoryWatch|undefined {
   const origin=runtime.store.triggers.get(ticket.origin.triggerId);

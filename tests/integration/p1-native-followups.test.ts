@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { fixture } from './review-fixtures.ts';
 import { followupToolGuard,permittedBusinessTrigger } from '../../packages/host/followup-native-authority.ts';
 import { AgentTools } from '../../packages/host/agent-tools.ts';
+import { privacyHooks } from '../../packages/host/privacy.ts';
 
 function seed(f: ReturnType<typeof fixture>) {
   const forecast = f.business.command('main','forecast',{requestId:'forecast-initial',store:'Synthetic',site:'US',listing:'A',
@@ -90,5 +91,24 @@ test('unit: routing model reads the current authoritative rule identifiers and m
     assert.ok(policy,'operations prompt must not hide actual rule IDs from real model assessment');
     assert.match(policy.text(),/inventory-risk-review/);assert.match(policy.text(),/observe/);
     mode='auto';assert.match(policy.text(),/auto/);
+  }finally{f.dispose();}
+});
+
+test('unit: current watch trigger remains readable across two risk transitions without granting stale writes',async()=>{
+  const f=fixture();try{
+    const inventory=seed(f),watch=await f.source.followups.createWatch('main',{requestId:'history-native',inventoryId:inventory.id,expiresAt:new Date(Date.now()+86400000).toISOString()});
+    const row:any={id:'history-ticket',origin:{triggerId:watch.sourceId,triggerIds:[watch.sourceId]},inputs:[],assignments:[{id:'a',state:'running',report:{state:'waiting'}}],updatedAt:new Date().toISOString()};
+    f.tickets.set(row.id,row);await f.source.followups.pump('main');
+    for(const quantity of [8,9]){
+      f.business.command('main','forecast',{requestId:`history-${quantity}`,store:'Synthetic',site:'US',listing:'A',asOf:'2026-11-05',manualDaily:quantity,manualReason:'Synthetic history update'});
+      await f.source.followups.pump('main');const event=f.received.at(-1);
+      row.inputs.push({id:`input-${quantity}`,kind:'trigger',triggerId:event.id});
+    }
+    const agent=f.agent(row),current=f.received.at(-1);
+    const hooks=privacyHooks(f.business,()=>f.runtime,()=>f.source,agent.tools);
+    assert.doesNotThrow(()=>hooks.authorizeTool(agent.value,row,'orchestrator_read',{resource:`trigger/${current.id}`}));
+    assert.throws(()=>followupToolGuard(f.business,f.runtime,row,'cc_prepare_task',{}),/WATCH_FACTS_NOT_READ/);
+    const prior=f.received[1];f.business.learning.deleteSource('main',prior.id);
+    assert.throws(()=>hooks.authorizeTool(agent.value,row,'orchestrator_read',{resource:`trigger/${current.id}`}),/SOURCE_FORBIDDEN|DERIVATION_REVOKED/);
   }finally{f.dispose();}
 });

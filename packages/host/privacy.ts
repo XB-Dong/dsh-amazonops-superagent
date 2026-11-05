@@ -5,7 +5,7 @@ import type { Business,Base } from '../business/index.ts';
 import type { Runtime,Ticket } from '../../vendor/superagent/src/extension.ts';
 import type { AgentTools } from './agent-tools.ts';
 import type { WorkbenchSource } from './source.ts';
-import { permittedBusinessTrigger, followupToolGuard } from './followup-native-authority.ts';
+import { permittedBusinessTrigger, readableBusinessTrigger, followupToolGuard } from './followup-native-authority.ts';
 
 /** Durable privacy decisions also select a fresh native routing context after restore. */
 export function privacyEpoch(business:Business):string {
@@ -15,6 +15,11 @@ export function privacyHooks(business:Business,runtime:()=>Runtime|undefined,sou
   const permittedTrigger=(scope:string,id:string)=>{
     const trigger=runtime()?.store.triggers.get(id);
     if(!trigger||trigger.meta.scope!==scope||!permittedBusinessTrigger(business,trigger))throw new Error('SOURCE_FORBIDDEN');
+    return trigger;
+  };
+  const readableTrigger=(scope:string,id:string)=>{
+    const trigger=runtime()?.store.triggers.get(id);
+    if(!trigger||trigger.meta.scope!==scope||!readableBusinessTrigger(business,trigger))throw new Error('SOURCE_FORBIDDEN');
     return trigger;
   };
   const allowedText=(text:string):boolean=>{
@@ -56,11 +61,11 @@ export function privacyHooks(business:Business,runtime:()=>Runtime|undefined,sou
         if(resource===`ticket/${ticket.id}`||resource.startsWith(`ticket/${ticket.id}/`))return;
         const readId=resource.startsWith('trigger/')?resource.slice(8):undefined;
         if(!readId||!ids.has(readId))throw new Error('SOURCE_FORBIDDEN');
-        const trigger=permittedTrigger('main',readId);
+        const trigger=readableTrigger('main',readId);
         const consumed=new Set<string>();
         for(const thread of trigger.threads){
           const rows=runtime()!.store.read.threadTriggers(`${thread.source}:${thread.id}`,2147483647);
-          for(const row of rows){permittedTrigger('main',row.id);consumed.add(row.id);}
+          for(const row of rows){readableTrigger('main',row.id);consumed.add(row.id);}
         }
         const binding=business.store.get<Base&{sources:string[]}>('main',`native-binding:${agent.id}`);
         const sources=[...new Set([...binding.sources,...consumed])];

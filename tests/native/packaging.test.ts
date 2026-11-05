@@ -48,7 +48,7 @@ test('spawn environment carries only OS necessities, this home and the explicit 
   const environment = scrubEnvironment({ PATH: 'synthetic-path', GITHUB_TOKEN: 'not-for-child',
     SSH_AUTH_SOCK: 'not-for-child', DEEPSEEK_API_KEY: 'not-for-child', NODE_OPTIONS: '--require malicious',
     AMAZONOPS_API_KEY: 'explicit-key' }, 'D:/synthetic-home', 'explicit-key');
-  assert.deepEqual(Object.keys(environment).sort(), ['AMAZONOPS_API_KEY', 'DSH_HOME', 'PATH']);
+  assert.deepEqual(Object.keys(environment).sort(), ['AMAZONOPS_API_KEY', 'DSH_HOME', ...process.platform === 'win32' ? [] : ['HOME'], 'PATH'].sort());
   assert.equal(environment.AMAZONOPS_API_KEY, 'explicit-key');
   assert.equal(environment.DSH_HOME.replaceAll('\\', '/'), 'D:/synthetic-home/data/harness');
 });

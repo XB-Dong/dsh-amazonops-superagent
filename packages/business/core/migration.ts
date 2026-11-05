@@ -2,7 +2,7 @@
 import { backup, DatabaseSync } from 'node:sqlite';
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, renameSync, rmSync, rmdirSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
-import { copyInventory, directory, emptyDestination, hash, inside, inventory, removeStage, safeName, unlinked, type FileRecord } from './migration-files.ts';
+import { copyInventory, directory, emptyDestination, hash, inside, inventory, physical, removeStage, safeName, unlinked, type FileRecord } from './migration-files.ts';
 import { compareStates, databaseState, sqliteFile, statesAt, type DatabaseRecord, type MigrationDifference } from './migration-state.ts';
 export { stageMigration } from './migration-stage.ts';
 
@@ -28,8 +28,8 @@ export async function exportMigrationSnapshot(options: ExportMigrationOptions): 
   if (typeof options.sourceQuiesced !== 'boolean') throw new Error('MIGRATION_FENCE_ATTESTATION_REQUIRED');
   const source = directory(options.source), destination = emptyDestination(source, options.destination);
   unlinked(options.registryPath);
-  if (inside(source, resolve(options.registryPath))) throw new Error('MIGRATION_REGISTRY_INSIDE_SOURCE');
-  if (inside(destination, resolve(options.registryPath))) throw new Error('MIGRATION_INPUT_OVERLAP');
+  if (inside(source, physical(options.registryPath))) throw new Error('MIGRATION_REGISTRY_INSIDE_SOURCE');
+  if (inside(destination, physical(options.registryPath))) throw new Error('MIGRATION_INPUT_OVERLAP');
   const excludePaths = options.excludePaths ?? ['backups'];
   for (const item of excludePaths) {
     safeName(item);

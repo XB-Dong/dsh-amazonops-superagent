@@ -1,8 +1,25 @@
 import { createHash } from 'node:crypto';
 import { lstatSync, readFileSync, realpathSync } from 'node:fs';
 import { isAbsolute, join, relative, resolve, sep } from 'node:path';
+import type { BudgetPolicy, Limits } from '../business/core/budget.ts';
 
 export type ReleaseIdentity = Readonly<{ sourceSha: string; manifestSha256: string }>;
+
+export type RuntimeProtection = { runtimePolicy?: BudgetPolicy; runtimeLimits?: Limits };
+export function budgetConfiguration(settings: RuntimeProtection & { modelAccount?: 'test' | 'runtime'; publicOrigin?: string }) {
+  const unlimited: Limits = { maxCalls: null, maxInputTokens: null, maxOutputTokens: null, maxTotalTokens: null };
+  const policy = settings.runtimePolicy;
+  const limits = settings.runtimeLimits;
+  if (policy !== undefined && (!policy || !/^[a-z][a-z0-9-]{0,63}$/.test(policy.account) || !['daily', 'lifetime'].includes(policy.period)))
+    throw new Error('INVALID_BUDGET_POLICY');
+  if (limits !== undefined && (!limits || Object.keys(limits).length !== 4 || Object.keys(unlimited).some(key => {
+    const value = limits[key as keyof Limits]; return value !== null && (!Number.isSafeInteger(value) || value <= 0);
+  }))) throw new Error('INVALID_MODEL_BUDGET');
+  if (settings.publicOrigin && settings.modelAccount === 'runtime' && (!policy || !limits)) throw new Error('RUNTIME_POLICY_REQUIRED');
+  return settings.modelAccount === 'runtime'
+    ? { limits: limits ?? unlimited, policy: policy ?? { account: 'amazonops-runtime', period: 'daily' as const } }
+    : { limits: unlimited, policy: { account: 'amazonops-test', period: 'lifetime' as const } };
+}
 
 /** Public authority is explicit configuration, never an incoming forwarded header. */
 export function configuredOrigin(localOrigin: string, publicOrigin?: unknown): string {

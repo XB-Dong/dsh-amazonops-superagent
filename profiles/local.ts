@@ -1,9 +1,9 @@
 /** Concrete local overlay; private credentials are supplied only in the private launch file. */
 import { join } from 'node:path';
 import { operationsPatch } from './operations.ts';
-import type { ReleaseIdentity } from '../packages/host/production.ts';
+import type { ReleaseIdentity, RuntimeProtection } from '../packages/host/production.ts';
 
-export interface LocalProfile {
+export interface LocalProfile extends RuntimeProtection {
   root: string;
   home: string;
   password: string;
@@ -30,7 +30,7 @@ export function localPatch(options: LocalProfile): object[] {
         dataDir: path(options.home, 'data'), password: options.password,
         live: options.live && !options.migrationMode, modelAccount: options.modelAccount,
         publicOrigin: options.publicOrigin, migrationMode: options.migrationMode ?? false,
-        releaseIdentity: options.releaseIdentity } },
+        releaseIdentity: options.releaseIdentity, runtimePolicy: options.runtimePolicy, runtimeLimits: options.runtimeLimits } },
       ...!options.migrationMode ? [{ id: 'amazonops-superagent', name: path(options.root, 'vendor/superagent/lib/index.js'),
         config: { stateDir, executionMode: 'operations' } }] : [],
     ] },

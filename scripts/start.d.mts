@@ -2,6 +2,8 @@ import type { ChildProcess,SpawnOptions } from 'node:child_process';
 export function loadSettings(home:string,env?:NodeJS.ProcessEnv):{
   project:string;password:string;port:number;modelAccount:'test'|'runtime';settingsPath:string;
   publicOrigin?:string;migrationMode:boolean;
+  runtimePolicy?:import('../packages/business/core/budget.ts').BudgetPolicy;
+  runtimeLimits?:import('../packages/business/core/budget.ts').Limits;
 };
 export function scrubEnvironment(env:NodeJS.ProcessEnv,home:string,apiKey?:string):NodeJS.ProcessEnv&{DSH_HOME:string};
 export function redactOutput(text:string,secrets?:string[]):string;

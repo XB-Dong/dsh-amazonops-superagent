@@ -23,10 +23,24 @@ export function directory(path: string): string {
   if (!lstatSync(path).isDirectory()) throw new Error('MIGRATION_DIRECTORY_REQUIRED');
   return realpathSync(path);
 }
+/** Resolve existing physical ancestors before comparing paths, including Windows DOS aliases. */
+export function physical(path: string): string {
+  unlinked(path);
+  const requested = resolve(path);
+  let ancestor = requested;
+  while (!existsSync(ancestor)) {
+    const parent = dirname(ancestor);
+    if (parent === ancestor) throw new Error('MIGRATION_DIRECTORY_REQUIRED');
+    ancestor = parent;
+  }
+  const result = resolve(realpathSync.native(ancestor), relative(ancestor, requested));
+  unlinked(result);
+  return result;
+}
 export function emptyDestination(source: string, target: string): string {
   unlinked(target);
-  const destination = resolve(target);
-  if (inside(source, destination) || inside(destination, source)) throw new Error('MIGRATION_INPUT_OVERLAP');
+  const destination = physical(target), input = physical(source);
+  if (inside(input, destination) || inside(destination, input)) throw new Error('MIGRATION_INPUT_OVERLAP');
   if (existsSync(destination) && (!lstatSync(destination).isDirectory() || readdirSync(destination).length))
     throw new Error('MIGRATION_TARGET_NOT_EMPTY');
   return destination;

@@ -15,21 +15,20 @@ import { AgentTools } from './agent-tools.ts';
 import { WorkbenchSource } from './source.ts';
 import { privacyHooks,privacyEpoch } from './privacy.ts';
 import { json,readBody,failure,loginPage } from './http.ts';
-import { configuredOrigin, sessionCookie, releaseHealth, migrationReadAllowed, type ReleaseIdentity } from './production.ts';
+import { configuredOrigin, sessionCookie, releaseHealth, migrationReadAllowed, budgetConfiguration, type ReleaseIdentity, type RuntimeProtection } from './production.ts';
 import type { WorkAction } from '../contracts/model.ts';
 
 export const name='amazonops-workbench';
 export const inject=['webServer','llm','sessionPersistence'];
-export type Config={dataDir:string;password:string;live?:boolean;modelAccount?:'test'|'runtime';
+export type Config=RuntimeProtection&{dataDir:string;password:string;live?:boolean;modelAccount?:'test'|'runtime';
   publicOrigin?:string;migrationMode?:boolean;releaseIdentity?:ReleaseIdentity};
 export function apply(ctx:Context,config:Config):void {
   if(!config.dataDir)throw new Error('DATA_DIRECTORY_REQUIRED');
   mkdirSync(config.dataDir,{recursive:true});
   const business=new Business(config.dataDir);
   const auth=new Auth(config.password);
-  const budget=new ModelBudget(join(config.dataDir,'model-budget.sqlite'),
-    {maxCalls:null,maxInputTokens:null,maxOutputTokens:null,maxTotalTokens:null},
-    {account:config.modelAccount==='runtime'?'amazonops-runtime':'amazonops-test',period:config.modelAccount==='runtime'?'daily':'lifetime'});
+  const protection=budgetConfiguration(config);
+  const budget=new ModelBudget(join(config.dataDir,'model-budget.sqlite'),protection.limits,protection.policy);
   const migrationMode=config.migrationMode===true;
   const accounting=installAccounting(ctx,budget,{live:config.live===true&&!migrationMode,maxRequestsPerTurn:12,defaultOutputTokens:2048});
   const origin=configuredOrigin(ctx.webServer.getOrigin(),config.publicOrigin);

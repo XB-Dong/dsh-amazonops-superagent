@@ -7,7 +7,7 @@ import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
 import { spawn } from 'node:child_process';
 import { localPatch } from '../profiles/local.ts';
-import { configuredOrigin, migrationSetting, verifyRelease } from '../packages/host/production.ts';
+import { configuredOrigin, migrationSetting, verifyRelease, budgetConfiguration } from '../packages/host/production.ts';
 
 const PROJECT = 'dsh-amazonops-superagent';
 const projectRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -59,6 +59,7 @@ export function loadSettings(home, env = process.env) {
   const publicOrigin = settings.publicOrigin;
   configuredOrigin('http://127.0.0.1', publicOrigin);
   const migrationMode = migrationSetting(settings.migrationMode);
+  budgetConfiguration({ ...settings, modelAccount });
   return { ...settings, port, modelAccount, publicOrigin, migrationMode, settingsPath: path };
 }
 
@@ -116,7 +117,8 @@ export function start(options = {}) {
   validateHome(home);
   writeFileSync(patch, `${JSON.stringify(localPatch({ root, home, password: settings.password,
     port: settings.port, live: !!apiKey, modelAccount: settings.modelAccount,
-    publicOrigin: settings.publicOrigin, migrationMode: settings.migrationMode, releaseIdentity }), null, 2)}\n`, { mode: 0o600, flag: 'wx' });
+    publicOrigin: settings.publicOrigin, migrationMode: settings.migrationMode, releaseIdentity,
+    runtimePolicy: settings.runtimePolicy, runtimeLimits: settings.runtimeLimits }), null, 2)}\n`, { mode: 0o600, flag: 'wx' });
   const output = options.stdout ?? (value => process.stdout.write(value));
   const errorOutput = options.stderr ?? (value => process.stderr.write(value));
   const origin = configuredOrigin(`http://127.0.0.1:${settings.port}`, settings.publicOrigin);

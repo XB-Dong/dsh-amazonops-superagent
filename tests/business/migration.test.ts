@@ -46,6 +46,21 @@ function fixture() {
   return { root, source, db, budget, put, feedback, skill, registry, registryPath, close: () => { db.close(); budget.close(); } };
 }
 
+test('Windows physical alias cannot publish a migration candidate inside its source snapshot', { skip: process.platform !== 'win32' }, async () => {
+  const f = fixture();
+  try {
+    const snapshot = join(f.root, 'Long migration snapshot directory');
+    await exportMigrationSnapshot({ ...f, destination: snapshot, sourceQuiesced: true });
+    const result = spawnSync('cmd.exe', ['/d', '/v:off', '/c', `for %I in ("${snapshot}") do @echo %~sI`],
+      { encoding: 'utf8', windowsHide: true, windowsVerbatimArguments: true });
+    assert.equal(result.status, 0);
+    const alias = result.stdout.trim(); assert.ok(alias.length > 0);
+    const before = tree(snapshot);
+    await assert.rejects(stageMigration({ snapshot, destination: join(alias, 'nested-candidate') }), /MIGRATION_INPUT_OVERLAP/);
+    assert.deepEqual(tree(snapshot), before);
+  } finally { f.close(); }
+});
+
 test('migration snapshots include live WAL, all tables and pending queue without mutating input', async () => {
   const f = fixture();
   try {

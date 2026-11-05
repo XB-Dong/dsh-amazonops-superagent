@@ -1,9 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { DatabaseSync } from 'node:sqlite';
-import { mkdirSync, mkdtempSync, writeFileSync, readFileSync, readdirSync, lstatSync, existsSync, symlinkSync, rmSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, writeFileSync, readFileSync, readdirSync, lstatSync, existsSync, symlinkSync, rmSync, realpathSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { join, resolve } from 'node:path';
 import { createHash } from 'node:crypto';
 import { spawnSync } from 'node:child_process';
 import { Business } from '../../packages/business/application.ts';
@@ -45,6 +45,71 @@ function fixture() {
   writeFileSync(registryPath, JSON.stringify(registry));
   return { root, source, db, budget, put, feedback, skill, registry, registryPath, close: () => { db.close(); budget.close(); } };
 }
+
+function shortName(path: string): string {
+  assert.ok(!/["%!\r\n]/.test(path), 'Read-only short-name query requires a safe generated path');
+  const result = spawnSync('cmd.exe', ['/d', '/v:off', '/c', `for %I in ("${path}") do @echo %~sI`],
+    { encoding: 'utf8', windowsHide: true, windowsVerbatimArguments: true });
+  assert.equal(result.status, 0, result.stderr);
+  const alias = result.stdout.trim();
+  assert.match(alias, /~/, 'Exercise a real DOS short alias, not a case-only mock');
+  assert.notEqual(resolve(alias).toLowerCase(), resolve(path).toLowerCase());
+  return alias;
+}
+
+test('Windows mixed short source and long registry still rejects private registry inside product data', {
+  skip: process.platform !== 'win32',
+}, async () => {
+  const f = fixture();
+  try {
+    const source = realpathSync.native(f.source), alias = shortName(source);
+    const registryPath = join(source, 'private-feedback-state.json'); writeFileSync(registryPath, JSON.stringify(f.registry));
+    const before = tree(source);
+    for (const paths of [{ source: alias, registryPath }, { source, registryPath: join(alias, 'private-feedback-state.json') }]) {
+      const destination = join(f.root, 'mixed-registry-snapshot');
+      await assert.rejects(exportMigrationSnapshot({ ...f, ...paths, destination, sourceQuiesced: false }), /MIGRATION_REGISTRY_INSIDE_SOURCE/);
+      assert.equal(existsSync(destination), false);
+      assert.deepEqual(tree(source), before, 'Guard rejection must not write into input DB/WAL/SHM or registry');
+    }
+  } finally { f.close(); }
+});
+
+test('Windows short TEMP runs the original registry containment case with actual tests', {
+  skip: process.platform !== 'win32', timeout: 30000,
+}, () => {
+  const root = realpathSync.native(mkdtempSync(join(tmpdir(), 'amazonops-real-long-registry-temp-')));
+  try {
+    const alias = shortName(root), env: NodeJS.ProcessEnv = { ...process.env, TEMP: alias, TMP: alias };
+    delete env.NODE_TEST_CONTEXT;
+    const result = spawnSync(process.execPath, ['--experimental-transform-types', '--test',
+      '--test-name-pattern=^registry cannot be accidentally included inside product source data$', 'tests/business/migration.test.ts'],
+    { cwd: resolve('.'), env, encoding: 'utf8', windowsHide: true, timeout: 25000 });
+    assert.equal(result.status, 0, `${result.stdout}\n${result.stderr}`);
+    assert.match(result.stdout, /tests\s+1\b/, 'Nested runner must actually execute the selected original test');
+    assert.match(result.stdout, /pass\s+1\b/);
+  } finally { rmSync(root, { recursive: true, force: true }); }
+});
+
+test('Windows CLI short repository alias cannot publish private output into the repository', {
+  skip: process.platform !== 'win32',
+}, () => {
+  const f = fixture(), root = realpathSync.native(resolve('.'));
+  const destination = join(root, 'migration-alias-output-denied');
+  assert.equal(existsSync(destination), false, 'Use a fresh fixed test destination');
+  try {
+    f.close();
+    const alias = shortName(root);
+    const result = spawnSync(process.execPath, ['--experimental-transform-types', 'scripts/migration.ts', 'export',
+      '--source', f.source, '--destination', join(alias, 'migration-alias-output-denied'), '--registry', f.registryPath,
+      '--source-quiesced', 'false'], { encoding: 'utf8', windowsHide: true });
+    assert.equal(result.status, 1, result.stdout);
+    assert.equal(JSON.parse(result.stderr.trim().split('\n').at(-1)!).error, 'MIGRATION_OUTPUT_INSIDE_REPOSITORY');
+    assert.equal(existsSync(destination), false);
+  } finally {
+    if (existsSync(destination)) rmSync(destination, { recursive: true });
+    try { f.close(); } catch {}
+  }
+});
 
 test('Windows physical alias cannot publish a migration candidate inside its source snapshot', { skip: process.platform !== 'win32' }, async () => {
   const f = fixture();

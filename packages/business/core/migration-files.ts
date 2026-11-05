@@ -5,8 +5,9 @@ import { dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
 
 export type FileRecord = { path: string; bytes: number; sha256: string };
 export const hash = (value: Buffer | string): string => createHash('sha256').update(value).digest('hex');
+/** Containment is always physical; callers may supply different DOS/long spellings. */
 export function inside(root: string, candidate: string): boolean {
-  const path = relative(root, candidate);
+  const path = relative(physical(root), physical(candidate));
   return path === '' || (!isAbsolute(path) && path !== '..' && !path.startsWith(`..${sep}`));
 }
 export function unlinked(path: string): void {
@@ -21,7 +22,7 @@ export function unlinked(path: string): void {
 export function directory(path: string): string {
   unlinked(path);
   if (!lstatSync(path).isDirectory()) throw new Error('MIGRATION_DIRECTORY_REQUIRED');
-  return realpathSync(path);
+  return physical(path);
 }
 /** Resolve existing physical ancestors before comparing paths, including Windows DOS aliases. */
 export function physical(path: string): string {

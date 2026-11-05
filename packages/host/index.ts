@@ -15,10 +15,13 @@ import { AgentTools } from './agent-tools.ts';
 import { WorkbenchSource } from './source.ts';
 import { privacyHooks,privacyEpoch } from './privacy.ts';
 import { json,readBody,failure,loginPage } from './http.ts';
+import { configuredOrigin, sessionCookie, releaseHealth, migrationReadAllowed, type ReleaseIdentity } from './production.ts';
+import type { WorkAction } from '../contracts/model.ts';
 
 export const name='amazonops-workbench';
 export const inject=['webServer','llm','sessionPersistence'];
-export type Config={dataDir:string;password:string;live?:boolean;modelAccount?:'test'|'runtime'};
+export type Config={dataDir:string;password:string;live?:boolean;modelAccount?:'test'|'runtime';
+  publicOrigin?:string;migrationMode?:boolean;releaseIdentity?:ReleaseIdentity};
 export function apply(ctx:Context,config:Config):void {
   if(!config.dataDir)throw new Error('DATA_DIRECTORY_REQUIRED');
   mkdirSync(config.dataDir,{recursive:true});
@@ -27,8 +30,9 @@ export function apply(ctx:Context,config:Config):void {
   const budget=new ModelBudget(join(config.dataDir,'model-budget.sqlite'),
     {maxCalls:null,maxInputTokens:null,maxOutputTokens:null,maxTotalTokens:null},
     {account:config.modelAccount==='runtime'?'amazonops-runtime':'amazonops-test',period:config.modelAccount==='runtime'?'daily':'lifetime'});
-  const accounting=installAccounting(ctx,budget,{live:config.live===true,maxRequestsPerTurn:12,defaultOutputTokens:2048});
-  const origin=ctx.webServer.getOrigin();
+  const migrationMode=config.migrationMode===true;
+  const accounting=installAccounting(ctx,budget,{live:config.live===true&&!migrationMode,maxRequestsPerTurn:12,defaultOutputTokens:2048});
+  const origin=configuredOrigin(ctx.webServer.getOrigin(),config.publicOrigin);
   const server=(ctx.webServer as unknown as {server:Server}).server;
   const offBoundary=installBoundary(server,origin,auth);
   let runtime:Runtime|undefined;let source:WorkbenchSource|undefined;let maintenance=false;
@@ -43,6 +47,7 @@ export function apply(ctx:Context,config:Config):void {
     child.effect(()=>()=>{offAccess?.();offAccess=undefined;});
   });
   ctx.inject(['orchestrator'],async child=>{
+    if(migrationMode)return;
     const next=child.get('orchestrator') as unknown as Runtime;
     await next.ready;
     const attached=new WorkbenchSource(next,business);
@@ -66,29 +71,42 @@ export function apply(ctx:Context,config:Config):void {
     }
   });
   ctx.effect(()=>ctx.webServer.tapIndex(html=>html.replace(/<title>[^<]*<\/title>/,'<title>cc 运营工作台</title>')));
+  for(const path of ['/health','/ready'])ctx.effect(()=>ctx.webServer.register({kind:'exact',path,handler:(req,res)=>{
+    if(req.method!=='GET'&&req.method!=='HEAD'){json(res,{error:'NOT_FOUND'},404);return;}
+    const ready=!maintenance&&(migrationMode||!!source);
+    json(res,releaseHealth(config.releaseIdentity,ready,migrationMode),path==='/ready'&&!ready?503:200);
+  }}));
   ctx.effect(()=>ctx.webServer.register({kind:'exact',path:'/amazonops/login',handler:(_req,res)=>loginPage(res)}));
   ctx.effect(()=>ctx.webServer.register({kind:'prefix',path:'/amazonops/api',handler:async(req,res)=>{
     try{
       const path=new URL(req.url??'/',origin).pathname.slice('/amazonops/api/'.length);
       if(path==='login'&&req.method==='POST'){
         const body=await readBody(req);const token=auth.login(body.password,req.socket.remoteAddress);
-        res.setHeader('set-cookie',`amazonops_session=${token}; HttpOnly; SameSite=Strict; Path=/; Max-Age=28800`);
+        res.setHeader('set-cookie',sessionCookie(token,origin));
         json(res,{authenticated:true});return;
       }
       const identity=auth.identity(req);if(!identity)throw new Error('AUTH_REQUIRED');
       const scope=identity.scope;
+      if(migrationMode&&!migrationReadAllowed(new URL(req.url??'/',origin).pathname,req.method))throw new Error('MIGRATION_READ_ONLY');
       if(maintenance&&path!=='status'&&path!=='logout'&&!(path==='snapshot'&&req.method==='GET'))throw new Error('MAINTENANCE_IN_PROGRESS');
       if(path==='logout'&&req.method==='POST'){
-        auth.logout(req);res.setHeader('set-cookie','amazonops_session=; HttpOnly; SameSite=Strict; Path=/; Max-Age=0');json(res,{authenticated:false});return;
+        auth.logout(req);res.setHeader('set-cookie',sessionCookie('',origin,0));json(res,{authenticated:false});return;
       }
       if(path==='status'&&req.method==='GET'){
-        const live=config.live===true&&!!source&&!maintenance;
+        const live=config.live===true&&!!source&&!maintenance&&!migrationMode;
         json(res,{authenticated:true,scope,live,version:'0.1.0',modelState:maintenance?'maintenance':!live?'disabled':budget.exhausted()?'budget_exhausted':
           accounting.state.lastOutcome==='failed'?'last_failed':accounting.state.lastOutcome==='succeeded'?'last_succeeded':'enabled_unverified',
           budget:{used:budget.snapshot(),limits:budget.limits,policy:budget.policy,lifetime:budget.lifetimeSnapshot()}});return;
       }
       if(path==='snapshot'&&req.method==='GET'){json(res,business.snapshot(scope));return;}
-      if(path==='work'&&req.method==='GET'){json(res,source?.work(scope)??{tickets:[],messages:[]});return;}
+      if(path==='work'&&req.method==='GET'){
+        const query=new URL(req.url??'/',origin).searchParams;
+        const page=query.has('offset')||query.has('limit')?{offset:Number(query.get('offset')??0),limit:Number(query.get('limit')??20)}:undefined;
+        json(res,source?.work(scope,page)??{tickets:[],messages:[]});return;
+      }
+      if(path==='work-actions'&&req.method==='POST'){
+        if(!source)throw new Error('RUNTIME_NOT_READY');json(res,await source.action(scope,await readBody(req) as WorkAction));return;
+      }
       if(path.startsWith('actions/')&&path!=='actions/backup'&&req.method==='POST'){
         const action=path.slice(8);const body=await readBody(req);
         json(res,business.command(scope,action,body));return;
@@ -123,7 +141,7 @@ export function apply(ctx:Context,config:Config):void {
       throw new Error('NOT_FOUND');
     }catch(error){failure(res,error);}
   }}));
-  const worker=setInterval(()=>{if(!maintenance){try{business.tick('main');}catch{ctx.logger.warn('Business background work is pending after a recoverable error.');}}},3000);
+  const worker=setInterval(()=>{if(!maintenance&&!migrationMode){try{business.tick('main');}catch{ctx.logger.warn('Business background work is pending after a recoverable error.');}}},3000);
   worker.unref();
   ctx.effect(()=>async()=>{
     clearInterval(worker);offChange();await runtime?.stop();await ctx.sessionPersistence.flush();accounting();

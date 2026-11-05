@@ -31,8 +31,8 @@ export function localPatch(options: LocalProfile): object[] {
         live: options.live && !options.migrationMode, modelAccount: options.modelAccount,
         publicOrigin: options.publicOrigin, migrationMode: options.migrationMode ?? false,
         releaseIdentity: options.releaseIdentity } },
-      { id: 'amazonops-superagent', name: path(options.root, 'vendor/superagent/lib/index.js'),
-        config: { stateDir, executionMode: 'operations' } },
+      ...!options.migrationMode ? [{ id: 'amazonops-superagent', name: path(options.root, 'vendor/superagent/lib/index.js'),
+        config: { stateDir, executionMode: 'operations' } }] : [],
     ] },
   ];
 }

@@ -39,6 +39,8 @@ test('profile forwards public origin and migration mode while hard disabling mod
   assert.equal(config.publicOrigin, 'https://ops.example.test');
   assert.equal(config.migrationMode, true);
   assert.equal(config.live, false);
+  assert.equal(entries.some(row => row.id === 'amazonops-superagent'), false,
+    'migration inspection must not resume existing native workers or mutate their lifecycle');
   assert.equal((rows.find(row => (row as any).id === 'webserver') as any).config.host, '127.0.0.1');
 });
 

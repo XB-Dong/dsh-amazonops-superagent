@@ -2,7 +2,9 @@
 
 基于官方 DeepSeek Harness 与 dsh-superagent-prototype，重新组织并完整复现 ccagent 的中文运营工作台。
 
-本机 P0 已完成：13个中文入口、9个业务工具、真实 SuperAgent 路由/工单/执行器、原生会话、认证、隐私闭包和用量账本。237项离线测试、59项分层验收、两个真实模型场景、独立审核及干净Windows CI均通过。完整状态看 [P0状态](docs/waves/P0/state.json)，细节见[验收报告](docs/testing/EXECUTION-20261102.md)。云服务器、旧 ccagent 和旧自动任务保持不动。
+本机 P0 已完成：13个中文入口、9个业务工具、真实 SuperAgent 路由/工单/执行器、原生会话、认证、隐私闭包和用量账本。237项离线测试、59项分层验收、两个真实模型场景、独立审核及干净Windows CI均通过。完整状态看 [P0状态](docs/waves/P0/state.json)，细节见[验收报告](docs/testing/EXECUTION-20261102.md)。本轮P0没有变更云服务器、旧 ccagent 和旧自动任务。
+
+2026-11-05：仓库已由维护者公开。P1正在准备云端接替、完整建议迁移、每日维护与个人主页切换，以及原生持续跟进能力；等待用户启动，当前没有P1产品实现或生产切换。见[P1计划](docs/waves/P1/PLAN.md)和[就绪报告](docs/waves/P1/READINESS.zh.md)。
 
 项目主体是 TypeScript，页面使用 React，底座是固定版本的官方 DSH 与保留 core 的 SuperAgent 源码。业务能力通过 Source、agent-local 工具与 Skill Provider 装配，不另建对话循环。
 
@@ -25,4 +27,4 @@ pnpm start
 
 入口：[文档导航](docs/README.md)、[业务需求](docs/product/REQUIREMENTS.zh.md)、[工程规则](AGENTS.md)、[开发宪法](CONSTITUTION.md)、[阶段边界](NEXT-WAVES.md)。
 
-新仓库独立建立，不复制旧 Git 历史。GitHub 默认先建私有仓库；未获得公开发布指令前保持私有，并按可公开代码的隐私标准维护。
+新仓库独立建立，不复制旧 Git 历史；当前为公开仓库。原始反馈、真实运维身份/地址、数据库、会话、凭据和私有证据均不进入Git。

@@ -1,0 +1,54 @@
+{
+  "waveId": "P1",
+  "specVersion": "0.3.0",
+  "productBaselineSha": "9ef48273d88d309c361557f942b20da1882ded52",
+  "dispatchable": false,
+  "meaning": "Frozen preparation inputs only; S0 must bind actual dispatch commit and revalidate private/current production inputs after explicit user start.",
+  "artifacts": [
+    {
+      "path": "docs/waves/P1/PLAN.md",
+      "sha256": "32a2eb1c1c1e981cb5832b900887c310cf4119f1890971b9c219bfb5594a6a91",
+      "bytes": 5394
+    },
+    {
+      "path": "docs/waves/P1/SPEC.zh.md",
+      "sha256": "51d6009bb33e0e0e9d005d0632f91f5b8167c12014b031eea3a69e157a1974cf",
+      "bytes": 5702
+    },
+    {
+      "path": "docs/waves/P1/MIGRATION-CUTOVER.zh.md",
+      "sha256": "f5dfb720e1b4dbd3461a1aa85bf30cc151878f57731750a8d6bb3b33fd0c4120",
+      "bytes": 3804
+    },
+    {
+      "path": "docs/waves/P1/MAINTENANCE.zh.md",
+      "sha256": "e081855a0e12d654a90cd3c7e79bc136a9ee37ce8ed73d6bd4c884dff1b18f34",
+      "bytes": 3725
+    },
+    {
+      "path": "docs/waves/P1/PUBLICATION-DRAFT.zh.md",
+      "sha256": "1dff739a6a1500c294a03f78102edfa1a1240cd97a4056c14d6bdc1dd525136e",
+      "bytes": 2154
+    },
+    {
+      "path": "docs/waves/P1/EVIDENCE.zh.md",
+      "sha256": "a7020bf4facc6052bbdb9674e39591c0d0102ebc210f1e05fd0a85660cc43285",
+      "bytes": 2293
+    },
+    {
+      "path": "docs/waves/P1/acceptance.json",
+      "sha256": "b2510a7568fa623d6f3883f8c1c0c28125cae9137d4766023ffd084059726ef7",
+      "bytes": 12505
+    },
+    {
+      "path": "docs/product/changes/2026-11-05.md",
+      "sha256": "22588155484c4fe5a6edf86c2dd6753f2d9a3bbc85303b162edc7425adbed758",
+      "bytes": 1604
+    },
+    {
+      "path": "docs/audit/context-maps/P1-PREPARATION-20261105.md",
+      "sha256": "c39fc287634e067fd84ffe56d20bdb2d0a6e6cb3fca1d7ea534c32c19fc3d311",
+      "bytes": 4394
+    }
+  ]
+}

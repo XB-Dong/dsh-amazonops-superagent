@@ -1,0 +1,101 @@
+{
+  "waveId": "P1",
+  "specVersion": "0.3.0",
+  "baselineSha": "9ef48273d88d309c361557f942b20da1882ded52",
+  "dispatchable": false,
+  "tasks": [
+    {
+      "id": "P1-FOUNDATION",
+      "path": "tasks/P1-FOUNDATION.json",
+      "owner": "Leader",
+      "dependencies": [],
+      "status": "prepared_waiting_for_start"
+    },
+    {
+      "id": "P1-CLOUD",
+      "path": "tasks/P1-CLOUD.json",
+      "owner": "p1_platform",
+      "dependencies": [
+        "P1-FOUNDATION"
+      ],
+      "status": "prepared_waiting_for_start"
+    },
+    {
+      "id": "P1-MIGRATION",
+      "path": "tasks/P1-MIGRATION.json",
+      "owner": "p1_migration",
+      "dependencies": [
+        "P1-FOUNDATION"
+      ],
+      "status": "prepared_waiting_for_start"
+    },
+    {
+      "id": "P1-WATCH-DOMAIN",
+      "path": "tasks/P1-WATCH-DOMAIN.json",
+      "owner": "p1_backend",
+      "dependencies": [
+        "P1-FOUNDATION"
+      ],
+      "status": "prepared_waiting_for_start"
+    },
+    {
+      "id": "P1-ORCHESTRATION",
+      "path": "tasks/P1-ORCHESTRATION.json",
+      "owner": "p1_native",
+      "dependencies": [
+        "P1-FOUNDATION",
+        "P1-WATCH-DOMAIN"
+      ],
+      "status": "prepared_waiting_for_start"
+    },
+    {
+      "id": "P1-CLIENT",
+      "path": "tasks/P1-CLIENT.json",
+      "owner": "p1_frontend",
+      "dependencies": [
+        "P1-FOUNDATION"
+      ],
+      "status": "prepared_waiting_for_start"
+    },
+    {
+      "id": "P1-INTEGRATION",
+      "path": "tasks/P1-INTEGRATION.json",
+      "owner": "Leader",
+      "dependencies": [
+        "P1-CLOUD",
+        "P1-MIGRATION",
+        "P1-WATCH-DOMAIN",
+        "P1-ORCHESTRATION",
+        "P1-CLIENT"
+      ],
+      "status": "prepared_waiting_for_start"
+    },
+    {
+      "id": "P1-REVIEW",
+      "path": "tasks/P1-REVIEW.json",
+      "owner": "p1_review",
+      "dependencies": [
+        "P1-INTEGRATION"
+      ],
+      "status": "prepared_waiting_for_start"
+    },
+    {
+      "id": "P1-CUTOVER",
+      "path": "tasks/P1-CUTOVER.json",
+      "owner": "Leader",
+      "dependencies": [
+        "P1-REVIEW"
+      ],
+      "status": "prepared_waiting_for_start"
+    },
+    {
+      "id": "P1-HANDOVER",
+      "path": "tasks/P1-HANDOVER.json",
+      "owner": "Leader",
+      "dependencies": [
+        "P1-CUTOVER"
+      ],
+      "status": "prepared_waiting_for_start"
+    }
+  ]
+}

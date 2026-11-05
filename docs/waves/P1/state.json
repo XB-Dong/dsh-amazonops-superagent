@@ -1,0 +1,38 @@
+{
+  "schemaVersion": "0.3",
+  "waveId": "P1",
+  "phase": "preparation",
+  "specVersion": "0.3.0",
+  "preparedDate": "2026-11-05",
+  "timezone": "Asia/Shanghai",
+  "baselineSha": "9ef48273d88d309c361557f942b20da1882ded52",
+  "plan": "docs/waves/P1/PLAN.md",
+  "authorization": {
+    "preparation": "authorized",
+    "productExecution": "waiting_for_explicit_start",
+    "cloudExecution": "waiting_for_explicit_start",
+    "migration": "waiting_for_explicit_start",
+    "automationChanges": "waiting_for_explicit_start",
+    "profilePublication": "waiting_for_explicit_start"
+  },
+  "preparationStatus": "under_review",
+  "repositoryVisibility": "public_verified",
+  "githubProfile": "read_only_old_project_reference_verified",
+  "automation": "viewed_active_old_project_unchanged",
+  "legacyProjectWrites": "not_performed",
+  "cloudAccess": "not_performed",
+  "modelCalls": 0,
+  "productionDeployment": "not_performed",
+  "productionMigration": "not_performed",
+  "productImplementation": "not_started",
+  "productAcceptance": "not_run",
+  "mandatoryCases": 39,
+  "independentReview": {
+    "status": "pending",
+    "scope": "preparation_only"
+  },
+  "taskIndex": "docs/waves/P1/tasks.json",
+  "inputManifest": "docs/waves/P1/inputs.json",
+  "releaseGate": "All mandatory acceptance passed on exact candidate and independently reviewed, final source snapshot reconciled before new writes.",
+  "nextAction": "Wait for the user start instruction; on start run S0 fresh baseline checks, not stale preparation probes."
+}

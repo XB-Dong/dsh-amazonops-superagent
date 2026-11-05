@@ -1,0 +1,54 @@
+{
+  "schemaVersion": "0.3",
+  "id": "P1-INTEGRATION",
+  "rootTask": "P1-CLOUD-SUCCESSOR",
+  "baselineSha": "9ef48273d88d309c361557f942b20da1882ded52",
+  "inputSpecVersion": "0.3.0",
+  "inputFiles": [
+    "docs/waves/P1/PLAN.md",
+    "docs/waves/P1/SPEC.zh.md",
+    "docs/waves/P1/MIGRATION-CUTOVER.zh.md",
+    "docs/waves/P1/MAINTENANCE.zh.md",
+    "docs/waves/P1/acceptance.json"
+  ],
+  "inputManifest": "docs/waves/P1/inputs.json",
+  "owner": "Leader",
+  "stage": "S4",
+  "allowedWritePaths": [
+    "packages/host/index.ts",
+    "packages/contracts/**",
+    "specs/**",
+    "scripts/**",
+    "docs/**"
+  ],
+  "excludedWritePaths": [],
+  "dependencies": [
+    "P1-CLOUD",
+    "P1-MIGRATION",
+    "P1-WATCH-DOMAIN",
+    "P1-ORCHESTRATION",
+    "P1-CLIENT"
+  ],
+  "acceptanceIds": [
+    "P1-FINAL-01",
+    "P1-FINAL-02",
+    "P1-FINAL-03",
+    "P1-FINAL-04"
+  ],
+  "instructions": "Integrate without overlapping writers; run Windows/Linux/offline/native/browser/necessary real-model acceptance and preserve actual evidence, counts and budget history; freeze exact release candidate.",
+  "status": "prepared_waiting_for_start",
+  "dispatchable": false,
+  "dispatchGate": "User start message plus S0 current-baseline and private-input revalidation; Leader records exact dispatch commit and frozen interface SHA before activation. Preparation baseline is not automatically the later execution baseline.",
+  "repairCount": 0,
+  "repairCondition": "Preserve root cause history. After two same-root-cause repair attempts, perform renewed diagnosis and record the decision before further repair. Installation and fixture errors are not product Red.",
+  "stopConditions": [
+    "user_pause_or_no_start_authorization",
+    "untrusted_or_unverified_private_connection",
+    "secret_or_real_feedback_exposure",
+    "unexplained_migration_difference",
+    "concurrent_writer_or_stale_authority",
+    "required_release_gate_failed",
+    "out_of_scope_external_business_action"
+  ],
+  "deliverable": "Exact commit, changed paths, commands/exit codes, real Red/Green when applicable, raw evidence hashes outside Git, known gaps and integration notes. No invented production/model/browser passes."
+}

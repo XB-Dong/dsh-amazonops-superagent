@@ -20,12 +20,12 @@
   "githubProfile": "read_only_old_project_reference_verified",
   "automation": "paused_same_id_via_tool_legacy_thread_idle_verified",
   "legacyProjectWrites": "not_performed",
-  "cloudAccess": "not_performed",
+  "cloudAccess": "verified_inventory_and_isolated_staging",
   "modelCalls": 0,
   "productionDeployment": "not_performed",
-  "productionMigration": "not_performed",
-  "productImplementation": "not_started",
-  "productAcceptance": "not_run",
+  "productionMigration": "rehearsal_completed_not_cutover",
+  "productImplementation": "in_progress",
+  "productAcceptance": "in_progress",
   "mandatoryCases": 39,
   "independentReview": {
     "status": "accepted",
@@ -37,7 +37,7 @@
   "taskIndex": "docs/waves/P1/tasks.json",
   "inputManifest": "docs/waves/P1/inputs.json",
   "releaseGate": "G1 pre_release evidence plus accepted exact-candidate review; G2 final source reconciliation/pre_open safety before writes; G3 actual handover and independent business acceptance; G4 ACTIVE readback and all 39 cases before final completion.",
-  "nextAction": "Complete S0 cloud and writer inventory; freeze S1 interfaces and dispatch exact tasks",
+  "nextAction": "Integrate native watch/proactive and maintenance checker; complete exact-candidate cross-platform, browser, model and independent acceptance before cutover",
   "businessDelivery": "not_started",
   "taskPackets": 11,
   "gates": {
@@ -124,7 +124,7 @@
     }
   },
   "gateDefinition": "docs/waves/P1/GATES.zh.md",
-  "activeStage": "S1",
+  "activeStage": "S3",
   "executionBaselineSha": "ccb36eef91787aa8e53854e02e247ab9f5475b15",
   "startedDate": "2026-11-05",
   "startInstruction": "User explicitly said 启动 in this chat",
@@ -135,5 +135,31 @@
     "oldBusinessHealthy": true,
     "privateInventory": "captured",
     "hostFingerprintVerified": true
+  },
+  "currentEvidence": {
+    "windowsInitialFull": {
+      "tests": 274,
+      "passed": 274,
+      "candidate": "bb3b1bbaa32aab5a423039f10b0a71f9cdfbecf9"
+    },
+    "linuxInitialNative": {
+      "tests": 14,
+      "passed": 14,
+      "candidate": "d328985547789eef196824453490bac1dec5bfc6"
+    },
+    "linuxMigrationDomain": {
+      "tests": 23,
+      "passed": 23,
+      "candidate": "bb3b1bbaa32aab5a423039f10b0a71f9cdfbecf9"
+    },
+    "migrationRehearsal": {
+      "businessRowsAdded": 0,
+      "businessRowsRemoved": 0,
+      "businessRowsChanged": 0,
+      "expectedSchemaAdditions": 1,
+      "registryPreserved": true,
+      "cutover": false
+    },
+    "independentEarlyReview": "3 confirmed defects plus runtime policy gap; fixes integrated and under re-review"
   }
 }

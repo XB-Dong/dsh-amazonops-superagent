@@ -1,0 +1,99 @@
+{
+  "rootTask": "P1-CLOUD-SUCCESSOR",
+  "authorization": "explicit_user_start_2026-11-05",
+  "preparedInputManifest": "inputs.json",
+  "preparedManifestMeaning": "Historical preparation hashes at reviewed candidate155abc7; current execution inputs and dispatch commits below do not rewrite that evidence.",
+  "dispatches": [
+    {
+      "task": "P1-CLOUD",
+      "owner": "p1_platform",
+      "baselineSha": "f6a2a62feff5fac95f30077b537cbbb94679313f",
+      "status": "integrated_targeted_verified",
+      "specVersion": "0.3.0",
+      "contracts": [
+        "specs/contracts/p1-platform-migration-v0.3.md",
+        "specs/contracts/p1-followups-v0.3.md",
+        "specs/contracts/p1-workbench-v0.3.md"
+      ],
+      "repairPolicy": "cumulative_root_causes_preserved"
+    },
+    {
+      "task": "P1-MIGRATION",
+      "owner": "p1_migration",
+      "baselineSha": "f6a2a62feff5fac95f30077b537cbbb94679313f",
+      "status": "integrated_rehearsal_verified",
+      "specVersion": "0.3.0",
+      "contracts": [
+        "specs/contracts/p1-platform-migration-v0.3.md",
+        "specs/contracts/p1-followups-v0.3.md",
+        "specs/contracts/p1-workbench-v0.3.md"
+      ],
+      "repairPolicy": "cumulative_root_causes_preserved"
+    },
+    {
+      "task": "P1-WATCH-DOMAIN",
+      "owner": "p1_backend",
+      "baselineSha": "0e06220d239675b2029166a2fde110384d0bba1a",
+      "status": "integrated_review_repairs",
+      "specVersion": "0.3.0",
+      "contracts": [
+        "specs/contracts/p1-platform-migration-v0.3.md",
+        "specs/contracts/p1-followups-v0.3.md",
+        "specs/contracts/p1-workbench-v0.3.md"
+      ],
+      "repairPolicy": "cumulative_root_causes_preserved"
+    },
+    {
+      "task": "P1-CLIENT",
+      "owner": "p1_frontend",
+      "baselineSha": "69024c2b02056b274ff64377d93bc987426bcbe6",
+      "status": "integrated_browser_pending",
+      "specVersion": "0.3.0",
+      "contracts": [
+        "specs/contracts/p1-platform-migration-v0.3.md",
+        "specs/contracts/p1-followups-v0.3.md",
+        "specs/contracts/p1-workbench-v0.3.md"
+      ],
+      "repairPolicy": "cumulative_root_causes_preserved"
+    },
+    {
+      "task": "P1-ORCHESTRATION",
+      "owner": "p1_native",
+      "baselineSha": "bb3b1bbaa32aab5a423039f10b0a71f9cdfbecf9",
+      "status": "executing_native_acceptance",
+      "specVersion": "0.3.0",
+      "contracts": [
+        "specs/contracts/p1-platform-migration-v0.3.md",
+        "specs/contracts/p1-followups-v0.3.md",
+        "specs/contracts/p1-workbench-v0.3.md"
+      ],
+      "repairPolicy": "cumulative_root_causes_preserved"
+    },
+    {
+      "task": "P1-REVIEW",
+      "owner": "p1_review",
+      "baselineSha": "bb3b1bbaa32aab5a423039f10b0a71f9cdfbecf9",
+      "status": "early_findings_rechecking",
+      "specVersion": "0.3.0",
+      "contracts": [
+        "specs/contracts/p1-platform-migration-v0.3.md",
+        "specs/contracts/p1-followups-v0.3.md",
+        "specs/contracts/p1-workbench-v0.3.md"
+      ],
+      "repairPolicy": "cumulative_root_causes_preserved"
+    },
+    {
+      "task": "P1-HANDOVER-CHECK",
+      "owner": "p1_maintenance",
+      "baselineSha": "bb3b1bbaa32aab5a423039f10b0a71f9cdfbecf9",
+      "status": "implementing_checker_no_external_changes",
+      "specVersion": "0.3.0",
+      "contracts": [
+        "specs/contracts/p1-platform-migration-v0.3.md",
+        "specs/contracts/p1-followups-v0.3.md",
+        "specs/contracts/p1-workbench-v0.3.md"
+      ],
+      "repairPolicy": "cumulative_root_causes_preserved"
+    }
+  ]
+}

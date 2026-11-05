@@ -3,6 +3,8 @@
   "password": "replace-with-a-private-random-password",
   "port": 4315,
   "modelAccount": "runtime",
+  "runtimePolicy": { "account": "runtime", "period": "daily" },
+  "runtimeLimits": { "maxCalls": null, "maxInputTokens": null, "maxOutputTokens": null, "maxTotalTokens": null },
   "publicOrigin": "https://ops.example.test",
   "migrationMode": true
 }

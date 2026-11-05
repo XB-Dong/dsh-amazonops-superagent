@@ -1,6 +1,6 @@
-# 已实现的 P0 架构
+# 已实现架构（P0 + P1）
 
-2026-11-02。实现结果及运行证据见[验收报告](../testing/EXECUTION-20261102.md)，当前总状态以[P0状态](../waves/P0/state.json)为准。
+P0基线为2026-11-02，P1增量与云端接替为2026-11-05。分别见[P0历史验收](../testing/EXECUTION-20261102.md)、[P1执行报告](../testing/P1-EXECUTION-20261105.zh.md)及[P1状态](../waves/P1/state.json)。
 
 项目主体为 TypeScript；中文工作台使用 React，宿主采用 DSH `0.2.1-rc.3`。SuperAgent 固定到 `6337fc823ce20251c8de8085948165c81aaa701e`，保留上游许可证，15 个 core 文件的字节哈希未变。所需改动集中在宿主、执行器、权限和扩展接缝，清单见[补丁记录](../../vendor/superagent/patch-manifest.json)。DSH 客户端的只读入口改动通过 pnpm patch 固定。
 
@@ -15,7 +15,7 @@
 | `packages/contracts` | 共享 DTO；不依赖数据库、React 或领域实现 |
 | `packages/client` | 原生客户端 slot 下的中文页面；高级执行视图打开官方 Session，复用宿主 React |
 
-只有认证后的 `human_request` 可以进入 Source。普通业务事件、后台 tick、反馈捕获、助手投递和工具回执不会再进入模型 Eval。master 仅有 `orchestrator_route`、`orchestrator_reply`；worker 的原生编排工具与业务工具按 Ticket 注入，shell、文件、安装、凭据和管理工具不在运营会话授权内。
+认证后的 `human_request` 使用显式路由；P1只增加两类可信事件：当前有效有限授权下的 `watch_update`，以及唯一规则、明确对象/当前版本下的 `risk_candidate`。普通业务事件、后台tick、反馈捕获和回执不进入模型Eval。master仅有route、reply、eval、eval_decide；worker原生及业务工具按Ticket授权，shell、文件、安装和管理能力不在运营会话授权内。
 
 ## 业务工具
 
@@ -30,6 +30,7 @@
 | `cc_capture_feedback` | 记录反馈及来源，不授予研发权限 |
 | `cc_read_memory` | 分页读取有效已确认事实 |
 | `cc_draft_checklist` | 将当前有效 L0 经验装配为清单草稿 |
+| `cc_read_watch`（P1） | 读取当前授权对象和确定性风险，写草稿前必须重查最新事实 |
 
 写工具的逻辑身份按可信 scope、原始消息、动作和意图槽持久化。换适配器、重启或重新派工不改变操作身份；同槽变更 payload 会冲突，新用户请求拥有新身份。工具使用服务端当前事实，不接受模型自报权限。
 
@@ -45,6 +46,14 @@
 
 隐私账本作用于派生实体、Skill、Session、Ticket 和已消费上下文。删除或撤销使旧 master epoch 失效，原生 checkpoint 后换新上下文；维护期间已提交业务结果仍可查询。模型 reserve/settle 覆盖路由、worker 和压缩，未知用量保守保留；自动模型重试为零，累计调用/金额不设自定义限额。
 
-备份协调 business、预算、原生 Store、Session、文件与导出。恢复只发布经哈希、业务完整性和原生 owner 校验的新目录，合并最新隐私及用量。旧格式会话不伪装为原生会话：无隐私删除时原行保留在业务 SQLite 供离线审阅，有删除事件时按隐私闭包退役。当前没有旧会话归档页面，也没有迁移旧生产数据。具体操作见[本机恢复](../operations/LOCAL-RECOVERY.md)。
+备份协调business、预算、原生Store、Session、文件与导出。恢复只发布经哈希、业务完整性和原生owner校验的新目录，合并最新隐私及用量。P1已完整迁移旧生产业务、隐私和预算，并将旧SDK会话保留私有离线归档；没有旧会话归档页面。具体见[本机恢复](../operations/LOCAL-RECOVERY.md)和[上线与维护](../operations/PRODUCTION.zh.md)。
+
+## P1 责任与跟进
+
+领域Followups只管理有限授权、确定性风险、版本事件/游标和接单窗口；原生Runtime/Engine仍拥有Ticket/Mandate/Assignment/attention及Session。FollowupNative串行投递，在配置修改前和扫描前从真实持久Decision回写结果；markDelivered只代表入站，不冒充accept。策略新revision可以重新观察，真正accepted auto窗口跨开关不重复派工。
+
+可信auto闭包由宿主配置提供，默认关闭，在启动/恢复/入站和每次工具授权复查；HTTP声明不能开闸。保存的auto意图遇关闭闸门时有效模式为off，旧worker也不能继续写。当前事实、scope、来源、期限及人工等待共同约束执行。GET投影不扫描或消费工作。
+
+工单补充/答复使用稳定意图和CAS，丢响应重放不重复派工。后续人工答复保留原watch/事件父链，删除原授权会闭包删除派生草稿并退役旧会话。客户端只投影原生责任，工单草稿按ticket/attention保留，不新增第二套工单状态机。
 
 Windows运行根按真实物理路径及目录身份固定，允许同一目录的8.3/长路径拼写；原路径和标准路径每级检查junction及符号链接，目录创建前后复核，模型及工具继续检查。物理比较不采用缺目录时退回字符串的兜底，也不允许同名根目录替换继承旧授权。

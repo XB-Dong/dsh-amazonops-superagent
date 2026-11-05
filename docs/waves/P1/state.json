@@ -15,35 +15,35 @@
     "automationChanges": "authorized",
     "profilePublication": "authorized"
   },
-  "preparationStatus": "ready_waiting_for_start",
+  "preparationStatus": "historical_ready_before_explicit_start",
   "repositoryVisibility": "public_verified",
-  "githubProfile": "read_only_old_project_reference_verified",
-  "automation": "paused_same_id_via_tool_legacy_thread_idle_verified",
-  "legacyProjectWrites": "not_performed",
-  "cloudAccess": "verified_inventory_and_isolated_staging",
+  "githubProfile": "publication_in_progress",
+  "automation": "same_id_new_prompt_paused_verified",
+  "legacyProjectWrites": "retirement_only_private_operations_guard_updated",
+  "cloudAccess": "production_verified",
   "modelCalls": 65,
-  "productionDeployment": "not_performed",
-  "productionMigration": "rehearsal_completed_not_cutover",
-  "productImplementation": "integrated_final_review_repairs",
-  "productAcceptance": "cross_platform_and_live_completed_final_gate_repairs_pending",
+  "productionDeployment": "new_application_active_public_verified_legacy_disabled",
+  "productionMigration": "completed_full_reconciliation",
+  "productImplementation": "completed",
+  "productAcceptance": "partial_handover_closeout_pending",
   "mandatoryCases": 39,
   "independentReview": {
     "status": "accepted",
-    "scope": "preparation_only",
-    "reviewedSha": "155abc71ecef2899e03fe2ff5ffedc016a872c9b",
-    "report": "docs/audit/reviews/P1-PREPARATION-20261105.zh.md",
-    "productTests": "not_run",
-    "productReview": "trusted_auto_restore_gate_blocker_under_repair"
+    "scope": "pre_release_35_cases_only",
+    "reviewedSha": "16b2ae1a1a967e3155e99a8d9b2c4b6f8525892c",
+    "report": "docs/audit/reviews/P1-PRE-RELEASE-20261105.zh.md",
+    "productTests": "cross_platform_native_browser_model_and_actual_systemd_verified",
+    "businessHandoverReview": "not_run"
   },
   "taskIndex": "docs/waves/P1/tasks.json",
   "inputManifest": "docs/waves/P1/inputs.json",
   "releaseGate": "G1 pre_release evidence plus accepted exact-candidate review; G2 final source reconciliation/pre_open safety before writes; G3 actual handover and independent business acceptance; G4 ACTIVE readback and all 39 cases before final completion.",
-  "nextAction": "Close trusted auto restoration and Windows mixed-alias containment findings; rerun exact-candidate checks before G1 and production cutover",
-  "businessDelivery": "not_started",
+  "nextAction": "Publish successor README/profile and legacy retirement notice; independent G3 acceptance, then same-ID ACTIVE readback and final closeout",
+  "businessDelivery": "handover",
   "taskPackets": 11,
   "gates": {
     "pre_release": {
-      "status": "not_run",
+      "status": "passed",
       "caseIds": [
         "P1-CLOUD-01",
         "P1-CLOUD-02",
@@ -83,7 +83,7 @@
       ]
     },
     "cutover": {
-      "status": "not_run",
+      "status": "passed",
       "caseIds": [
         "P1-CLOUD-01",
         "P1-CLOUD-02",
@@ -104,7 +104,7 @@
       ]
     },
     "handover": {
-      "status": "not_run",
+      "status": "partial",
       "caseIds": [
         "P1-MAINT-01",
         "P1-MAINT-02",
@@ -125,7 +125,7 @@
     }
   },
   "gateDefinition": "docs/waves/P1/GATES.zh.md",
-  "activeStage": "S3",
+  "activeStage": "S6",
   "executionBaselineSha": "ccb36eef91787aa8e53854e02e247ab9f5475b15",
   "startedDate": "2026-11-05",
   "startInstruction": "User explicitly said 启动 in this chat",
@@ -161,7 +161,7 @@
       "registryPreserved": true,
       "cutover": false
     },
-    "independentEarlyReview": "3 confirmed defects plus runtime policy gap; fixes integrated and under re-review",
+    "independentEarlyReview": "historical findings closed; final exact-candidate pre-release accepted",
     "paidSynthetic": {
       "requests": 65,
       "verifiedRequests": 63,
@@ -187,6 +187,58 @@
       "candidate": "0c59e70e45af1b04644efd8935e9717ab716b8fe",
       "exitCode": 0,
       "latestRepairsNotYetIncluded": true
+    },
+    "latestExactCandidateCi": {
+      "runUrl": "https://github.com/XB-Dong/dsh-amazonops-superagent/actions/runs/42006473040",
+      "sourceSha": "16b2ae1a1a967e3155e99a8d9b2c4b6f8525892c",
+      "windows": {
+        "tests": 328,
+        "passed": 327,
+        "skipped": 1,
+        "failed": 0
+      },
+      "linux": {
+        "tests": 328,
+        "passed": 323,
+        "skipped": 5,
+        "failed": 0
+      }
+    },
+    "production": {
+      "newApplicationActive": true,
+      "legacyApplicationInactiveAndDisabled": true,
+      "sourceQuiescedForFinalSnapshot": true,
+      "rawFilesPreserved": 302,
+      "activeRuntimeFilesAfterGracefulClose": 3,
+      "mainFeedbackInherited": 5,
+      "legacyRegistryRecordsInherited": 7,
+      "businessRowsAddedByMigration": 0,
+      "businessRowsRemovedByMigration": 0,
+      "businessRowsChangedByMigration": 0,
+      "unexplainedFileDifferences": 0,
+      "explainedEmptySchemaAdditions": [
+        "business.sqlite:business_events",
+        "model-budget.sqlite:model_request_attribution"
+      ],
+      "strictPublicTlsLoginRpcWss": true,
+      "realNewFeedbackSurvivedServiceRestartExactlyOnce": true,
+      "authorizedSyntheticFeedbackWithdrawn": true,
+      "coordinatedBackupAndIsolatedRestore": true
+    },
+    "maintenanceHandover": {
+      "actualReadOnlyHandoverExecuted": true,
+      "modelCalls": 0,
+      "newWaves": 0,
+      "canDevelop": false,
+      "usedAuditedS0Checkpoint": true,
+      "syntheticOnlyDifferenceExplicitlyAcknowledged": true,
+      "realFeedbackChangesSinceS0": 0,
+      "originalRegistryBytesArchived": true,
+      "sameAutomationId": true,
+      "sameTimeAndTargetAndHistory": true,
+      "automationStatus": "PAUSED",
+      "businessDelivery": "handover",
+      "firstActualScheduledInvocation": "not_yet_observed"
     }
   }
 }

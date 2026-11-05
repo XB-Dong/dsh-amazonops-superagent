@@ -1,7 +1,7 @@
 {
   "schemaVersion": "0.3",
   "wave": "P1",
-  "status": "execution_in_progress_not_production_cutover",
+  "status": "production_cutover_verified_handover_in_progress",
   "model": {
     "requests": 65,
     "verifiedRequests": 63,
@@ -15,7 +15,11 @@
     "coldObserveCandidate": "9308083",
     "observeDecision": "would_accept",
     "independentColdStart": true,
-    "oldMasterRecovered": false
+    "oldMasterRecovered": false,
+    "verifiedInputTokens": 542890,
+    "verifiedOutputTokens": 36820,
+    "unknownReservedInputTokens": 92848,
+    "unknownReservedOutputTokens": 3072
   },
   "artifacts": [
     {
@@ -72,6 +76,152 @@
       "artifact": "decision-integrated-green.txt",
       "bytes": 2266,
       "sha256": "e65d1c6d3ce0fd908d8a61e19f0afa22a16915f79aa08a3533252c20a8a7501f"
+    },
+    {
+      "id": "P1-G1-REVIEW",
+      "artifact": "g1-final-review.json",
+      "bytes": 4411,
+      "sha256": "c3ac1ddf396cd971f810fffe8e08eb35c9c4c54fb3af2bfc4217d7c79ded957a",
+      "rawLocation": "maintainer_private_only"
+    },
+    {
+      "id": "P1-PLATFORM-FINAL",
+      "artifact": "isolated-final-16b2ae1-all-evidence.zip",
+      "bytes": 17723,
+      "sha256": "9bcd855464c328540844f00f834112757d6a05d718af9672023ceafb60b4235f",
+      "rawLocation": "maintainer_private_only"
+    },
+    {
+      "id": "P1-G2-REPORTS",
+      "artifact": "g2-evidence-reports.zip",
+      "bytes": 15407,
+      "sha256": "8368152d655433d1aa6889b59e5e8c365b61e33535b483275b1e468fc64dc8a5",
+      "rawLocation": "maintainer_private_only"
+    },
+    {
+      "id": "P1-PROD-BROWSER",
+      "artifact": "browser-result.json",
+      "bytes": 2271,
+      "sha256": "491f3d1dd291ddf467205ac5b6150cebdc6352d4e1b655e75fee2f41cea0b2d8",
+      "rawLocation": "maintainer_private_only"
+    },
+    {
+      "id": "P1-PROD-BROWSER-ARTIFACTS",
+      "artifact": "browser-artifacts.json",
+      "bytes": 6077,
+      "sha256": "eed185f7e986c835b1108787154fd9e440efe105e0d70482846b3c846b14ab0e",
+      "rawLocation": "maintainer_private_only"
+    },
+    {
+      "id": "P1-MAINTENANCE-HANDOVER",
+      "artifact": "g3-maintenance-evidence.zip",
+      "bytes": 101014,
+      "sha256": "378753fd3901a7e2c4f8d5d25588d5ba01f9bffbac9d8a646cb6a4af10433817",
+      "rawLocation": "maintainer_private_only"
+    },
+    {
+      "id": "P1-AUTOMATION-PAUSED-READBACK",
+      "artifact": "automation-g3-readback.json",
+      "bytes": 322,
+      "sha256": "9ccdd9ed91f2859b34c8ed3e19dba076edc98a86d2268df07722b73893938345",
+      "rawLocation": "maintainer_private_only"
+    },
+    {
+      "id": "P1-NATIVE-CI-RACE",
+      "artifact": "delivery.json",
+      "bytes": 5370,
+      "sha256": "f8cbedb68daafdf456570b7a84316a4b0724b67fc1cb6f2fc94557ea81205dc1",
+      "rawLocation": "maintainer_private_only"
+    },
+    {
+      "id": "P1-COMPARISON",
+      "artifact": "native-followup-comparison.json",
+      "bytes": 7305,
+      "sha256": "ee9e4276cf59500563a940ab853c85ffe1c7a42d9175eb3067298d1614403eb6",
+      "rawLocation": "maintainer_private_only"
     }
-  ]
+  ],
+  "releaseCandidateSha": "16b2ae1a1a967e3155e99a8d9b2c4b6f8525892c",
+  "productionManifestSha256": "dd12ea6247a36552bb007afaab9b589b5da4b6d54f14c6ed081e0dae12e2344e",
+  "ci": {
+    "runUrl": "https://github.com/XB-Dong/dsh-amazonops-superagent/actions/runs/42006473040",
+    "sourceSha": "16b2ae1a1a967e3155e99a8d9b2c4b6f8525892c",
+    "windows": {
+      "tests": 328,
+      "passed": 327,
+      "skipped": 1,
+      "failed": 0
+    },
+    "linux": {
+      "tests": 328,
+      "passed": 323,
+      "skipped": 5,
+      "failed": 0
+    }
+  },
+  "production": {
+    "newApplicationActive": true,
+    "legacyApplicationInactiveAndDisabled": true,
+    "sourceQuiescedForFinalSnapshot": true,
+    "rawFilesPreserved": 302,
+    "activeRuntimeFilesAfterGracefulClose": 3,
+    "mainFeedbackInherited": 5,
+    "legacyRegistryRecordsInherited": 7,
+    "businessRowsAddedByMigration": 0,
+    "businessRowsRemovedByMigration": 0,
+    "businessRowsChangedByMigration": 0,
+    "unexplainedFileDifferences": 0,
+    "explainedEmptySchemaAdditions": [
+      "business.sqlite:business_events",
+      "model-budget.sqlite:model_request_attribution"
+    ],
+    "strictPublicTlsLoginRpcWss": true,
+    "realNewFeedbackSurvivedServiceRestartExactlyOnce": true,
+    "authorizedSyntheticFeedbackWithdrawn": true,
+    "coordinatedBackupAndIsolatedRestore": true
+  },
+  "maintenance": {
+    "actualReadOnlyHandoverExecuted": true,
+    "modelCalls": 0,
+    "newWaves": 0,
+    "canDevelop": false,
+    "usedAuditedS0Checkpoint": true,
+    "syntheticOnlyDifferenceExplicitlyAcknowledged": true,
+    "realFeedbackChangesSinceS0": 0,
+    "originalRegistryBytesArchived": true,
+    "sameAutomationId": true,
+    "sameTimeAndTargetAndHistory": true,
+    "automationStatus": "PAUSED",
+    "businessDelivery": "handover",
+    "firstActualScheduledInvocation": "not_yet_observed"
+  },
+  "productionBrowser": {
+    "navigationEntries": 13,
+    "narrowViewport": [
+      390,
+      844
+    ],
+    "realPhoneTested": false,
+    "productionNativeTicketExecution": "not_run_no_tickets",
+    "workTicketDraftAndExecutionEvidence": "separate_isolated_native_browser_and_model_layers",
+    "firstLoadingRecoveredByOneRefresh": true,
+    "unsavedFeedbackInputClearsAcrossNavigation": true,
+    "modelMessagesSent": 0
+  },
+  "comparison": {
+    "sameSyntheticRiskCase": true,
+    "repeatedContextPrompts": {
+      "control": 1,
+      "watch": 0
+    },
+    "totalHumanMessages": {
+      "control": 2,
+      "watch": 3
+    },
+    "fakeModelRequests": {
+      "control": 11,
+      "watch": 15
+    },
+    "noSpeedOrCostBenefitClaim": true
+  }
 }

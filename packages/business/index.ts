@@ -19,3 +19,4 @@ export * from './operations/advertising.ts';
 export { Learning, type Feedback, type Memory, type Skill } from './learning/service.ts';
 export { Capture } from './learning/capture.ts';
 export { confirmChange, exportChanges, withdrawFeedback } from './learning/export.ts';
+export { Followups } from './followups/index.ts';

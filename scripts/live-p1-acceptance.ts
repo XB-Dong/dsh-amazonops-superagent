@@ -104,7 +104,13 @@ try {
     return proof;
   });
   report.completion = completion;
-  await api('followups/rule', { requestId: 'p1-live-observe', mode: 'observe', inventoryIds: [inventory.id] });
+  // The watch already handled A's risk. A fresh, explicitly enrolled object tests
+  // positive admission without asking the model to duplicate the existing draft.
+  const ruleForecast=await api('actions/forecast',{requestId:'p1-live-rule-seed',store:'Synthetic',site:'US',listing:'B',asOf,
+    manualDaily:3,manualReason:'尚未处理过的合成观察对象'});
+  const ruleInventory=await api('actions/inventory',{forecastId:ruleForecast.id,physicalSku:'B',asOf,available:1,reserved:0,inbound:[],
+    leadDays:{purchase:1,transport:2,receiving:1},safetyDays:2,horizon:7,demandFactors:[]});
+  await api('followups/rule', { requestId: 'p1-live-observe-uncovered', mode: 'observe', inventoryIds: [ruleInventory.id] });
   const observed = await until('native-observe-assessment', async () => {
     const state = await api('followups'); return state.assessments?.find((item: any) => item.decision === 'would_accept');
   });

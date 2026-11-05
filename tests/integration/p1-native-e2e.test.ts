@@ -70,8 +70,17 @@ test('actual native finite watch continues on business change, hands decision to
     await api('rule',{requestId:'observe-native',mode:'observe',inventoryIds:[inventory.id]});
     current=await until('actual observe assessment',async()=>{const s=await state();return s.followups.assessments.some((a:any)=>a.decision==='would_accept')?s:undefined;});
     assert.equal(current.tickets.length,1,'observe cannot launch another worker');assert.equal(current.tasks.length,1);
+    await api('rule',{requestId:'observe-off-native',mode:'off',inventoryIds:[inventory.id]});
+    await api('rule',{requestId:'observe-again-native',mode:'observe',inventoryIds:[inventory.id]});
+    current=await until('explicit observe reconfiguration is assessed again',async()=>{const s=await state();return s.decisions.filter((d:any)=>d.audit?.would_accept).length===2?s:undefined;});
+    assert.equal(current.tickets.length,1);assert.equal(current.tasks.length,1);
     await api('rule',{requestId:'auto-native',mode:'auto',inventoryIds:[inventory.id]});
     current=await until('single native auto worker and result',async()=>{const s=await state();return s.tickets.length===2&&s.tasks.length===2&&s.outbox.some((m:any)=>m.text==='规则草稿已准备，等待确认。'&&m.status==='sent')?s:undefined;});
+    await api('rule',{requestId:'accepted-auto-off-native',mode:'off',inventoryIds:[inventory.id]});
+    await api('rule',{requestId:'accepted-auto-again-native',mode:'auto',inventoryIds:[inventory.id]});
+    await new Promise(done=>setTimeout(done,2400));current=await state();
+    assert.equal(current.tickets.length,2,'a genuinely accepted auto risk window is not accepted again after off/on');
+    assert.equal(current.tasks.length,2,'native intake delivery alone is not an accepted-window receipt');
     await shutdown();await boot();const restarted=await state();
     assert.equal(restarted.tasks.length,2);assert.equal(restarted.tickets.length,2);
     const modelEvidence=readFileSync(join(evidence,'model-requests.jsonl'),'utf8').trim().split('\n').map(l=>JSON.parse(l));

@@ -1,7 +1,7 @@
 import { Followups, digest, type Base, type Business } from '../business/index.ts';
 import type { WatchCreate, InventoryWatch, FollowupSnapshot, FollowupEvent } from '../contracts/followups.ts';
-import { ticketStage, type Trigger } from '../../vendor/superagent/src/extension.ts';
-import { RISK_BOT,RISK_RULE_ID,RISK_INSTRUCTION,currentEvent,ticketWatch,authorizeFollowup } from './followup-native-authority.ts';
+import { ticketStage, type Trigger, type Decision } from '../../vendor/superagent/src/extension.ts';
+import { RISK_BOT,RISK_RULE_ID,RISK_INSTRUCTION,currentEvent,ticketWatch,authorizeFollowup,readableBusinessTrigger } from './followup-native-authority.ts';
 import type { WorkbenchSource } from './source.ts';
 
 type RuleInput={requestId:string;mode:'off'|'observe'|'auto';inventoryIds:string[]};
@@ -37,12 +37,42 @@ export class FollowupNative {
   async configureRule(scope:string,input:RuleInput,options:{autoAvailable:boolean}):Promise<unknown>{
     if(scope!=='main')throw new Error('SCOPE_FORBIDDEN');request(input.requestId);
     if(input.mode==='auto'&&!options.autoAvailable)throw new Error('AUTO_NOT_VALIDATED');
+    this.syncDecisions(scope);
     const rule=this.business.store.transaction(()=>{
       const source=this.business.store.once(scope,`rule-human-source:${input.requestId}`,()=>this.business.store.source(scope,
         `配置唯一库存内部复核规则：${input.mode}；对象 ${input.inventoryIds.join(',')}`,`human-rule-${input.requestId}`));
       return this.domain.configureRule(scope,input,source.id);
     });
     await this.syncPolicy();return rule;
+  }
+  /** Intake delivery is not acceptance: mirror only durable native decisions, including historical ones. */
+  syncDecisions(scope:string):void{
+    const runtime=this.source.runtime;
+    const decisions=runtime.store.db.prepare('SELECT value FROM decision ORDER BY rowid').all()
+      .map(row=>JSON.parse(String(row.value)) as Decision);
+    for(const decision of decisions){
+      if(!['accept','ignore'].includes(decision.kind)||decision.strength!=='inferred')continue;
+      for(const triggerId of decision.triggerIds){
+        const trigger=runtime.store.triggers.get(triggerId);
+        if(!trigger||trigger.source!=='amazonops'||trigger.meta.scope!==scope||trigger.human||
+          trigger.meta.eventClass!=='risk_candidate'||trigger.actor.id!==RISK_BOT||!readableBusinessTrigger(this.business,trigger))continue;
+        const eventId=String(trigger.meta.eventId);
+        const event=this.business.store.get<FollowupEvent>(scope,eventId);
+        if(event.kind!=='followup-event'||event.eventClass!=='risk_candidate'||event.watchId||trigger.id!==`event-${event.id}`)continue;
+        let ticketId:string|undefined;
+        const outcome=decision.kind==='accept'?'accepted':decision.audit?.would_accept===true?'would_accept':'ignored';
+        if(outcome==='accepted'){
+          const ticket=decision.ticketId?runtime.store.tickets.get(decision.ticketId):undefined;
+          if(!ticket||ticket.decisionId!==decision.id||ticket.mandate.strength!=='inferred'||
+            !ticket.mandate.basis.rules?.includes(RISK_RULE_ID)||!ticket.origin.triggerIds.includes(trigger.id))continue;
+          ticketId=ticket.id;
+        }
+        this.business.store.command(scope,`native-rule-decision:${decision.id}`,{eventId,outcome,ticketId},()=>{
+          this.domain.recordRuleDecision(scope,eventId,outcome,ticketId);
+          return {eventId,sourceId:trigger.id,ticketId};
+        });
+      }
+    }
   }
   async syncPolicy():Promise<void>{
     const runtime=this.source.runtime,settings=runtime.store.settings();
@@ -73,6 +103,7 @@ export class FollowupNative {
   }
   private async run(scope:string):Promise<void>{
     this.domain.expire(scope);
+    this.syncDecisions(scope);
     for(const ticket of this.source.runtime.store.tickets.list()){
       try{
         if(!ticket.ended)authorizeFollowup(this.business,this.source.runtime,ticket);

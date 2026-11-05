@@ -4,6 +4,7 @@ import type { Inventory } from '../operations/inventory.ts';
 import type { WatchCreate, InventoryWatch, InventoryRule, RiskSnapshot, FollowupEvent, FollowupSnapshot } from '../../contracts/followups.ts';
 import { humanSource, inventoryRisk, liveEntity } from './risk.ts';
 import { scanEvents, pendingEvents } from './scan.ts';
+import { recordRuleDecision, type RuleDecision } from './decisions.ts';
 
 export type WatchRecord = InventoryWatch & { startSequence: number; initialDigest: string };
 export type RuleInput = { requestId: string; mode: 'off' | 'observe' | 'auto'; inventoryIds: string[] };
@@ -105,6 +106,9 @@ export class Followups {
   }
   scan(scope: string): void { scanEvents(this, scope); }
   pending(scope: string): FollowupEvent[] { return pendingEvents(this, scope); }
+  recordRuleDecision(scope: string, eventId: string, decision: RuleDecision, ticketId?: string): void {
+    recordRuleDecision(this.store, scope, eventId, decision, ticketId);
+  }
   markDelivered(scope: string, eventId: string): void {
     this.store.transaction(() => {
       const event = this.store.list<FollowupEvent>(scope, 'followup-event').find(row => row.eventId === eventId);

@@ -207,12 +207,13 @@ test('consumer handles more than one source page and keeps snapshots read-only',
   } finally { f.close(); }
 });
 
-test('same rule semantics and reenabling a delivered risk window cannot create duplicate auto work', () => {
+test('same rule semantics and reenabling a truly accepted risk window cannot create duplicate auto work', () => {
   const f = fixture();
   try {
     const rule = f.followups.configureRule('main', { requestId: 'auto-first', mode: 'auto', inventoryIds: [f.inventory.id] }, f.source.id);
     f.followups.scan('main'); const event = f.followups.pending('main')[0];
     f.followups.markDelivered('main', event.eventId);
+    f.followups.recordRuleDecision('main', event.eventId, 'accepted', 'verified-native-ticket');
     const repeated = f.followups.configureRule('main', { requestId: 'auto-repeat', mode: 'auto', inventoryIds: [f.inventory.id] }, f.source.id);
     assert.equal(repeated.revision, rule.revision, 'unchanged rule semantics do not create a policy revision');
     f.followups.scan('main'); assert.equal(f.followups.pending('main').length, 0);
@@ -313,4 +314,83 @@ test('completion persists expiry before rejecting and rechecks revoked authority
       }
     } finally { f.close(); }
   }
+});
+
+test('observe policy can reevaluate unchanged risk after off and whitelist changes', () => {
+  for (const delivery of ['pending', 'delivered'] as const) {
+    const f = fixture();
+    try {
+      const configure = (requestId: string, mode: 'off' | 'observe', inventoryIds: string[]) =>
+        f.followups.configureRule('main', { requestId, mode, inventoryIds }, f.source.id);
+      configure('first', 'observe', [f.inventory.id]); f.followups.scan('main');
+      const first = f.followups.pending('main')[0];
+      if (delivery === 'delivered') f.followups.markDelivered('main', first.eventId);
+      configure('off', 'off', []); configure('again', 'observe', [f.inventory.id]); f.followups.scan('main');
+      const second = f.followups.pending('main');
+      assert.equal(second.length, 1, delivery);
+      assert.notEqual(second[0].eventId, first.eventId);
+      assert.ok(second[0].ruleRevision! > first.ruleRevision!);
+      const otherForecast = forecastVersion(f.store, 'main', { requestId: 'B', store: 'S', site: 'US', listing: 'B',
+        asOf: '2026-11-05', manualDaily: 5, manualReason: 'Synthetic other listing' });
+      const other = saveInventory(f.store, 'main', { ...f.inventory, forecastId: otherForecast.id, physicalSku: 'SKU-B' });
+      configure('away', 'observe', [other.id]); configure('back', 'observe', [f.inventory.id]); f.followups.scan('main');
+      assert.equal(f.followups.pending('main').length, 1);
+      assert.notEqual(f.followups.pending('main')[0].eventId, second[0].eventId);
+    } finally { f.close(); }
+  }
+});
+
+test('auto intake delivery and ignored decisions do not masquerade as native acceptance', () => {
+  for (const outcome of ['delivered', 'ignored', 'would_accept'] as const) {
+    const f = fixture();
+    try {
+      f.followups.configureRule('main', { requestId: 'auto-first', mode: 'auto', inventoryIds: [f.inventory.id] }, f.source.id);
+      f.followups.scan('main'); const first = f.followups.pending('main')[0];
+      f.followups.markDelivered('main', first.eventId);
+      if (outcome !== 'delivered') f.followups.recordRuleDecision('main', first.eventId, outcome);
+      f.followups.configureRule('main', { requestId: 'off', mode: 'off', inventoryIds: [] }, f.source.id);
+      f.followups.configureRule('main', { requestId: 'auto-again', mode: 'auto', inventoryIds: [f.inventory.id] }, f.source.id);
+      f.followups.scan('main');
+      assert.equal(f.followups.pending('main').length, 1, outcome);
+      assert.notEqual(f.followups.pending('main')[0].eventId, first.eventId);
+    } finally { f.close(); }
+  }
+});
+
+test('historical native auto acceptance survives policy changes and is durable across restart', () => {
+  const f = fixture();
+  let closed = false;
+  try {
+    f.followups.configureRule('main', { requestId: 'auto-first', mode: 'auto', inventoryIds: [f.inventory.id] }, f.source.id);
+    f.followups.scan('main'); const first = f.followups.pending('main')[0];
+    f.followups.recordRuleDecision('main', first.eventId, 'ignored');
+    f.followups.configureRule('main', { requestId: 'off', mode: 'off', inventoryIds: [] }, f.source.id);
+    f.followups.recordRuleDecision('main', first.eventId, 'accepted', 'verified-native-ticket');
+    f.followups.recordRuleDecision('main', first.eventId, 'accepted', 'verified-native-ticket');
+    assert.throws(() => f.followups.recordRuleDecision('main', first.eventId, 'accepted', 'different-ticket'), /CONFLICT/);
+    f.followups.configureRule('main', { requestId: 'auto-again', mode: 'auto', inventoryIds: [f.inventory.id] }, f.source.id);
+    assert.throws(() => f.followups.recordRuleDecision('other', first.eventId, 'accepted', 'verified-native-ticket'), /NOT_FOUND|DELETED/);
+    f.store.close(); closed = true;
+    const reopened = new Store(join(f.dir, 'business.sqlite'));
+    try {
+      const restarted = new Followups(reopened, () => new Date('2026-11-05T01:00:00.000Z'));
+      restarted.scan('main'); assert.equal(restarted.pending('main').length, 0);
+    } finally { reopened.close(); }
+  } finally { if (closed) rmSync(f.dir, { recursive: true, force: true }); else f.close(); }
+});
+
+test('decision bookkeeping refuses missing acceptance proof and revoked or mismatched event authority', () => {
+  const f = fixture();
+  try {
+    f.followups.configureRule('main', { requestId: 'observe', mode: 'observe', inventoryIds: [f.inventory.id] }, f.source.id);
+    f.followups.scan('main'); const observed = f.followups.pending('main')[0];
+    assert.throws(() => f.followups.recordRuleDecision('main', observed.eventId, 'accepted', 'ticket'), /PROOF_REQUIRED/);
+    f.followups.configureRule('main', { requestId: 'auto', mode: 'auto', inventoryIds: [f.inventory.id] }, f.source.id);
+    f.followups.scan('main'); const candidate = f.followups.pending('main')[0];
+    assert.throws(() => f.followups.recordRuleDecision('main', candidate.eventId, 'accepted'), /PROOF_REQUIRED/);
+    assert.throws(() => f.followups.recordRuleDecision('main', candidate.eventId, 'invalid' as 'ignored'), /INVALID_RULE_DECISION/);
+    assert.equal(f.followups.pending('main').length, 1);
+    f.store.privacyIntent('main', f.source.id, 'revoke'); f.store.applyPrivacyLedger();
+    assert.throws(() => f.followups.recordRuleDecision('main', candidate.eventId, 'ignored'), /REVOKED/);
+  } finally { f.close(); }
 });

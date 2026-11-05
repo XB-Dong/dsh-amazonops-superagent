@@ -2,6 +2,7 @@ import { digest, type Base, type BusinessEvent } from '../core/store.ts';
 import type { FollowupEvent, InventoryRule, RiskSnapshot } from '../../contracts/followups.ts';
 import { liveEntity, sameInventory } from './risk.ts';
 import type { Followups, WatchRecord } from './index.ts';
+import { acceptedWindow } from './decisions.ts';
 
 type Cursor = Base & { sequence: number; ruleRevision: number };
 const relevantKinds = new Set(['business:inventory', 'business:forecast', 'business:report-import']);
@@ -19,7 +20,8 @@ function relevant(service: Followups, scope: string, event: BusinessEvent, risk:
   } catch (error) { if (!unavailable(error)) throw error; return false; }
 }
 function enqueue(service: Followups, scope: string, risk: RiskSnapshot, sequence: number, watch?: WatchRecord, rule?: InventoryRule): void {
-  const owner = watch ? `watch:${watch.id}` : `rule:${rule!.id}:${rule!.mode}`;
+  if (rule?.mode === 'auto' && acceptedWindow(service.store, scope, rule.id, risk.digest)) return;
+  const owner = watch ? `watch:${watch.id}` : `rule:${rule!.id}:${rule!.revision}:${rule!.mode}`;
   const eventId = `followup-${digest([scope, owner, risk.digest, ...(watch ? [sequence] : [])])}`;
   if (service.store.isDeleted(scope, eventId) || service.store.list<FollowupEvent>(scope, 'followup-event').some(row => row.eventId === eventId)) return;
   service.store.create(scope, 'followup-event', {
@@ -87,6 +89,7 @@ export function pendingEvents(service: Followups, scope: string): FollowupEvent[
       }
       const rule = service.rule(scope);
       if (!rule || rule.mode === 'off' || rule.mode !== event.ruleMode || rule.revision !== event.ruleRevision || !risk.stockoutDate) return false;
+      if (rule.mode === 'auto' && acceptedWindow(service.store, scope, rule.id, risk.digest)) return false;
       if (!rule.inventoryIds.some(id => sameInventory(service.risk(scope, id), risk))) return false;
       return !service.list(scope).some(watch => watch.status === 'active' && Date.parse(watch.expiresAt) > service.clock().getTime() && sameInventory(watch, risk));
     } catch (error) { if (!unavailable(error)) throw error; return false; }

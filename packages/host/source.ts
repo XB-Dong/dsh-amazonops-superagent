@@ -70,6 +70,16 @@ export class WorkbenchSource {
     const hash=digest({text,threadId:threadId??null});
     const receipt=this.business.store.once<MessageReceipt>(scope,`human-message:${requestId}`,()=>{
       const source=this.business.capture.enqueue(scope,text,`human-${requestId}`);
+      // A human decision on ongoing work still derives from that work's original
+      // authorization and facts. Carry those parents into later task/feedback writes.
+      const parents=threadId?this.runtime.store.tickets.list().flatMap(ticket=>{
+        const origin=this.runtime.store.triggers.get(ticket.origin.triggerId);
+        if(origin?.meta.scope!==scope||!origin.threads.some(thread=>thread.id===threadId)||
+          (!origin.meta.watchId&&origin.meta.eventClass!=='risk_candidate'))return [];
+        return [origin.id,...typeof origin.meta.watchId==='string'?[origin.meta.watchId]:[],
+          ...typeof origin.meta.eventId==='string'?[origin.meta.eventId]:[]];
+      }):[];
+      if(parents.length)this.business.store.update(source as typeof source&{sources:string[]},{sources:[...new Set(parents)]});
       return {hash,threadId:threadId??randomUUID(),sourceId:source.id};
     });
     if(receipt.hash!==hash)throw new Error('REQUEST_CONFLICT');

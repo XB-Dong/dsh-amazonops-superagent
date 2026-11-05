@@ -31,6 +31,22 @@ test('unit: untrusted derived metadata cannot enter the new Source admission',()
     assert.equal(f.kinds[0].scope({meta:{scope:'other',eventClass:'human_request'}}).listened,false);
   }finally{f.dispose();}
 });
+
+test('unit: deleting a watch authorization erases a draft derived from its later human answer',async()=>{
+  const f=fixture();try{
+    const inventory=seed(f),watch=await f.source.followups.createWatch('main',
+      {requestId:'derived-privacy',inventoryId:inventory.id,expiresAt:new Date(Date.now()+86400000).toISOString()});
+    const row:any={id:'privacy-watch-ticket',origin:{triggerId:watch.sourceId,triggerIds:[watch.sourceId]},
+      inputs:[],assignments:[],updatedAt:new Date().toISOString()};f.tickets.set(row.id,row);
+    const answer=await f.source.submit('main','同意创建合成复核草稿。','derived-answer',`watch-${watch.id}`);
+    const task=f.business.tool('main',answer.messageId,'prepare_task',
+      {title:'合成库存复核',timeZone:'Asia/Shanghai',checklist:['人工核对风险']},'derived-task');
+    assert.equal(f.business.snapshot('main').tasks.length,1);
+    f.business.learning.deleteSource('main',watch.sourceId);
+    assert.equal(f.business.snapshot('main').tasks.length,0,'a later human answer must retain its original authorized context lineage');
+    assert.throws(()=>f.business.store.get('main',task.id),/NOT_FOUND/);
+  }finally{f.dispose();}
+});
 test('unit: automatic activation needs trusted evidence and never follows request payload claims',async()=>{
   const f=fixture();try{
     const inventory=seed(f);

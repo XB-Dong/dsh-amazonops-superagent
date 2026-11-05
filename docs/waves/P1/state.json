@@ -124,8 +124,16 @@
     }
   },
   "gateDefinition": "docs/waves/P1/GATES.zh.md",
-  "activeStage": "S0",
+  "activeStage": "S1",
   "executionBaselineSha": "ccb36eef91787aa8e53854e02e247ab9f5475b15",
   "startedDate": "2026-11-05",
-  "startInstruction": "User explicitly said 启动 in this chat"
+  "startInstruction": "User explicitly said 启动 in this chat",
+  "g0": {
+    "status": "passed",
+    "sameAutomationPaused": true,
+    "legacyMaintenanceThreadIdle": true,
+    "oldBusinessHealthy": true,
+    "privateInventory": "captured",
+    "hostFingerprintVerified": true
+  }
 }

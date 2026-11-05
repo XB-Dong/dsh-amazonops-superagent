@@ -2,14 +2,15 @@
   "schemaVersion": "0.3",
   "id": "P1-CLOUD",
   "rootTask": "P1-CLOUD-SUCCESSOR",
-  "baselineSha": "9ef48273d88d309c361557f942b20da1882ded52",
-  "inputSpecVersion": "0.3.0",
+  "baselineSha": "711c630150f06058d78db0c98956a3177d81a606",
+  "inputSpecVersion": "0.3.0-execution",
   "inputFiles": [
     "docs/waves/P1/PLAN.md",
     "docs/waves/P1/SPEC.zh.md",
     "docs/waves/P1/MIGRATION-CUTOVER.zh.md",
     "docs/waves/P1/MAINTENANCE.zh.md",
-    "docs/waves/P1/acceptance.json"
+    "docs/waves/P1/acceptance.json",
+    "specs/contracts/p1-platform-migration-v0.3.md"
   ],
   "inputManifest": "docs/waves/P1/inputs.json",
   "owner": "p1_platform",
@@ -22,9 +23,16 @@
     ".github/workflows/**",
     "tests/native/**",
     "tests/integration/boundary.test.ts",
-    "deploy/**"
+    "deploy/**",
+    "scripts/build.mjs",
+    "packages/host/production.ts",
+    "tests/integration/production*.ts"
   ],
-  "excludedWritePaths": [],
+  "excludedWritePaths": [
+    "packages/host/index.ts",
+    "packages/host/source.ts",
+    "packages/host/agent-tools.ts"
+  ],
   "dependencies": [
     "P1-FOUNDATION"
   ],
@@ -36,8 +44,8 @@
     "P1-CLOUD-05"
   ],
   "instructions": "Implement and verify real Linux native startup, trusted public-origin HTTPS proxy, production authentication, health/version and service packaging. Coordinate shared host index with Leader; no production changes before release gate.",
-  "status": "prepared_waiting_for_start",
-  "dispatchable": false,
+  "status": "authorized_dispatch_pending",
+  "dispatchable": true,
   "dispatchGate": "User start message plus S0 current-baseline and private-input revalidation; Leader records exact dispatch commit and frozen interface SHA before activation. Preparation baseline is not automatically the later execution baseline.",
   "repairCount": 0,
   "repairCondition": "Preserve root cause history. After two same-root-cause repair attempts, perform renewed diagnosis and record the decision before further repair. Installation and fixture errors are not product Red.",

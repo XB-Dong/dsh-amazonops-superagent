@@ -15,7 +15,7 @@
     "automationChanges": "waiting_for_explicit_start",
     "profilePublication": "waiting_for_explicit_start"
   },
-  "preparationStatus": "under_review",
+  "preparationStatus": "ready_waiting_for_start",
   "repositoryVisibility": "public_verified",
   "githubProfile": "read_only_old_project_reference_verified",
   "automation": "viewed_active_old_project_unchanged",
@@ -28,8 +28,11 @@
   "productAcceptance": "not_run",
   "mandatoryCases": 39,
   "independentReview": {
-    "status": "pending",
-    "scope": "preparation_only"
+    "status": "accepted",
+    "scope": "preparation_only",
+    "reviewedSha": "155abc71ecef2899e03fe2ff5ffedc016a872c9b",
+    "report": "docs/audit/reviews/P1-PREPARATION-20261105.zh.md",
+    "productTests": "not_run"
   },
   "taskIndex": "docs/waves/P1/tasks.json",
   "inputManifest": "docs/waves/P1/inputs.json",

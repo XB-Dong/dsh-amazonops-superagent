@@ -1,4 +1,6 @@
+import { useState } from 'react';
 import { useWorkbench } from './controller.ts';
+import { emptyAssistantDrafts } from './assistant-state.ts';
 import { api, empty, modelLabel, assistantHealthy, type Snapshot, type Status } from './api.ts';
 import { Icon } from './components.tsx';
 import { Overview } from './Overview.tsx';
@@ -33,6 +35,7 @@ const navigation = [
   { id: 'help', name: '使用说明', icon: 'book' },
 ];
 export function App({ openSession }: { openSession?: (id: string) => void }) {
+  const [assistantDrafts, setAssistantDrafts] = useState(emptyAssistantDrafts);
   const {page,status,data,ready,authenticated,error,notice,busy,initialPrompt,menuOpen,setMenuOpen,setError,setAuthenticated,setData,refresh,login,mutate,navigate,prompt} = useWorkbench();
   if (!ready)
     return (
@@ -148,6 +151,8 @@ export function App({ openSession }: { openSession?: (id: string) => void }) {
               refresh={refresh}
               reportError={setError}
               openSession={openSession}
+              drafts={assistantDrafts}
+              setDrafts={setAssistantDrafts}
             />
           )}{' '}
           {page === 'tasks' && <TasksPage data={data} mutate={mutate} busy={busy} />}{' '}
@@ -169,6 +174,7 @@ export function App({ openSession }: { openSession?: (id: string) => void }) {
               mutate={mutate}
               logout={() =>
                 void api('logout', {}).then(() => {
+                  setAssistantDrafts(emptyAssistantDrafts());
                   setAuthenticated(false);
                   setData(empty);
                 })

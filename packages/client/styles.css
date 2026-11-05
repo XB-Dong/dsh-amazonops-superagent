@@ -571,3 +571,74 @@
 .amazonops { position: relative; height: 100%; min-height: 0; overflow: auto; contain: layout paint; }
 .amazonops .app-shell { min-height: 100%; }
 .amazonops .work-ticket { border-top: 1px solid #dae5df; padding: 12px 0; }
+
+.amazonops .p1-assistant { grid-template-columns: minmax(0, 1.05fr) minmax(340px, .95fr); align-items: start; gap: 20px; }
+.amazonops .p1-assistant .chat-panel { min-height: 560px; height: min(760px, calc(100dvh - 170px)); }
+.amazonops .p1-assistant .chat-heading h2 { font-size: 22px; margin: 3px 0; }
+.amazonops .p1-assistant .chat-heading p { font-size: 12px; color: #71837a; display: block; }
+.amazonops .chat-hint { padding: 14px 22px 0; margin: 0; font-size: 12px; }
+.amazonops .thread-picker { margin: 12px 22px 0; font-size: 12px; }
+.amazonops .p1-assistant .chat-messages { padding: 20px 22px; min-height: 140px; flex: 1; overflow-y: auto; }
+.amazonops .p1-assistant .chat-composer { margin-top: auto; }
+.amazonops .assistant-empty { padding: 25px 6px; color: #71837a; font-size: 13px; }
+.amazonops .assistant-empty strong { color: #40594d; font-size: 15px; }
+.amazonops .assistant-empty p { margin: 8px 0; }
+.amazonops .assistant-work, .amazonops .followups-panel { min-width: 0; padding: 22px; }
+.amazonops .section-title-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.amazonops .section-title-row h2 { margin: 4px 0 0; font-size: 19px; }
+.amazonops .count-label { color: #7c8b82; font-size: 12px; white-space: nowrap; }
+.amazonops .work-ticket-list { max-height: 690px; overflow: auto; padding-right: 4px; }
+.amazonops .p1-assistant .work-ticket { padding: 18px 0; border-top-color: #e4ebe5; }
+.amazonops .work-ticket-heading { display: flex; gap: 12px; justify-content: space-between; align-items: baseline; }
+.amazonops .work-ticket-heading h3, .amazonops .work-ticket-heading strong { font-size: 15px; margin: 0; overflow-wrap: anywhere; }
+.amazonops .work-ticket-heading .badge { flex-shrink: 0; font-size: 11px; }
+.amazonops .badge.amber { background: #fff2d9; color: #87601d; }
+.amazonops .ticket-report { font-size: 13px; color: #52665b; white-space: pre-wrap; overflow-wrap: anywhere; margin: 12px 0; }
+.amazonops .attention-question { padding: 12px 14px; background: #fcf7e9; border-left: 3px solid #c9ac68; border-radius: 8px; margin: 12px 0; font-size: 13px; }
+.amazonops .attention-question strong { color: #826329; font-size: 12px; }
+.amazonops .attention-question p { margin: 5px 0 0; white-space: pre-wrap; }
+.amazonops .ticket-details { margin: 12px 0; color: #6e8174; font-size: 12px; }
+.amazonops .ticket-details summary, .amazonops .rule-settings summary { cursor: pointer; font-weight: 600; }
+.amazonops .ticket-details dl { margin: 12px 0; padding: 12px; background: #f7f9f6; border-radius: 8px; }
+.amazonops .ticket-details dl > div { margin-bottom: 8px; }
+.amazonops .ticket-details dt { color: #7d8e80; font-size: 11px; }
+.amazonops .ticket-details dd { margin: 2px 0 0; color: #41594b; white-space: pre-wrap; overflow-wrap: anywhere; }
+.amazonops .ticket-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 12px; }
+.amazonops .quiet-danger { color: #9c655d; }
+.amazonops .ticket-answer { background: #f6f9f4; padding: 14px; margin-top: 14px; border: 1px solid #dbe5d6; border-radius: 10px; }
+.amazonops .ticket-answer textarea { min-height: 95px; resize: vertical; font-size: 13px; }
+.amazonops .work-pagination { display: flex; align-items: center; justify-content: space-between; gap: 10px; border-top: 1px solid #e4ebe5; padding-top: 14px; font-size: 12px; color: #71837a; }
+.amazonops .followups-panel, .amazonops .assistant-banner { grid-column: 1 / -1; }
+.amazonops .assistant-banner { padding: 10px 14px; background: #eff5ed; color: #55704f; border-radius: 9px; margin: 0; font-size: 13px; }
+.amazonops .assistant-banner.warning { background: #fff5e5; color: #896a3b; }
+.amazonops .watch-form { max-width: 780px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px 18px; margin: 18px 0; padding: 18px; background: #f6f9f5; border: 1px solid #e0e8dc; border-radius: 12px; }
+.amazonops .watch-form > label:first-child, .amazonops .watch-form > .authorization-note { grid-column: 1 / -1; }
+.amazonops .watch-form > .helper-text { margin: 0; font-size: 12px; }
+.amazonops .watch-form input, .amazonops .watch-form select { min-width: 0; }
+.amazonops .authorization-note { font-size: 12px; color: #5d725e; padding: 11px 13px; background: #eaf0e5; border-radius: 8px; }
+.amazonops .watch-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(270px, 1fr)); gap: 12px; margin: 18px 0; }
+.amazonops .watch-item { padding: 16px; border: 1px solid #e0e8dc; border-radius: 11px; background: #fbfcfa; }
+.amazonops .watch-item p { margin: 6px 0; font-size: 13px; }
+.amazonops .rule-settings { border-top: 1px solid #e2e9de; margin-top: 18px; padding-top: 16px; font-size: 13px; }
+.amazonops .rule-settings > label { max-width: 420px; margin-top: 14px; }
+.amazonops .rule-settings fieldset { border: 1px solid #e1e8dd; border-radius: 9px; margin: 15px 0; padding: 10px 14px; }
+.amazonops .rule-settings legend { padding: 0 7px; color: #72816e; font-size: 12px; }
+.amazonops .rule-choice { display: flex; gap: 9px; align-items: center; padding: 7px 0; font-size: 13px; }
+.amazonops .rule-choice input { width: auto; flex-shrink: 0; }
+.amazonops .rule-assessments { margin-top: 18px; }
+.amazonops .rule-assessments h3 { font-size: 14px; }
+.amazonops .rule-assessments article, .amazonops .watch-event { border-top: 1px solid #e5ebe1; padding: 12px 0; font-size: 13px; }
+.amazonops .rule-assessments p { margin: 5px 0 0; }
+.amazonops .watch-event small { color: #7d8d80; }
+@media (max-width: 1100px) {
+  .amazonops .p1-assistant { grid-template-columns: minmax(0, 1fr); }
+  .amazonops .p1-assistant .chat-panel { min-height: 480px; height: 620px; }
+  .amazonops .work-ticket-list { max-height: none; }
+}
+@media (max-width: 640px) {
+  .amazonops .assistant-work, .amazonops .followups-panel { padding: 16px; }
+  .amazonops .watch-form { grid-template-columns: minmax(0, 1fr); padding: 13px; }
+  .amazonops .work-ticket-heading { flex-wrap: wrap; gap: 6px; }
+  .amazonops .section-title-row { align-items: flex-start; }
+  .amazonops .p1-assistant .chat-panel { min-height: 490px; height: calc(100dvh - 150px); }
+}

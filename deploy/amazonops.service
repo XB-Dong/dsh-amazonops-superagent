@@ -12,7 +12,8 @@ Environment=AMAZONOPS_HOME=/var/lib/amazonops
 EnvironmentFile=/opt/amazonops/config/service.env
 ExecStart=/opt/amazonops/tooling/node-v24.22.1-linux-x64/bin/node scripts/start.mjs
 Restart=on-failure
-RestartSec=3
+# Native owner locks expire after 30s following a crash; retain that protection.
+RestartSec=35
 TimeoutStopSec=30
 KillMode=mixed
 UMask=0077

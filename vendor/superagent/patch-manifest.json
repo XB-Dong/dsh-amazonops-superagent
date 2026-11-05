@@ -107,7 +107,9 @@
     "operationsTools": {
       "master": [
         "orchestrator_route",
-        "orchestrator_reply"
+        "orchestrator_reply",
+        "orchestrator_eval",
+        "orchestrator_eval_decide"
       ],
       "worker": [
         "orchestrator_read",
@@ -122,7 +124,13 @@
   },
   "operationsTurnCompletion": {
     "mechanism": "Official ToolRunContext.concludeTurn on this successful tool result; preserve native steering and inbox behavior",
-    "terminalReports": ["ready", "blocked", "failed", "dropped"],
+    "terminalReports": [
+      "ready",
+      "waiting",
+      "blocked",
+      "failed",
+      "dropped"
+    ],
     "requirements": "report requires reported=true; route requires nonempty results with no refused item; reply requires status=sent; errors and progress never conclude",
     "validation": "Real native E2E Red showed delivered ready worker turn/end reason=error TICKET_ENDED; Green reason=completed with exactly two worker model requests, unchanged privacy guards and dynamic captured accounting"
   },
@@ -138,5 +146,15 @@
   "transportAdaptations": [
     "Business tool results use JSON transport semantics for optional fields; real native output validator is authoritative",
     "Operations read tool schema documents only current ticket and authenticated original triggers; unlisted resources are denied by host authorization"
-  ]
+  ],
+  "operationsFollowups": {
+    "owner": "Host FollowupNative and business Followups; native Runtime/Engine remain authoritative",
+    "newAdapterFiles": [
+      "src/operations.ts"
+    ],
+    "behavior": "Finite human inventory watches resume the same native ticket. One explicitly enrolled risk rule runs observe or trusted auto. Native persisted Decisions synchronize before policy changes and event scans; intake delivery is not acceptance. Event identity includes current rule revision; only actual accepted auto decisions reserve the deduplicated risk window.",
+    "completion": "Successful native eval_decide concludes the current main turn; waiting reports conclude a worker turn without ending its ticket. Explicit human completion remains required for an active watch.",
+    "authorization": "Every current event, object, policy version, privacy lineage and human decision is checked at execution. Missing trigger_id is rejected with a corrective message; it is never inferred. Historical context grants no fresh write authority.",
+    "validation": "Actual DSH SSE watch/attention/answer/draft/completion; observe off/on reevaluation without worker; accepted auto off/on without duplicate worker; persisted native decision history and privacy closure regressions."
+  }
 }

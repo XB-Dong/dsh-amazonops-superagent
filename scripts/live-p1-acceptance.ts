@@ -10,6 +10,7 @@ import { DatabaseSync } from 'node:sqlite';
 import { build } from 'esbuild';
 import { localPatch } from '../profiles/local.ts';
 import { scrubEnvironment, lineWriter } from './start.mjs';
+import { liveDeliveryProof } from './live-proof.ts';
 
 const key = process.env.AMAZONOPS_API_KEY;
 if (!key) throw new Error('AMAZONOPS_API_KEY_REQUIRED');
@@ -89,8 +90,11 @@ try {
   const completion = await action(first.id, 'p1-live-completion', '现在完成跟进。请结束这次合成库存跟进，报告内部草稿已保存、等待人工确认，并把最终结果回复给我。不要执行外部操作。');
   await until('native-final-result-delivered', async () => {
     const state = native(), ticket = state?.tickets.find((item: any) => item.id === first.id), work = await api('work');
-    const result = state?.outbox.find((item: any) => item.ticketId === first.id && item.status === 'sent' && item.purpose === 'result');
-    return ticket?.ended?.outcome === 'completed' && result && work.messages.some((item: any) => item.id === result.id && item.text === result.text);
+    if(ticket?.ended?.outcome!=='completed')return false;
+    const events=readFileSync(join(evidence,'session-events.jsonl'),'utf8').trim().split('\n').map(line=>JSON.parse(line));
+    const proof=liveDeliveryProof(work,events,state.outbox,first.source.threadId,watch.sourceId);
+    if(proof)report.deliveryProof=proof;
+    return proof;
   });
   report.completion = completion;
   await api('followups/rule', { requestId: 'p1-live-observe', mode: 'observe', inventoryIds: [inventory.id] });

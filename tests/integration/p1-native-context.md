@@ -9,3 +9,5 @@ Dependencies: native Ticket/Mandate/Assignment, Source admission, policy observe
 Risks: machine input must not become new authority; delivered event remains valid for current-policy revalidation; no ended/blocked/attention wake; waiting is not a result; actual answer/attention/final result use native outbox. Model-free domain processing and original core hashes remain intact.
 
 Follow-up diagnosis: current event authorization and historical read provenance must be separate. A later risk transition invalidates old draft authority but does not erase a valid earlier source. Trigger reads check immutable same-scope source/event identity, text, actor and complete nondeleted lineage; current assessment and draft execution still recheck the latest domain risk/rule/expiry. Deleting earlier consumed sources continues to retire the native context.
+
+Wake gating uses the native ticketStage person category as its single rule, including failed delivery, answer, review, blocked and failed; it does not duplicate only a subset of those conditions. This keeps all human handoffs quiet until actual human/native recovery changes the stage.

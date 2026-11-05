@@ -1,6 +1,6 @@
 import { Followups, digest, type Base, type Business } from '../business/index.ts';
 import type { WatchCreate, InventoryWatch, FollowupSnapshot, FollowupEvent } from '../contracts/followups.ts';
-import type { Trigger } from '../../vendor/superagent/src/extension.ts';
+import { ticketStage, type Trigger } from '../../vendor/superagent/src/extension.ts';
 import { RISK_BOT,RISK_RULE_ID,RISK_INSTRUCTION,currentEvent,ticketWatch,authorizeFollowup } from './followup-native-authority.ts';
 import type { WorkbenchSource } from './source.ts';
 
@@ -95,7 +95,7 @@ export class FollowupNative {
       let thread:string;
       if(event.watchId){
         const watch=this.domain.get(scope,event.watchId),ticket=watch.ticketId?this.source.runtime.store.tickets.get(watch.ticketId):undefined;
-        if(!ticket||ticket.ended||ticket.attention||['blocked','failed'].includes(ticket.assignments.at(-1)?.report?.state??''))continue;
+        if(!ticket||ticket.ended||ticketStage(ticket).stage==='person')continue;
         thread=this.source.runtime.store.triggers.get(ticket.origin.triggerId)!.threads[0]!.id;
       }else thread=`risk-${event.id}`;
       currentEvent(this.business,scope,event.id);

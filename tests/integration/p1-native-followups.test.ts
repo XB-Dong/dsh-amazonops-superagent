@@ -60,7 +60,9 @@ test('unit: durable business delivery is once, attention holds it and ended work
     assert.equal(f.received.length,2);await f.source.followups.pump('main');assert.equal(f.received.length,2);
     const eventTrigger=f.received[1];assert.equal(permittedBusinessTrigger(f.business,eventTrigger),true);
     assert.equal(permittedBusinessTrigger(f.business,{...eventTrigger,actor:{source:'amazonops',id:'forged'}}),false);
-    row.attention={id:'attention',question:'Choose'};change('change-two',9);await f.source.followups.pump('main');assert.equal(f.received.length,2);
+    row.delivery={error:'Synthetic delivery requires a person',at:new Date().toISOString()};
+    change('change-two',9);await f.source.followups.pump('main');assert.equal(f.received.length,2,'person/delivery does not accept another automatic input');
+    delete row.delivery;row.attention={id:'attention',question:'Choose'};await f.source.followups.pump('main');assert.equal(f.received.length,2);
     row.ended={outcome:'completed',by:'executor'};await f.source.followups.pump('main');
     assert.equal(f.source.followups.domain.get('main',watch.id).status,'completed');assert.equal(f.received.length,2);
   }finally{f.dispose();}

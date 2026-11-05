@@ -1,6 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtempSync, writeFileSync, readFileSync, mkdirSync, copyFileSync } from 'node:fs';
+import { mkdtempSync, writeFileSync, readFileSync, mkdirSync, copyFileSync, symlinkSync } from 'node:fs';
+import { spawnSync } from 'node:child_process';
+import { pathToFileURL } from 'node:url';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { loadSettings, scrubEnvironment } from '../../scripts/start.mjs';
@@ -123,4 +125,18 @@ test('release verification rejects dirty builds, payload tampering and path trav
   manifest.artifacts.push({ path: '../escape', bytes: 0, sha256: '0'.repeat(64) });
   writeFileSync(path, JSON.stringify(manifest));
   assert.throws(() => verifyRelease(staged), /RELEASE_PATH_FORBIDDEN/);
+});
+
+test('artifact-only release imports the actual native extension without the source checkout',()=>{
+  const root=resolve('.'),staged=mkdtempSync(join(tmpdir(),'amazonops-artifact-import-'));
+  const manifest=JSON.parse(readFileSync(join(root,'lib/release-manifest.json'),'utf8'));
+  for(const artifact of manifest.artifacts){
+    const target=join(staged,artifact.path);mkdirSync(join(target,'..'),{recursive:true});copyFileSync(join(root,artifact.path),target);
+  }
+  // Dependencies are supplied independently; no vendor source-tree assets leak
+  // into the staged package through its working directory.
+  symlinkSync(join(root,'node_modules'),join(staged,'node_modules'),'junction');
+  const loaded=spawnSync(process.execPath,['--input-type=module','-e','await import(process.argv[1])',
+    pathToFileURL(join(staged,'vendor/superagent/lib/extension.js')).href],{cwd:staged,encoding:'utf8',windowsHide:true,timeout:15000});
+  assert.equal(loaded.status,0,loaded.stderr);
 });

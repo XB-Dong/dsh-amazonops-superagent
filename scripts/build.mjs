@@ -86,7 +86,8 @@ export async function buildProject(options = {}) {
   for (const path of ['package.json', 'pnpm-lock.yaml', 'tsconfig.json', 'THIRD-PARTY-NOTICES.md',
     'vendor/superagent/package.json', 'vendor/superagent/LICENSE', 'vendor/superagent/UPSTREAM.json', 'vendor/superagent/patch-manifest.json'])
     files.push([path, join(root, path)]);
-  for (const directory of ['profiles', 'patches', 'scripts', 'packages']) collect(join(root, directory), directory);
+  for (const directory of ['profiles', 'patches', 'scripts', 'packages',
+    'vendor/superagent/prompts', 'vendor/superagent/skills']) collect(join(root, directory), directory);
   const release = { schemaVersion: '0.3', sourceSha: manifest.sourceSha, sourceDirty: manifest.sourceDirty,
     superagentSha: manifest.superagentSha, builtAt: manifest.builtAt,
     artifacts: files.sort(([a], [b]) => a.localeCompare(b)).map(([path, file]) => {

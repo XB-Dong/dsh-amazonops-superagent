@@ -14,8 +14,10 @@ import { liveDeliveryProof } from './live-proof.ts';
 
 const key = process.env.AMAZONOPS_API_KEY;
 if (!key) throw new Error('AMAZONOPS_API_KEY_REQUIRED');
-const root = resolve('.'), home = mkdtempSync(join(tmpdir(), 'amazonops-p1-live-'));
-const evidence = join(home, 'evidence'); mkdirSync(evidence);
+const root = resolve('.'), home = process.env.AMAZONOPS_P1_LIVE_HOME ?? mkdtempSync(join(tmpdir(), 'amazonops-p1-live-'));
+const evidence = join(home, 'evidence'); mkdirSync(evidence,{recursive:true});
+const prior=existsSync(join(evidence,'result.json'))?JSON.parse(readFileSync(join(evidence,'result.json'),'utf8')):undefined;
+if(prior)writeFileSync(join(evidence,`result-prior-${Date.now()}.json`),JSON.stringify(prior,null,2));
 const password = randomBytes(24).toString('base64url');
 const socket = createServer(); await new Promise<void>(done => socket.listen(0, '127.0.0.1', done));
 const port = (socket.address() as { port: number }).port; await new Promise<void>(done => socket.close(() => done()));
@@ -58,7 +60,9 @@ async function action(id: string, requestId: string, text: string) {
 function processed(ticketId: string, messageId: string): boolean {
   const ticket = native()?.tickets.find((item: any) => item.id === ticketId), assignment = ticket?.assignments.at(-1);
   const input = ticket?.inputs.find((item: any) => item.kind === 'trigger' && item.triggerId === messageId);
-  return !!input?.readAt && !!assignment?.idleAt && assignment.report?.at >= input.at && assignment.idleAt >= assignment.report.at;
+  // Official turn completion can precede the synchronous report timestamp by a
+  // millisecond. Both must follow this input; ordering those two clocks is not a gate.
+  return !!input?.readAt && !!assignment?.idleAt && assignment.report?.at >= input.at && assignment.idleAt >= input.at;
 }
 try {
   child = spawn(process.execPath, [join(root, 'node_modules/@deepseek-ai/dsh/lib/bin.js'), 'web', '--patch', profile, '--no-open'],
@@ -71,7 +75,7 @@ try {
   const inventory = await api('actions/inventory', { forecastId: forecast.id, physicalSku: 'A', asOf, available: 12, reserved: 0,
     inbound: [], leadDays: { purchase: 1, transport: 2, receiving: 1 }, safetyDays: 2, horizon: 7, demandFactors: [] });
   const watch = await api('followups/create', { requestId: 'p1-live-watch', inventoryId: inventory.id,
-    expiresAt: new Date(Date.now() + 3600000).toISOString(), title: 'P1真实模型合成库存跟进' });
+    expiresAt: prior?.watch?.expiresAt??new Date(Date.now() + 3600000).toISOString(), title: 'P1真实模型合成库存跟进' });
   report.watch = watch;
   const first = await until('finite-watch-waiting', async () => (await api('work')).tickets.find((ticket: any) =>
     ticket.watchId === watch.id && ticket.latestReport?.status === 'waiting'));

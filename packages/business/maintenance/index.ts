@@ -78,12 +78,14 @@ export function checkMaintenance(options: Options & { state: string; mode: strin
   const registryBytesChanged = baseline.registrySha256 !== registry.fingerprint;
   const registryChanged = canonical(baseline.legacyDecisions) !== canonical(registry.decisions);
   const privacyChanged = baseline.snapshot.privacyLedgerSha256 !== captured.snapshot.privacyLedgerSha256;
-  const actionable = registryChanged || privacyChanged || [feedback, tombstones]
+  const pendingCaptureOutstanding = captured.snapshot.pendingCapture.some(item => item.kind === 'job');
+  const actionable = pendingCaptureOutstanding || registryChanged || privacyChanged || [feedback, tombstones]
     .some(group => group.added.length + group.changed.length + group.removed.length > 0) ||
     pendingCapture.added.length + pendingCapture.changed.length > 0;
   const report = { schemaVersion: 'amazonops-maintenance-check/1', mode, checkedAt: now.toISOString(), sourceStable: true,
     actionable, canDevelop: false, modelCalls: 0, newWaves: 0, legacyHistoryCount: baseline.legacyDecisions.length,
-    registryChanged, registryBytesChanged, privacyChanged, changes: { feedback: { ...feedback, excludedReappeared }, pendingCapture, tombstones },
+    registryChanged, registryBytesChanged, privacyChanged, pendingCaptureOutstanding,
+    changes: { feedback: { ...feedback, excludedReappeared }, pendingCapture, tombstones },
     nextSnapshot: captured.snapshot, baselineSha256: hash(baselineBytes) };
   authority(options, mode); noLinks(options.state); writeNew(destination, report);
   return report;

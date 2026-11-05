@@ -205,3 +205,19 @@ test('maintenance: check timestamps alone do not become new actionable feedback'
     assert.equal(report.registryBytesChanged, true);
   } finally { f.db.close(); }
 });
+
+test('maintenance: unresolved capture already present at handover remains visible until actually drained', () => {
+  const f = fixture();
+  try {
+    f.put('initial-source', 'source', { origin: 'user' });
+    f.put('initial-capture', 'job', { type: 'capture', status: 'pending', sourceId: 'initial-source' });
+    f.init();
+    const pending = f.check();
+    assert.equal(pending.pendingCaptureOutstanding, true); assert.equal(pending.actionable, true);
+    assert.equal(pending.changes.pendingCapture.added.length, 0, 'it was pending before baseline initialization');
+    f.put('initial-capture', 'job', { type: 'capture', status: 'completed', sourceId: 'initial-source' });
+    const drained = f.check();
+    assert.equal(drained.pendingCaptureOutstanding, false); assert.equal(drained.actionable, false);
+    assert.equal(drained.changes.pendingCapture.removed.length, 2);
+  } finally { f.db.close(); }
+});

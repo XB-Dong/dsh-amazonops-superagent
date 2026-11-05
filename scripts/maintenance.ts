@@ -23,6 +23,7 @@ export function maintenanceCli(args: string[]) {
     pendingCaptureChanges: report.changes.pendingCapture.added.length + report.changes.pendingCapture.changed.length + report.changes.pendingCapture.removed.length,
     deletionChanges: report.changes.tombstones.added.length + report.changes.tombstones.changed.length + report.changes.tombstones.removed.length,
     registryChanged: report.registryChanged, privacyChanged: report.privacyChanged,
+    pendingCaptureOutstanding: report.pendingCaptureOutstanding,
     legacyHistoryCount: report.legacyHistoryCount, canDevelop: false, modelCalls: 0, newWaves: 0 };
 }
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {

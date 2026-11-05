@@ -18,7 +18,8 @@ const root = resolve('.'), home = process.env.AMAZONOPS_P1_LIVE_HOME ?? mkdtempS
 const evidence = join(home, 'evidence'); mkdirSync(evidence,{recursive:true});
 const prior=existsSync(join(evidence,'result.json'))?JSON.parse(readFileSync(join(evidence,'result.json'),'utf8')):undefined;
 if(prior)writeFileSync(join(evidence,`result-prior-${Date.now()}.json`),JSON.stringify(prior,null,2));
-const observeOnly=process.env.AMAZONOPS_P1_LIVE_PHASE==='observe';
+const coldObserve=process.env.AMAZONOPS_P1_LIVE_PHASE==='observe-cold';
+const observeOnly=coldObserve||process.env.AMAZONOPS_P1_LIVE_PHASE==='observe';
 const password = randomBytes(24).toString('base64url');
 const socket = createServer(); await new Promise<void>(done => socket.listen(0, '127.0.0.1', done));
 const port = (socket.address() as { port: number }).port; await new Promise<void>(done => socket.close(() => done()));
@@ -26,11 +27,17 @@ const origin = `http://127.0.0.1:${port}`, observer = join(root, 'lib/p1-live-ob
 await build({ entryPoints: [join(root, 'tests/integration/native-e2e-probe.ts')], outfile: observer,
   bundle: true, packages: 'external', platform: 'node', format: 'esm', target: 'node24' });
 const profile = join(home, 'profile.json');
+const overlay=localPatch({ root, home, password, port, live: true, modelAccount: 'test', proactiveAutoEnabled: true });
+// An independent cold-start admission case keeps business, usage and all prior
+// native histories intact. It does not claim to repair a polluted old master.
+const coldState=coldObserve?join(home,'data',`superagent-observe-proof-${Date.now()}`):undefined;
+if(coldState)for(const row of overlay as any[])for(const plugin of row.insert??[])
+  if(plugin.id==='amazonops-superagent')plugin.config.stateDir=coldState.replaceAll('\\','/');
 writeFileSync(profile, JSON.stringify([{ insert: [{ id: 'p1-live-observer', name: observer.replaceAll('\\', '/'), config: { evidence } }] },
-  ...localPatch({ root, home, password, port, live: true, modelAccount: 'test', proactiveAutoEnabled: true })]), { mode: 0o600 });
+  ...overlay]), { mode: 0o600 });
 let child: ChildProcess | undefined, cookie = '', logs = '';
 const report: any = { ...(observeOnly?prior:{}),home, evidence, origin, phases: observeOnly?(prior?.phases??[]):[],
-  error:undefined,syntheticData: true, automaticModelRetries: 0, passed: false };
+  error:undefined,observeTerminal:undefined,coldObserve,coldState,syntheticData: true, automaticModelRetries: 0, passed: false };
 const save = () => writeFileSync(join(evidence, 'result.json'), JSON.stringify(report, null, 2));
 async function api(path: string, body?: unknown): Promise<any> {
   const response = await fetch(`${origin}/amazonops/api/${path}`, { method: body === undefined ? 'GET' : 'POST',
@@ -110,9 +117,11 @@ try {
   }else assert.ok(prior?.deliveryProof,'Observe-only resume requires the already recorded native watch delivery proof');
   // The watch already handled A's risk. A fresh, explicitly enrolled object tests
   // positive admission without asking the model to duplicate the existing draft.
-  const ruleForecast=await api('actions/forecast',{requestId:'p1-live-rule-seed-c',store:'Synthetic',site:'US',listing:'C',asOf,
+  const tasksBeforeObserve=(await api('snapshot')).tasks.length;
+  const listing=coldObserve?'D':'C';
+  const ruleForecast=await api('actions/forecast',{requestId:`p1-live-rule-seed-${listing.toLowerCase()}`,store:'Synthetic',site:'US',listing,asOf,
     manualDaily:3,manualReason:'尚未处理过的合成观察对象'});
-  const ruleInventory=await api('actions/inventory',{forecastId:ruleForecast.id,physicalSku:'C',asOf,available:1,reserved:0,inbound:[],
+  const ruleInventory=await api('actions/inventory',{forecastId:ruleForecast.id,physicalSku:listing,asOf,available:1,reserved:0,inbound:[],
     leadDays:{purchase:1,transport:2,receiving:1},safetyDays:2,horizon:7,demandFactors:[]});
   const recoveryId=observeOnly?`p1-live-observe-${Date.now()}`:undefined;
   if(observeOnly)await api('followups/rule',{requestId:`${recoveryId}-off`,mode:'off',inventoryIds:[]});
@@ -124,7 +133,8 @@ try {
     return state.assessments?.find((item: any) => item.decision === 'would_accept');
   });
   report.observe = observed;
-  const state = native(); assert.equal(state.tickets.length, 1, 'observe must not start a worker');
+  const state = native(); assert.equal(state.tickets.length, coldObserve?0:1, 'observe must not start a worker');
+  assert.equal((await api('snapshot')).tasks.length,tasksBeforeObserve,'observe must not create a business draft');
   const events = readFileSync(join(evidence, 'session-events.jsonl'), 'utf8').trim().split('\n').map(line => JSON.parse(line));
   const calls = events.filter(item => item.event.type === 'tool/call'), results = events.filter(item => item.event.type === 'tool/result');
   for (const name of ['orchestrator_route', 'cc_read_watch', 'cc_prepare_task', 'orchestrator_report', 'orchestrator_reply', 'orchestrator_eval', 'orchestrator_eval_decide'])

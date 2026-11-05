@@ -120,7 +120,7 @@ test('privacy epoch closes old master steps, queued inputs and historical tools 
     const clean=await wait(async()=>{const state=await call();return state.masterId!==rotation.old&&state.status==='idle'&&state;},'clean master after checkpoint');
     assert.notEqual(clean.masterId,initial.masterId);
     assert.equal(clean.epoch,'second');
-    assert.deepEqual(clean.tools.sort(),['orchestrator_reply','orchestrator_route']);
+    assert.deepEqual(clean.tools.sort(),['orchestrator_eval','orchestrator_eval_decide','orchestrator_reply','orchestrator_route']);
     const denied=await call('tools');assert.equal(denied.denied,true);
     await call('blocked-inputs');
     await new Promise(done=>setTimeout(done,1200));

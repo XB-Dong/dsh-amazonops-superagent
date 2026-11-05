@@ -292,13 +292,14 @@ export class Sessions {
             const result = value as { reported?: unknown; status?: unknown; results?: unknown }
             const state = (args as { state?: unknown }).state
             const reported = name === 'orchestrator_report' && result.reported === true &&
-              ['ready', 'blocked', 'failed', 'dropped'].includes(String(state))
+              ['ready', 'waiting', 'blocked', 'failed', 'dropped'].includes(String(state))
             const routed = name === 'orchestrator_route' && Array.isArray(result.results) && result.results.length > 0 &&
               result.results.every(row => row && typeof row === 'object' && !Object.hasOwn(row, 'refused'))
             const replied = name === 'orchestrator_reply' && result.status === 'sent'
+            const assessed = name === 'orchestrator_eval_decide' && result && !Object.hasOwn(result, 'refused')
             // The marker belongs to this successful tool result. DSH retains its own
             // steering/inbox semantics; no cancellation or second loop is introduced.
-            if (reported || routed || replied) execution.concludeTurn()
+            if (reported || routed || replied || assessed) execution.concludeTurn()
           }
           return value
         } }))
@@ -367,7 +368,7 @@ export class Sessions {
       const inherited = !master && agent.ctx.tools.get('skill', parent) ? ['skill'] : []
       binding.disposers.push(agent.ctx.tools.restrict({ allow: inherited }), agent.ctx.tools.guard(execution => {
         if (!operationToolAllowed(execution.name, master ? 'orchestrator' : 'worker')) return 'Tool forbidden in operations mode'
-        if (master ? !['orchestrator_route', 'orchestrator_reply'].includes(execution.name)
+        if (master ? !['orchestrator_route', 'orchestrator_reply', 'orchestrator_eval', 'orchestrator_eval_decide'].includes(execution.name)
           : !['orchestrator_read', 'orchestrator_ack', 'orchestrator_report', 'skill'].includes(execution.name) && !execution.name.startsWith('cc_'))
           return 'Tool forbidden in scoped operations mode'
         try { this.authorizeTool(agent, execution.name, execution.arguments) }

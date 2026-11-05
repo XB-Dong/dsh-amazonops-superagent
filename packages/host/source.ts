@@ -6,30 +6,44 @@ import type { WorkSnapshot, WorkAction } from '../contracts/model.ts';
 import { actOnWork, projectResponsibility } from './work-actions.ts';
 import { admitEvent } from './operations.ts';
 import { safeText } from '../business/core/validation.ts';
+import { FollowupNative } from './followup-native.ts';
+import { currentEvent, ticketWatch, permittedBusinessTrigger } from './followup-native-authority.ts';
 
 type MessageReceipt={hash:string;threadId:string;sourceId:string};
 type OutboxMessage={id:string;channel:{source:string;thread:string;address:Record<string,string>};text:string;ticketId?:string;status:string};
 export class WorkbenchSource {
   runtime:Runtime; business:Business;
-  constructor(runtime:Runtime,business:Business){this.runtime=runtime;this.business=business;}
+  readonly followups:FollowupNative;
+  constructor(runtime:Runtime,business:Business){this.runtime=runtime;this.business=business;this.followups=new FollowupNative(this);}
   async initializePolicy():Promise<void> {
     const policy=this.runtime.store.settings().policy;
-    if(policy.sources.amazonops)return;
-    await this.runtime.settings.save('policy',{...policy,sources:{...policy.sources,amazonops:{allowed:[{id:'cc',name:'cc'}]}}},
+    if(!policy.sources.amazonops)await this.runtime.settings.save('policy',{...policy,sources:{...policy.sources,amazonops:{allowed:[{id:'cc',name:'cc'}]}}},
       this.runtime.store.blockRevision('policy'),'sync');
+    await this.followups.syncPolicy();
   }
   register():()=>void {
     const kind:SourceKind = {kind:'amazonops',title:{zh:'cc运营工作台',en:'Operations workbench'},
       description:{zh:'认证的本机运营请求',en:'Authenticated local requests'},schema:z.object({}),fields:[],health:[],
-      scope:({meta})=>meta.eventClass==='human_request' && meta.scope==='main'
-        ?{listened:true,observed:false}:{listened:false,reason:'untrusted_event'},
-      policy:{schema:z.object({allowed:z.array(z.object({id:z.string(),name:z.string().optional()})).default([{id:'cc',name:'cc'}])}),
+      scope:({meta})=>{
+        if(meta.scope!=='main')return {listened:false,reason:'untrusted_event'};
+        if(meta.eventClass==='human_request')return {listened:true,observed:false};
+        try{const event=currentEvent(this.business,'main',String(meta.eventId));
+          if(meta.eventClass===event.eventClass)return {listened:true,observed:event.eventClass==='risk_candidate'};
+        }catch{}
+        return {listened:false,reason:'untrusted_event'};
+      },
+      policy:{schema:z.object({allowed:z.array(z.object({id:z.string(),name:z.string().optional()})).default([{id:'cc',name:'cc'}]),
+        bots:z.array(z.object({id:z.string(),name:z.string().optional()})).default([])}),
         fields:[],explicit:{zh:'工作台明确提交',en:'Explicit workbench request'}},
       channel:{
         allowed:address=>address.scope==='main',
         send:async(_host,message)=>{
           if (message.channel.address.scope!=='main') return 'gone';
           if (message.ticketId && !this.allowedTicket('main',message.ticketId)) return 'gone';
+          if(message.ticketId){const ticket=this.runtime.store.tickets.get(message.ticketId);
+            const origin=ticket&&this.runtime.store.triggers.get(ticket.origin.triggerId);
+            if(origin?.meta.eventClass==='risk_candidate'&&!permittedBusinessTrigger(this.business,origin))return 'gone';
+          }
           this.business.store.once('main',`native-delivery:${message.id}`,()=>({at:new Date().toISOString()}));
           return 'sent';
         },
@@ -42,7 +56,7 @@ export class WorkbenchSource {
           if (!Number.isSafeInteger(offset)||offset<0) throw new Error('INVALID_OFFSET');
           const all=this.runtime.store.read.threadTriggers(`amazonops:${trigger.threads[0]!.id}`,200)
             .filter(row=>row.meta.scope===scope&&!this.business.store.isDeleted(scope,row.id));
-          const messages=all.slice(offset,offset+20).map(row=>({id:row.id,from:'cc',at:row.at,text:row.text}));
+          const messages=all.slice(offset,offset+20).map(row=>({id:row.id,from:row.human?'cc':'库存业务事件',at:row.at,text:row.text}));
           return {messages,body:{messages},...(offset+20<all.length?{next:String(offset+20)}:{})};
         }},
     };
@@ -72,6 +86,7 @@ export class WorkbenchSource {
     const ticket=this.runtime.store.tickets.get(id);
     if(!ticket)return false;
     const trigger=this.runtime.store.triggers.get(ticket.origin.triggerId);
+    if(trigger?.meta.watchId){try{ticketWatch(this.business,this.runtime,ticket,false);}catch{return false;}}
     const binding=this.business.store.list<Base&{skills?:{id:string;hash:string}[]}>(scope,'native-binding').find(row=>row.id===`native-binding:worker-${ticket.id}`);
     const lineage=[...ticket.origin.triggerIds,...ticket.inputs.flatMap(input=>input.kind==='trigger'?[input.triggerId]:[])];
     return trigger?.source==='amazonops' && trigger.meta.scope===scope &&
@@ -94,10 +109,13 @@ export class WorkbenchSource {
     return {tickets:tickets.map(ticket=>{
       const report=ticket.assignments.findLast(assignment=>assignment.report)?.report;
       const origin=this.runtime.store.triggers.get(ticket.origin.triggerId)!;
+      let watchId:string|undefined;
+      try{watchId=ticketWatch(this.business,this.runtime,ticket,false)?.id;}catch{}
       return {id:ticket.id,title:ticket.title,status:ticket.ended?.outcome??report?.state??'working',sessionId:`worker-${ticket.id}`,
+        ...(watchId?{watchId}:{}),
         ...projectResponsibility(ticket,origin.threads[0]!.id),
         ...(report?{latestReport:{text:report.summary,status:report.state}}:{})};
-    }),messages:[...triggers.map(trigger=>({id:trigger.id,threadId:trigger.threads[0]!.id,role:'user' as const,text:trigger.text,at:trigger.at,
+    }),messages:[...triggers.filter(trigger=>trigger.human).map(trigger=>({id:trigger.id,threadId:trigger.threads[0]!.id,role:'user' as const,text:trigger.text,at:trigger.at,
       ticketId:tickets.find(ticket=>ticket.origin.triggerIds.includes(trigger.id)||ticket.inputs.some(input=>input.kind==='trigger'&&input.triggerId===trigger.id))?.id})),
       ...replies.reverse().map(reply=>({id:reply.id,threadId:reply.channel.thread,role:'assistant' as const,text:reply.text,ticketId:reply.ticketId,
         at:this.deliveryTime(scope,reply.id)??allTickets.find(ticket=>ticket.id===reply.ticketId)?.updatedAt??new Date(0).toISOString()}))].sort((a,b)=>a.at.localeCompare(b.at)),

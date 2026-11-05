@@ -156,7 +156,7 @@ export class Runtime extends Service implements SourceHost {
           const built = ticket ? executorTools(this.toolHost, ticket) : mainTools(this.toolHost, agent)
           const selected = operationsMode(machine) ? built.filter(tool => operationToolAllowed(tool.name, ticket ? 'worker' : 'orchestrator') &&
             (ticket ? ['orchestrator_read', 'orchestrator_ack', 'orchestrator_report'].includes(tool.name)
-              : ['orchestrator_route', 'orchestrator_reply'].includes(tool.name))) : built
+              : ['orchestrator_route', 'orchestrator_reply', 'orchestrator_eval', 'orchestrator_eval_decide'].includes(tool.name))) : built
           return [...selected, ...extensions.tools?.(agent, ticket) ?? []]
         } })
       const policyChanged: EngineForSettings['policyChanged'] = (from, to, effects) => { this.engine.policyChanged(from, to, effects) }

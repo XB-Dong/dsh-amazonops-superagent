@@ -9,7 +9,7 @@ test('native configuration accepts absolute Windows state paths', () => {
 });
 
 test('operations role cannot acquire developer or policy editing capabilities', () => {
-  assert.equal(BUSINESS_TOOLS.length, 9);
+  assert.equal(BUSINESS_TOOLS.length, 10);
   for (const name of ['bash', 'pwsh', 'write', 'read', 'subagent', 'orchestrator_settings_save', 'orchestrator_prompts_save']) {
     assert.equal(operationToolAllowed(name, 'orchestrator'), false);
     assert.equal(operationToolAllowed(name, 'worker'), false);

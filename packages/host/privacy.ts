@@ -5,6 +5,7 @@ import type { Business,Base } from '../business/index.ts';
 import type { Runtime,Ticket } from '../../vendor/superagent/src/extension.ts';
 import type { AgentTools } from './agent-tools.ts';
 import type { WorkbenchSource } from './source.ts';
+import { permittedBusinessTrigger, followupToolGuard } from './followup-native-authority.ts';
 
 /** Durable privacy decisions also select a fresh native routing context after restore. */
 export function privacyEpoch(business:Business):string {
@@ -13,8 +14,7 @@ export function privacyEpoch(business:Business):string {
 export function privacyHooks(business:Business,runtime:()=>Runtime|undefined,source:()=>WorkbenchSource|undefined,tools:AgentTools){
   const permittedTrigger=(scope:string,id:string)=>{
     const trigger=runtime()?.store.triggers.get(id);
-    if(!trigger||trigger.source!=='amazonops'||trigger.meta.scope!==scope||trigger.meta.eventClass!=='human_request'||
-      !trigger.human||business.store.isDeleted(scope,id))throw new Error('SOURCE_FORBIDDEN');
+    if(!trigger||trigger.meta.scope!==scope||!permittedBusinessTrigger(business,trigger))throw new Error('SOURCE_FORBIDDEN');
     return trigger;
   };
   const allowedText=(text:string):boolean=>{
@@ -40,11 +40,15 @@ export function privacyHooks(business:Business,runtime:()=>Runtime|undefined,sou
         }else if(name==='orchestrator_reply'){
           if(input.trigger_id)permittedTrigger('main',String(input.trigger_id));
           if(input.ticket_id&&!source()?.allowedTicket('main',String(input.ticket_id)))throw new Error('SOURCE_FORBIDDEN');
+        }else if(name==='orchestrator_eval'||name==='orchestrator_eval_decide'){
+          const trigger=permittedTrigger('main',String(input.trigger_id));
+          if(trigger.human||trigger.meta.eventClass!=='risk_candidate')throw new Error('SOURCE_FORBIDDEN');
         }else throw new Error('TOOL_FORBIDDEN');
         return;
       }
       tools.authorize(agent,ticket);
       const current=runtime()!.store.tickets.get(ticket.id)!;
+      followupToolGuard(business,runtime()!,current,name,input);
       const ids=new Set([...current.origin.triggerIds,...current.inputs.flatMap(row=>row.kind==='trigger'?[row.triggerId]:[])]);
       if(input.trigger_id&&!ids.has(String(input.trigger_id)))throw new Error('SOURCE_FORBIDDEN');
       if(name==='orchestrator_read'){

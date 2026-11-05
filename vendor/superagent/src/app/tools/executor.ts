@@ -77,7 +77,7 @@ export function executorTools(host: ExecutorToolsHost, ticket: Ticket): Tool[] {
       name: 'orchestrator_report',
       description: 'Report progress, ready, blocked, failed or dropped, as the work and handoff sections say.',
       schema: z.object({
-        state: z.enum(['progress', 'ready', 'blocked', 'failed', 'dropped']),
+        state: z.enum(['progress', 'waiting', 'ready', 'blocked', 'failed', 'dropped']),
         summary: z.string().min(1),
         human_action: z.string().trim().min(1).max(1000).nullish().describe('One concrete question for a person, also with state=progress; omit to keep the pending one, null to clear it.'),
         question_for_trigger_id: z.string().optional().describe('With human_action: the human message that raised the question, which is asked where that person wrote.'),

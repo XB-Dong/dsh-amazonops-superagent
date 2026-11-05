@@ -21,23 +21,24 @@
   "automation": "paused_same_id_via_tool_legacy_thread_idle_verified",
   "legacyProjectWrites": "not_performed",
   "cloudAccess": "verified_inventory_and_isolated_staging",
-  "modelCalls": 0,
+  "modelCalls": 65,
   "productionDeployment": "not_performed",
   "productionMigration": "rehearsal_completed_not_cutover",
-  "productImplementation": "in_progress",
-  "productAcceptance": "in_progress",
+  "productImplementation": "integrated_final_review_repairs",
+  "productAcceptance": "cross_platform_and_live_completed_final_gate_repairs_pending",
   "mandatoryCases": 39,
   "independentReview": {
     "status": "accepted",
     "scope": "preparation_only",
     "reviewedSha": "155abc71ecef2899e03fe2ff5ffedc016a872c9b",
     "report": "docs/audit/reviews/P1-PREPARATION-20261105.zh.md",
-    "productTests": "not_run"
+    "productTests": "not_run",
+    "productReview": "trusted_auto_restore_gate_blocker_under_repair"
   },
   "taskIndex": "docs/waves/P1/tasks.json",
   "inputManifest": "docs/waves/P1/inputs.json",
   "releaseGate": "G1 pre_release evidence plus accepted exact-candidate review; G2 final source reconciliation/pre_open safety before writes; G3 actual handover and independent business acceptance; G4 ACTIVE readback and all 39 cases before final completion.",
-  "nextAction": "Integrate native watch/proactive and maintenance checker; complete exact-candidate cross-platform, browser, model and independent acceptance before cutover",
+  "nextAction": "Close trusted auto restoration and Windows mixed-alias containment findings; rerun exact-candidate checks before G1 and production cutover",
   "businessDelivery": "not_started",
   "taskPackets": 11,
   "gates": {
@@ -160,6 +161,32 @@
       "registryPreserved": true,
       "cutover": false
     },
-    "independentEarlyReview": "3 confirmed defects plus runtime policy gap; fixes integrated and under re-review"
+    "independentEarlyReview": "3 confirmed defects plus runtime policy gap; fixes integrated and under re-review",
+    "paidSynthetic": {
+      "requests": 65,
+      "verifiedRequests": 63,
+      "unknownRequests": 2,
+      "inputTokensIncludingUnknownReservations": 635738,
+      "outputTokensIncludingUnknownReservations": 39892,
+      "automaticRetries": 0,
+      "syntheticOnly": true,
+      "ledgerPreserved": true,
+      "watchProofCandidate": "b8f2c933efcbf82e6d5876edce0a0c0702e92059",
+      "coldObserveCandidate": "9308083",
+      "observeDecision": "would_accept",
+      "independentColdStart": true,
+      "oldMasterRecovered": false
+    },
+    "browser": {
+      "candidate": "7ebba8ea1af70ace849cec8ca7f55908841b2e09",
+      "flows": 13,
+      "artifactHashesVerified": 32,
+      "externalModelCalls": 0
+    },
+    "linuxCandidateFull": {
+      "candidate": "0c59e70e45af1b04644efd8935e9717ab716b8fe",
+      "exitCode": 0,
+      "latestRepairsNotYetIncluded": true
+    }
   }
 }

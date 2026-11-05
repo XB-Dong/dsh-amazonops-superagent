@@ -55,7 +55,7 @@ export function apply(ctx:Context,config:Config):void {
     if(migrationMode)return;
     const next=child.get('orchestrator') as unknown as Runtime;
     await next.ready;
-    const attached=new WorkbenchSource(next,business);
+    const attached=new WorkbenchSource(next,business,{proactiveAutoEnabled:()=>config.proactiveAutoEnabled===true});
     const offSource=attached.register();
     await attached.initializePolicy();
     runtime=next;source=attached;

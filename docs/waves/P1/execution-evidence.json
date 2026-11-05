@@ -1,0 +1,77 @@
+{
+  "schemaVersion": "0.3",
+  "wave": "P1",
+  "status": "execution_in_progress_not_production_cutover",
+  "model": {
+    "requests": 65,
+    "verifiedRequests": 63,
+    "unknownRequests": 2,
+    "inputTokensIncludingUnknownReservations": 635738,
+    "outputTokensIncludingUnknownReservations": 39892,
+    "automaticRetries": 0,
+    "syntheticOnly": true,
+    "ledgerPreserved": true,
+    "watchProofCandidate": "b8f2c933efcbf82e6d5876edce0a0c0702e92059",
+    "coldObserveCandidate": "9308083",
+    "observeDecision": "would_accept",
+    "independentColdStart": true,
+    "oldMasterRecovered": false
+  },
+  "artifacts": [
+    {
+      "artifact": "result.json",
+      "bytes": 50044,
+      "sha256": "7f52e834313c2cb76189538e07b3cbbe182102aa43eef794054488031e485619"
+    },
+    {
+      "artifact": "session-events.jsonl",
+      "bytes": 431290,
+      "sha256": "9ff9d005364e2a9efe954d30e63c8fbb829f57d36d2c301e2167b7d0e7080464"
+    },
+    {
+      "artifact": "native-state.json",
+      "bytes": 5781,
+      "sha256": "6b34d578f8bdfe2ef03af42382331dd70e311a2542aaa8c1cb352feb3f6cd9fd"
+    },
+    {
+      "artifact": "native-followup-comparison.json",
+      "bytes": 7305,
+      "sha256": "ee9e4276cf59500563a940ab853c85ffe1c7a42d9175eb3067298d1614403eb6"
+    },
+    {
+      "artifact": "browser-result.json",
+      "bytes": 1854,
+      "sha256": "e3442057f4aedc5e26eaf2803455738aafcc5e5dbd65f7c12649c45a2edf9150"
+    },
+    {
+      "artifact": "browser-artifacts.json",
+      "bytes": 4815,
+      "sha256": "9dc60f516fd6636587749c91ea3678e070651eff1a6f3673c81dd42c7abb6755"
+    },
+    {
+      "artifact": "missing-trigger-red.txt",
+      "bytes": 3165,
+      "sha256": "49354287ee463badcf70936ce463aed0aa8b5fc0b967fa2171a79a668e8a5a41"
+    },
+    {
+      "artifact": "missing-trigger-green.txt",
+      "bytes": 1383,
+      "sha256": "0713b6a8954c11cb82dd9c95dc5afb7c0e00adc2d8f1c1ca6b9f12c6713dd507"
+    },
+    {
+      "artifact": "watch-derived-privacy-red.txt",
+      "bytes": 1231,
+      "sha256": "caae8340bacb5a621abb6510b85c827162b4b1610810b93bc870540a8130390f"
+    },
+    {
+      "artifact": "watch-derived-privacy-green.txt",
+      "bytes": 2830,
+      "sha256": "d646cd830f9e34effdfed061d4b0dc7a914c701eaf570a9a7a26c0f1b41528a8"
+    },
+    {
+      "artifact": "decision-integrated-green.txt",
+      "bytes": 2266,
+      "sha256": "e65d1c6d3ce0fd908d8a61e19f0afa22a16915f79aa08a3533252c20a8a7501f"
+    }
+  ]
+}

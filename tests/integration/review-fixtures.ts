@@ -21,9 +21,11 @@ export function fixture() {
   const db = new DatabaseSync(':memory:');
   db.exec('CREATE TABLE outbox (value TEXT NOT NULL)');
   db.exec('CREATE TABLE decision (value TEXT NOT NULL)');
+  const settings:any={policy:{rules:[],sources:{}},eval:{mode:'observe'}};
   const runtime: any = {
+    settings:{save:async(block:string,value:unknown)=>{settings[block]=value;}},
     sources: { register: (kind: any) => { kinds.push(kind); return () => {}; } },
-    store: { db,
+    store: { db,settings:()=>settings,blockRevision:()=>0,
       triggers: { get: (id: string) => triggers.get(id) },
       tickets: { get: (id: string) => tickets.get(id), list: () => [...tickets.values()],
         open: () => [...tickets.values()].filter(ticket => !ticket.ended) },
@@ -36,7 +38,7 @@ export function fixture() {
     context: () => ({ receive: async (trigger: any) => { received.push(trigger); triggers.set(trigger.id, trigger); } }),
     engine: { stopTicket: (id: string) => { stopped.push(id); tickets.get(id).ended = { outcome: 'cancelled' }; } },
   };
-  const source = new WorkbenchSource(runtime, business);
+  const source = new WorkbenchSource(runtime, business,{proactiveAutoEnabled:()=>true});
   source.register();
   async function ticket(text = '准备活动检查清单', requestId = 'first') {
     const result = await source.submit('main', text, requestId);

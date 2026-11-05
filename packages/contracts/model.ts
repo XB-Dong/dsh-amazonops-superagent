@@ -300,8 +300,24 @@ export type InventoryProjection = {
 
 export type Conversation = Base & { title: string; nativeId?: string; messages: { role: string; text: string; status?: string }[] };
 
-export type WorkTicket = { id: string; title: string; status: string; sessionId?: string; latestReport?: { text?: string; status?: string } };
+export type WorkTicket = {
+  id: string; title: string; status: string; sessionId?: string; latestReport?: { text?: string; status?: string };
+  stage?: { stage: 'person' | 'working' | 'idle' | 'ended'; action?: string };
+  updatedAt?: string; createdAt?: string;
+  mandate?: { scope: string; strength: 'explicit' | 'inferred'; policyVersion: string };
+  assignment?: { id: string; state: string; startedAt?: string; endedReason?: string };
+  attention?: { id: string; question: string };
+  source?: { threadId: string; messageId: string };
+  actions?: ('supplement' | 'answer' | 'retry' | 'stop')[];
+  watchId?: string;
+};
+
+export type WorkAction = {
+  ticketId: string; requestId: string; expectedUpdatedAt: string;
+  action: 'supplement' | 'answer' | 'retry' | 'stop'; text?: string; attentionId?: string;
+};
 
 export type WorkMessage = { id: string; threadId: string; role: 'user' | 'assistant'; text: string; ticketId?: string; at: string };
 
-export type WorkSnapshot = { tickets: WorkTicket[]; messages: WorkMessage[] };
+export type WorkSnapshot = { tickets: WorkTicket[]; messages: WorkMessage[];
+  pagination?: { offset: number; total: number; nextOffset: number | null } };

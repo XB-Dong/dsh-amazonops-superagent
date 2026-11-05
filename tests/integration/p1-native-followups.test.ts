@@ -11,6 +11,16 @@ function seed(f: ReturnType<typeof fixture>) {
   return f.business.command('main','inventory',{forecastId:forecast.id,physicalSku:'A',asOf:'2026-11-05',available:12,
     reserved:0,inbound:[],leadDays:{purchase:1,transport:2,receiving:1},safetyDays:2,horizon:7,demandFactors:[]});
 }
+test('unit: a missing assessment trigger gives a corrective error without granting authority',()=>{
+  const f=fixture();try{
+    const guard=privacyHooks(f.business,()=>f.runtime,()=>f.source,new AgentTools(f.business,()=>f.runtime));
+    for(const name of ['orchestrator_eval','orchestrator_eval_decide']){
+      assert.throws(()=>guard.authorizeTool({} as any,undefined,name,{decision:'accept'}),/MISSING_TRIGGER_ID/);
+      assert.throws(()=>guard.authorizeTool({} as any,undefined,name,{trigger_id:'forged'}),/SOURCE_FORBIDDEN/);
+    }
+    assert.equal(f.tickets.size,0);
+  }finally{f.dispose();}
+});
 test('unit: authenticated finite watch creates one human source and native request with stable intent',async()=>{
   const f=fixture();try{
     const inventory=seed(f);

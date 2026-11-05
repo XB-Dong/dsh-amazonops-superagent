@@ -46,6 +46,8 @@ export function privacyHooks(business:Business,runtime:()=>Runtime|undefined,sou
           if(input.trigger_id)permittedTrigger('main',String(input.trigger_id));
           if(input.ticket_id&&!source()?.allowedTicket('main',String(input.ticket_id)))throw new Error('SOURCE_FORBIDDEN');
         }else if(name==='orchestrator_eval'||name==='orchestrator_eval_decide'){
+          if(typeof input.trigger_id!=='string'||!input.trigger_id.trim())
+            throw new Error('MISSING_TRIGGER_ID: supply the same trigger_id used for orchestrator_eval; authority cannot be inferred');
           const trigger=permittedTrigger('main',String(input.trigger_id));
           if(trigger.human||trigger.meta.eventClass!=='risk_candidate')throw new Error('SOURCE_FORBIDDEN');
         }else throw new Error('TOOL_FORBIDDEN');

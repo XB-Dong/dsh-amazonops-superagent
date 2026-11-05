@@ -20,6 +20,7 @@ export function fixture() {
   const kinds: any[] = [];
   const db = new DatabaseSync(':memory:');
   db.exec('CREATE TABLE outbox (value TEXT NOT NULL)');
+  db.exec('CREATE TABLE decision (value TEXT NOT NULL)');
   const runtime: any = {
     sources: { register: (kind: any) => { kinds.push(kind); return () => {}; } },
     store: { db,

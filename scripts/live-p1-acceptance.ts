@@ -114,8 +114,9 @@ try {
     manualDaily:3,manualReason:'尚未处理过的合成观察对象'});
   const ruleInventory=await api('actions/inventory',{forecastId:ruleForecast.id,physicalSku:'B',asOf,available:1,reserved:0,inbound:[],
     leadDays:{purchase:1,transport:2,receiving:1},safetyDays:2,horizon:7,demandFactors:[]});
-  if(observeOnly)await api('followups/rule',{requestId:'p1-live-observe-recover-off',mode:'off',inventoryIds:[]});
-  await api('followups/rule', { requestId: observeOnly?'p1-live-observe-recover':'p1-live-observe-uncovered', mode: 'observe', inventoryIds: [ruleInventory.id] });
+  const recoveryId=observeOnly?`p1-live-observe-${Date.now()}`:undefined;
+  if(observeOnly)await api('followups/rule',{requestId:`${recoveryId}-off`,mode:'off',inventoryIds:[]});
+  await api('followups/rule', { requestId: recoveryId??'p1-live-observe-uncovered', mode: 'observe', inventoryIds: [ruleInventory.id] });
   const observed = await until('native-observe-assessment', async () => {
     const state = await api('followups');
     const terminal=state.assessments?.find((item:any)=>['ignored','unavailable'].includes(item.decision));

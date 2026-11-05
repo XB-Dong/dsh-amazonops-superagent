@@ -141,13 +141,23 @@ export function start(options = {}) {
     unlinkedPath(patch);
     if (existsSync(patch)) unlinkSync(patch);
   };
-  const stop = () => child.kill();
+  let stopping = false;
+  const stop = () => {
+    if (stopping) return;
+    stopping = true;
+    child.kill();
+  };
   process.once('SIGINT', stop); process.once('SIGTERM', stop);
-  child.once('error', error => { cleanup(); errorOutput(`${redactOutput(error.message, secrets)}\n`); });
+  child.once('error', error => {
+    cleanup(); errorOutput(`${redactOutput(error.message, secrets)}\n`);
+    if (!options.spawn) process.exitCode = 1;
+  });
   child.once('exit', code => {
     stdout.flush(); stderr.flush(); cleanup();
     process.removeListener('SIGINT', stop); process.removeListener('SIGTERM', stop);
-    if (!options.spawn) process.exitCode = code ?? 0;
+    // A signal-killed native child has no numeric exit code. Preserve failure
+    // so Restart=on-failure can recover; an explicit parent shutdown is expected.
+    if (!options.spawn) process.exitCode = code ?? (stopping ? 0 : 1);
   });
   return { child, home, port: settings.port, cleanup };
 }

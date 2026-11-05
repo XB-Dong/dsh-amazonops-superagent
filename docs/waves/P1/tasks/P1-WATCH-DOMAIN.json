@@ -9,14 +9,17 @@
     "docs/waves/P1/SPEC.zh.md",
     "docs/waves/P1/MIGRATION-CUTOVER.zh.md",
     "docs/waves/P1/MAINTENANCE.zh.md",
-    "docs/waves/P1/acceptance.json"
+    "docs/waves/P1/acceptance.json",
+    "specs/contracts/p1-followups-v0.3.md",
+    "packages/contracts/followups.ts"
   ],
   "inputManifest": "docs/waves/P1/inputs.json",
   "owner": "p1_backend",
   "stage": "S2-S3",
   "allowedWritePaths": [
-    "packages/business/**",
-    "tests/business/**"
+    "packages/business/followups/**",
+    "packages/business/index.ts",
+    "tests/business/followups*.test.ts"
   ],
   "excludedWritePaths": [
     "packages/business/core/recovery.ts",
@@ -34,8 +37,8 @@
     "P1-WATCH-07"
   ],
   "instructions": "Implement scoped finite watch authorization, subscriptions/cursors/stable operation identities and deterministic risk-rule eligibility. Migration owns recovery files; exclude those paths and its tests.",
-  "status": "prepared_waiting_for_start",
-  "dispatchable": false,
+  "status": "authorized_dispatch_pending",
+  "dispatchable": true,
   "dispatchGate": "User start message plus S0 current-baseline and private-input revalidation; Leader records exact dispatch commit and frozen interface SHA before activation. Preparation baseline is not automatically the later execution baseline.",
   "repairCount": 0,
   "repairCondition": "Preserve root cause history. After two same-root-cause repair attempts, perform renewed diagnosis and record the decision before further repair. Installation and fixture errors are not product Red.",

@@ -4,6 +4,7 @@ export function loadSettings(home:string,env?:NodeJS.ProcessEnv):{
   publicOrigin?:string;migrationMode:boolean;
   runtimePolicy?:import('../packages/business/core/budget.ts').BudgetPolicy;
   runtimeLimits?:import('../packages/business/core/budget.ts').Limits;
+  proactiveAutoEnabled?:boolean;
 };
 export function scrubEnvironment(env:NodeJS.ProcessEnv,home:string,apiKey?:string):NodeJS.ProcessEnv&{DSH_HOME:string};
 export function redactOutput(text:string,secrets?:string[]):string;

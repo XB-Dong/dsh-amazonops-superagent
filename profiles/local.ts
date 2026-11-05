@@ -12,6 +12,7 @@ export interface LocalProfile extends RuntimeProtection {
   modelAccount: 'test' | 'runtime';
   publicOrigin?: string;
   migrationMode?: boolean;
+  proactiveAutoEnabled?: boolean;
   releaseIdentity?: ReleaseIdentity;
 }
 
@@ -30,7 +31,8 @@ export function localPatch(options: LocalProfile): object[] {
         dataDir: path(options.home, 'data'), password: options.password,
         live: options.live && !options.migrationMode, modelAccount: options.modelAccount,
         publicOrigin: options.publicOrigin, migrationMode: options.migrationMode ?? false,
-        releaseIdentity: options.releaseIdentity, runtimePolicy: options.runtimePolicy, runtimeLimits: options.runtimeLimits } },
+        releaseIdentity: options.releaseIdentity, runtimePolicy: options.runtimePolicy, runtimeLimits: options.runtimeLimits,
+        proactiveAutoEnabled: options.proactiveAutoEnabled===true } },
       ...!options.migrationMode ? [{ id: 'amazonops-superagent', name: path(options.root, 'vendor/superagent/lib/index.js'),
         config: { stateDir, executionMode: 'operations' } }] : [],
     ] },

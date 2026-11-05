@@ -59,6 +59,7 @@ export function loadSettings(home, env = process.env) {
   const publicOrigin = settings.publicOrigin;
   configuredOrigin('http://127.0.0.1', publicOrigin);
   const migrationMode = migrationSetting(settings.migrationMode);
+  if(settings.proactiveAutoEnabled!==undefined&&typeof settings.proactiveAutoEnabled!=='boolean')throw new Error('INVALID_AUTO_MODE');
   budgetConfiguration({ ...settings, modelAccount });
   return { ...settings, port, modelAccount, publicOrigin, migrationMode, settingsPath: path };
 }
@@ -118,7 +119,8 @@ export function start(options = {}) {
   writeFileSync(patch, `${JSON.stringify(localPatch({ root, home, password: settings.password,
     port: settings.port, live: !!apiKey, modelAccount: settings.modelAccount,
     publicOrigin: settings.publicOrigin, migrationMode: settings.migrationMode, releaseIdentity,
-    runtimePolicy: settings.runtimePolicy, runtimeLimits: settings.runtimeLimits }), null, 2)}\n`, { mode: 0o600, flag: 'wx' });
+    runtimePolicy: settings.runtimePolicy, runtimeLimits: settings.runtimeLimits,
+    proactiveAutoEnabled:settings.proactiveAutoEnabled===true }), null, 2)}\n`, { mode: 0o600, flag: 'wx' });
   const output = options.stdout ?? (value => process.stdout.write(value));
   const errorOutput = options.stderr ?? (value => process.stderr.write(value));
   const origin = configuredOrigin(`http://127.0.0.1:${settings.port}`, settings.publicOrigin);

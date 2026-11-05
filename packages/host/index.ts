@@ -17,11 +17,17 @@ import { privacyHooks,privacyEpoch } from './privacy.ts';
 import { json,readBody,failure,loginPage } from './http.ts';
 import { configuredOrigin, sessionCookie, releaseHealth, migrationReadAllowed, budgetConfiguration, type ReleaseIdentity, type RuntimeProtection } from './production.ts';
 import type { WorkAction } from '../contracts/model.ts';
+import type { WatchCreate } from '../contracts/followups.ts';
+import { z } from 'zod';
 
 export const name='amazonops-workbench';
 export const inject=['webServer','llm','sessionPersistence'];
 export type Config=RuntimeProtection&{dataDir:string;password:string;live?:boolean;modelAccount?:'test'|'runtime';
-  publicOrigin?:string;migrationMode?:boolean;releaseIdentity?:ReleaseIdentity};
+  publicOrigin?:string;migrationMode?:boolean;releaseIdentity?:ReleaseIdentity;proactiveAutoEnabled?:boolean};
+const requestId=z.string().regex(/^[\w-]{1,80}$/);
+const watchInput=z.object({requestId,inventoryId:z.string().min(1).max(100),expiresAt:z.string(),title:z.string().optional()}).strict();
+const stopInput=z.object({requestId,id:z.string().min(1).max(100),revision:z.number().int().positive()}).strict();
+const ruleInput=z.object({requestId,mode:z.enum(['off','observe','auto']),inventoryIds:z.array(z.string().min(1).max(100)).max(100)}).strict();
 export function apply(ctx:Context,config:Config):void {
   if(!config.dataDir)throw new Error('DATA_DIRECTORY_REQUIRED');
   mkdirSync(config.dataDir,{recursive:true});
@@ -106,6 +112,21 @@ export function apply(ctx:Context,config:Config):void {
       if(path==='work-actions'&&req.method==='POST'){
         if(!source)throw new Error('RUNTIME_NOT_READY');json(res,await source.action(scope,await readBody(req) as WorkAction));return;
       }
+      if(path==='followups'&&req.method==='GET'){
+        json(res,source?.followups.snapshot(scope,{autoAvailable:config.proactiveAutoEnabled===true})??
+          {watches:[],rule:null,events:[],autoAvailable:false});return;
+      }
+      if(path==='followups/create'&&req.method==='POST'){
+        if(!source||!config.live)throw new Error('MODEL_OFFLINE');
+        json(res,await source.followups.createWatch(scope,watchInput.parse(await readBody(req)) as WatchCreate));return;
+      }
+      if(path==='followups/stop'&&req.method==='POST'){
+        if(!source)throw new Error('RUNTIME_NOT_READY');json(res,source.followups.stopWatch(scope,stopInput.parse(await readBody(req))));return;
+      }
+      if(path==='followups/rule'&&req.method==='POST'){
+        if(!source)throw new Error('RUNTIME_NOT_READY');
+        json(res,await source.followups.configureRule(scope,ruleInput.parse(await readBody(req)),{autoAvailable:config.proactiveAutoEnabled===true}));return;
+      }
       if(path.startsWith('actions/')&&path!=='actions/backup'&&req.method==='POST'){
         const action=path.slice(8);const body=await readBody(req);
         json(res,business.command(scope,action,body));return;
@@ -140,10 +161,14 @@ export function apply(ctx:Context,config:Config):void {
       throw new Error('NOT_FOUND');
     }catch(error){failure(res,error);}
   }}));
-  const worker=setInterval(()=>{if(!maintenance&&!migrationMode){try{business.tick('main');}catch{ctx.logger.warn('Business background work is pending after a recoverable error.');}}},3000);
+  let followupPump:Promise<void>|undefined;
+  const worker=setInterval(()=>{if(!maintenance&&!migrationMode){try{
+    business.tick('main');
+    if(!maintenance&&source)followupPump=source.followups.pump('main').catch(()=>ctx.logger.warn('Inventory followup is pending after a recoverable error.'));
+  }catch{ctx.logger.warn('Business background work is pending after a recoverable error.');}}},3000);
   worker.unref();
   ctx.effect(()=>async()=>{
-    clearInterval(worker);offChange();await runtime?.stop();await ctx.sessionPersistence.flush();accounting();
+    clearInterval(worker);offChange();await runtime?.stop();await followupPump;await ctx.sessionPersistence.flush();accounting();
     server.closeAllConnections();await new Promise<void>(resolve=>server.close(()=>resolve()));
     offAccess?.();offBoundary();business.close();budget.close();
   });

@@ -1,6 +1,8 @@
 # P1 数据迁移与切换规范
 
-准备规格，不是已运行工具。实际入口/账号/私有目录通过旧仓库本地operationsIndex和feedbackState配置定位，原文及真实反馈只在受限存储。
+2026-11-05：真实最终迁移、零遗漏全量对账、生产接替和备份恢复已完成并独立接受，事实见[执行证据](execution-evidence.json)。日常维护改从新仓库本地amazonops.operationsIndex和amazonops.feedbackState定位，不能继续旧版维护路径。以下迁移要求与准备记录保留为历史。
+
+准备期记录（历史）：当时只有准备规格，尚无已运行工具；入口/账号/私有目录通过旧仓库本地operationsIndex和feedbackState配置定位，原文及真实反馈只在受限存储。
 
 ## 权威与完整性
 

@@ -53,6 +53,9 @@ async function until(name: string, check: () => Promise<any>, timeout = 240000):
 }
 async function current(id: string) { return (await api('work')).tickets.find((ticket: any) => ticket.id === id); }
 async function action(id: string, requestId: string, text: string) {
+  const accepted=native()?.triggers.find((item:any)=>item.id===`human-work-action-${requestId}`);
+  if(accepted){assert.equal(accepted.text,text,'A resumed fixture must preserve the original human intent');
+    return {messageId:accepted.id,threadId:accepted.threads[0].id};}
   const ticket = await current(id);
   return api('work-actions', { ticketId: id, requestId, expectedUpdatedAt: ticket.updatedAt,
     action: ticket.attention ? 'answer' : 'supplement', ...(ticket.attention ? { attentionId: ticket.attention.id } : {}), text });

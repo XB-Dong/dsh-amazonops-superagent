@@ -39,9 +39,14 @@ export function inventoryRisk(store: Store, scope: string, inventoryId: string):
   const forecast = liveEntity<Forecast>(store, scope, candidate.id, 'forecast');
   const projection = projectInventory(inventory, forecast.dailyDemand);
   const facts = { store: inventory.store, site: inventory.site, listing: inventory.listing, physicalSku: inventory.physicalSku,
-    asOf: inventory.asOf, available: inventory.available, reserved: inventory.reserved, inbound: inventory.inbound,
-    leadDays: inventory.leadDays, safetyDays: inventory.safetyDays, horizon: inventory.horizon,
-    demandFactors: inventory.demandFactors, dailyDemand: forecast.dailyDemand, stockoutDate: projection.stockoutDate,
+    asOf: inventory.asOf, available: inventory.available, reserved: inventory.reserved,
+    inbound: inventory.inbound.map(row => ({ date: row.date, quantity: row.quantity }))
+      .sort((a, b) => a.date.localeCompare(b.date) || a.quantity - b.quantity),
+    leadDays: { purchase: inventory.leadDays.purchase, transport: inventory.leadDays.transport, receiving: inventory.leadDays.receiving },
+    safetyDays: inventory.safetyDays, horizon: inventory.horizon,
+    demandFactors: inventory.demandFactors.map(row => ({ date: row.date, multiplier: row.multiplier }))
+      .sort((a, b) => a.date.localeCompare(b.date)),
+    dailyDemand: forecast.dailyDemand, stockoutDate: projection.stockoutDate,
     replenishQuantity: projection.replenishQuantity, lostDemand: projection.lostDemand };
   return { inventoryId: inventory.id, forecastId: forecast.id, store: inventory.store, site: inventory.site,
     listing: inventory.listing, physicalSku: inventory.physicalSku, stockoutDate: projection.stockoutDate,

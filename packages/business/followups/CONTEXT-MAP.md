@@ -30,3 +30,5 @@ Store.command for payload conflict/idempotence, Store.transaction for cursor and
 - [x] Current source closure and time checks precede pending delivery, including after restart.
 
 Self-review completed before implementation. Domain authorization never grants native execution or external business permissions.
+
+Follow-up review findings retain the same root task and scope: latest-transition filtering must prevent an older pending risk from becoming actionable when facts return to it; order-insensitive inventory arrays require canonical hashing. The trusted native adapter also needs a CAS `complete` command with persisted expiry and current authorization validation. These edits remain inside the existing followups module and behavior tests; no shared DTO changes.

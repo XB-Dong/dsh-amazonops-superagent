@@ -239,3 +239,78 @@ test('mismatched event and referenced entity kinds cannot authorize work', () =>
     assert.equal(f.followups.pending('main').length, 0, 'event kind must agree with trusted entity kind');
   } finally { f.close(); }
 });
+
+test('a returned current risk exposes only its latest transition, never older pending copies', () => {
+  const f = fixture();
+  try {
+    watch(f); f.followups.scan('main');
+    change(f, 8, 'risk-first'); f.followups.scan('main');
+    const old = f.followups.pending('main')[0];
+    change(f, 6, 'risk-middle'); f.followups.scan('main');
+    change(f, 8, 'risk-returned'); f.followups.scan('main');
+    const pending = f.followups.pending('main');
+    assert.equal(pending.length, 1);
+    assert.ok(pending[0].sequence > old.sequence);
+    assert.notEqual(pending[0].eventId, old.eventId);
+    assert.throws(() => f.followups.markDelivered('main', old.eventId), /STALE/);
+    f.followups.markDelivered('main', pending[0].eventId);
+    assert.equal(f.followups.pending('main').length, 0, 'delivering latest must not uncover an old copy');
+  } finally { f.close(); }
+});
+
+test('reordering equivalent arrival and demand-factor inputs leaves risk identity unchanged', () => {
+  const f = fixture();
+  try {
+    const base = { forecastId: f.forecast.id, physicalSku: 'SKU-A', asOf: '2026-11-05', available: 12,
+      reserved: 0, inbound: [{ date: '2026-11-06', quantity: 2 }, { date: '2026-11-07', quantity: 3 }],
+      leadDays: { purchase: 1, transport: 2, receiving: 1 }, safetyDays: 2, horizon: 7,
+      demandFactors: [{ date: '2026-11-06', multiplier: 2 }, { date: '2026-11-07', multiplier: 3 }] };
+    const original = saveInventory(f.store, 'main', base);
+    const w = f.followups.create('main', { requestId: 'array-watch', inventoryId: original.id,
+      expiresAt: '2026-11-06T00:00:00.000Z' }, f.source.id);
+    const before = f.followups.risk('main', original.id);
+    const reordered = saveInventory(f.store, 'main', { ...base, inbound: [...base.inbound].reverse(),
+      demandFactors: [...base.demandFactors].reverse(), leadDays: { receiving: 1, transport: 2, purchase: 1 } });
+    f.store.appendEvent('main', 'business:inventory', reordered);
+    const after = f.followups.risk('main', reordered.id);
+    assert.equal(after.stockoutDate, before.stockoutDate);
+    assert.equal(after.replenishQuantity, before.replenishQuantity);
+    assert.equal(after.digest, before.digest);
+    f.followups.scan('main'); assert.equal(f.followups.pending('main').filter(e => e.watchId === w.id).length, 0);
+  } finally { f.close(); }
+});
+
+test('trusted completion checks CAS, persists completed and disallows more pending work', () => {
+  const f = fixture();
+  try {
+    const w = watch(f); change(f, 8); f.followups.scan('main');
+    assert.throws(() => f.followups.complete('main', w.id, w.revision + 1), /REVISION_CONFLICT/);
+    const completed = f.followups.complete('main', w.id, w.revision);
+    assert.equal(completed.status, 'completed');
+    assert.equal(f.followups.get('main', w.id).status, 'completed');
+    assert.equal(f.followups.complete('main', w.id, completed.revision).revision, completed.revision);
+    assert.equal(f.followups.pending('main').length, 0);
+    assert.throws(() => f.followups.complete('other', w.id, completed.revision), /NOT_FOUND|DELETED/);
+  } finally { f.close(); }
+});
+
+test('completion persists expiry before rejecting and rechecks revoked authority', () => {
+  for (const mode of ['expiry', 'revoke', 'stopped'] as const) {
+    const f = fixture();
+    try {
+      const w = watch(f);
+      if (mode === 'expiry') {
+        f.advance('2026-11-06T00:00:00.000Z');
+        assert.equal(f.followups.get('main', w.id).status, 'active', 'read does not silently expire');
+        assert.throws(() => f.followups.complete('main', w.id, w.revision), /EXPIRED/);
+        assert.equal(f.followups.get('main', w.id).status, 'expired');
+      } else if (mode === 'revoke') {
+        f.store.privacyIntent('main', f.source.id, 'revoke'); f.store.applyPrivacyLedger();
+        assert.throws(() => f.followups.complete('main', w.id, w.revision), /REVOKED/);
+      } else {
+        const stopped = f.followups.stop('main', w.id, w.revision);
+        assert.throws(() => f.followups.complete('main', w.id, stopped.revision), /INACTIVE/);
+      }
+    } finally { f.close(); }
+  }
+});

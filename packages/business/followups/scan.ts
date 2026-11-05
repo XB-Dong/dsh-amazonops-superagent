@@ -71,8 +71,13 @@ export function scanEvents(service: Followups, scope: string): void {
   });
 }
 export function pendingEvents(service: Followups, scope: string): FollowupEvent[] {
-  return service.store.list<FollowupEvent>(scope, 'followup-event').filter(event => {
+  const events = service.store.list<FollowupEvent>(scope, 'followup-event');
+  const latest = new Map<string, FollowupEvent>();
+  for (const event of events) if (event.watchId && (!latest.has(event.watchId)
+    || event.sequence > latest.get(event.watchId)!.sequence)) latest.set(event.watchId, event);
+  return events.filter(event => {
     if (event.status !== 'pending') return false;
+    if (event.watchId && latest.get(event.watchId)?.id !== event.id) return false;
     try {
       liveEntity(service.store, scope, event.id, 'followup-event');
       const risk = service.risk(scope, event.inventoryId);

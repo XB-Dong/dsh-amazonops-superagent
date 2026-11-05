@@ -55,6 +55,22 @@ export class Followups {
       return watchView(watch.status !== 'active' ? watch : this.store.update(watch, { status: 'stopped' }, revision));
     });
   }
+  complete(scope: string, id: string, revision: number): InventoryWatch {
+    const result = this.store.transaction(() => {
+      const watch = this.record(scope, id);
+      if (watch.revision !== revision) throw new Error('REVISION_CONFLICT');
+      if (watch.status === 'completed') return { watch, expired: false };
+      if (watch.status !== 'active') throw new Error('WATCH_INACTIVE');
+      if (Date.parse(watch.expiresAt) <= this.clock().getTime())
+        return { watch: this.store.update(watch, { status: 'expired' }), expired: true };
+      this.requireActive(watch);
+      this.risk(scope, watch.inventoryId);
+      return { watch: this.store.update(watch, { status: 'completed' }), expired: false };
+    });
+    // Reject after the expiry transaction commits, so an exception cannot revive an active watch.
+    if (result.expired) throw new Error('WATCH_EXPIRED');
+    return watchView(result.watch);
+  }
   expire(scope: string): void {
     this.store.transaction(() => {
       for (const watch of this.store.list<WatchRecord>(scope, 'inventory-watch'))

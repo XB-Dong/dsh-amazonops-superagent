@@ -12,7 +12,22 @@
       "mandatory": true,
       "expected": "Linux固定依赖安装、真实DSH原生启动和实际工具回调通过；Windows原有功能回归仍通过",
       "status": "not_run",
-      "evidence": []
+      "evidence": [],
+      "evidenceStages": [
+        "pre_release",
+        "cutover"
+      ],
+      "completionStage": "cutover",
+      "stageResults": {
+        "pre_release": {
+          "status": "not_run",
+          "evidence": []
+        },
+        "cutover": {
+          "status": "not_run",
+          "evidence": []
+        }
+      }
     },
     {
       "id": "P1-CLOUD-02",
@@ -21,7 +36,22 @@
       "mandatory": true,
       "expected": "HTTPS可信代理与公共Origin；伪造Host/Origin/转发头、匿名HTTP/RPC/WS均拒绝",
       "status": "not_run",
-      "evidence": []
+      "evidence": [],
+      "evidenceStages": [
+        "pre_release",
+        "cutover"
+      ],
+      "completionStage": "cutover",
+      "stageResults": {
+        "pre_release": {
+          "status": "not_run",
+          "evidence": []
+        },
+        "cutover": {
+          "status": "not_run",
+          "evidence": []
+        }
+      }
     },
     {
       "id": "P1-CLOUD-03",
@@ -30,7 +60,22 @@
       "mandatory": true,
       "expected": "生产Secure/HttpOnly/SameSite cookie、注销失效、运营管理和shell能力隔离",
       "status": "not_run",
-      "evidence": []
+      "evidence": [],
+      "evidenceStages": [
+        "pre_release",
+        "cutover"
+      ],
+      "completionStage": "cutover",
+      "stageResults": {
+        "pre_release": {
+          "status": "not_run",
+          "evidence": []
+        },
+        "cutover": {
+          "status": "not_run",
+          "evidence": []
+        }
+      }
     },
     {
       "id": "P1-CLOUD-04",
@@ -39,7 +84,22 @@
       "mandatory": true,
       "expected": "服务最小权限、自动重启、独立持久目录、脱敏日志及健康/就绪/精确版本验证",
       "status": "not_run",
-      "evidence": []
+      "evidence": [],
+      "evidenceStages": [
+        "pre_release",
+        "cutover"
+      ],
+      "completionStage": "cutover",
+      "stageResults": {
+        "pre_release": {
+          "status": "not_run",
+          "evidence": []
+        },
+        "cutover": {
+          "status": "not_run",
+          "evidence": []
+        }
+      }
     },
     {
       "id": "P1-CLOUD-05",
@@ -48,7 +108,22 @@
       "mandatory": true,
       "expected": "协调备份及独立目录恢复；不退款用量、不复活删除，模型账户与研发凭据隔离",
       "status": "not_run",
-      "evidence": []
+      "evidence": [],
+      "evidenceStages": [
+        "pre_release",
+        "cutover"
+      ],
+      "completionStage": "cutover",
+      "stageResults": {
+        "pre_release": {
+          "status": "not_run",
+          "evidence": []
+        },
+        "cutover": {
+          "status": "not_run",
+          "evidence": []
+        }
+      }
     },
     {
       "id": "P1-MIG-01",
@@ -57,7 +132,22 @@
       "mandatory": true,
       "expected": "完整实体/文件/来源/回执/隐私/用量和私有反馈登记一致性快照，有活动WAL仍完整",
       "status": "not_run",
-      "evidence": []
+      "evidence": [],
+      "evidenceStages": [
+        "pre_release",
+        "cutover"
+      ],
+      "completionStage": "cutover",
+      "stageResults": {
+        "pre_release": {
+          "status": "not_run",
+          "evidence": []
+        },
+        "cutover": {
+          "status": "not_run",
+          "evidence": []
+        }
+      }
     },
     {
       "id": "P1-MIG-02",
@@ -66,7 +156,22 @@
       "mandatory": true,
       "expected": "ID/revision/count/sources/补充/pending/确认历史/已交付及部分交付判定保留",
       "status": "not_run",
-      "evidence": []
+      "evidence": [],
+      "evidenceStages": [
+        "pre_release",
+        "cutover"
+      ],
+      "completionStage": "cutover",
+      "stageResults": {
+        "pre_release": {
+          "status": "not_run",
+          "evidence": []
+        },
+        "cutover": {
+          "status": "not_run",
+          "evidence": []
+        }
+      }
     },
     {
       "id": "P1-MIG-03",
@@ -75,7 +180,22 @@
       "mandatory": true,
       "expected": "演练后新增建议、同时间戳修改、不增revision的revoke、撤回/删除均被完整集合指纹发现",
       "status": "not_run",
-      "evidence": []
+      "evidence": [],
+      "evidenceStages": [
+        "pre_release",
+        "cutover"
+      ],
+      "completionStage": "cutover",
+      "stageResults": {
+        "pre_release": {
+          "status": "not_run",
+          "evidence": []
+        },
+        "cutover": {
+          "status": "not_run",
+          "evidence": []
+        }
+      }
     },
     {
       "id": "P1-MIG-04",
@@ -84,7 +204,22 @@
       "mandatory": true,
       "expected": "尚未抽取source/job队列迁移；候选验证时无后台消费，启用后只处理一次",
       "status": "not_run",
-      "evidence": []
+      "evidence": [],
+      "evidenceStages": [
+        "pre_release",
+        "cutover"
+      ],
+      "completionStage": "cutover",
+      "stageResults": {
+        "pre_release": {
+          "status": "not_run",
+          "evidence": []
+        },
+        "cutover": {
+          "status": "not_run",
+          "evidence": []
+        }
+      }
     },
     {
       "id": "P1-MIG-05",
@@ -93,7 +228,22 @@
       "mandatory": true,
       "expected": "重复/中断迁移和损坏manifest/漏项/ID变参冲突拒绝发布；源目录不被恢复读取改写",
       "status": "not_run",
-      "evidence": []
+      "evidence": [],
+      "evidenceStages": [
+        "pre_release",
+        "cutover"
+      ],
+      "completionStage": "cutover",
+      "stageResults": {
+        "pre_release": {
+          "status": "not_run",
+          "evidence": []
+        },
+        "cutover": {
+          "status": "not_run",
+          "evidence": []
+        }
+      }
     },
     {
       "id": "P1-MIG-06",
@@ -102,7 +252,22 @@
       "mandatory": true,
       "expected": "旧入口与后台/模型/维护全部写者排空冻结后最终快照及逐项零遗漏/重复/未解释差异对账",
       "status": "not_run",
-      "evidence": []
+      "evidence": [],
+      "evidenceStages": [
+        "pre_release",
+        "cutover"
+      ],
+      "completionStage": "cutover",
+      "stageResults": {
+        "pre_release": {
+          "status": "not_run",
+          "evidence": []
+        },
+        "cutover": {
+          "status": "not_run",
+          "evidence": []
+        }
+      }
     },
     {
       "id": "P1-MIG-07",
@@ -111,7 +276,17 @@
       "mandatory": true,
       "expected": "切流旧入口不能写、新入口建议仅接收一次，切换后追加建议在新权威持久化",
       "status": "not_run",
-      "evidence": []
+      "evidence": [],
+      "evidenceStages": [
+        "cutover"
+      ],
+      "completionStage": "cutover",
+      "stageResults": {
+        "cutover": {
+          "status": "not_run",
+          "evidence": []
+        }
+      }
     },
     {
       "id": "P1-MIG-08",
@@ -120,7 +295,22 @@
       "mandatory": true,
       "expected": "开放写入后的故障恢复保留新建议、墓碑/隐私、用量和登记；禁止回过期快照",
       "status": "not_run",
-      "evidence": []
+      "evidence": [],
+      "evidenceStages": [
+        "pre_release",
+        "cutover"
+      ],
+      "completionStage": "cutover",
+      "stageResults": {
+        "pre_release": {
+          "status": "not_run",
+          "evidence": []
+        },
+        "cutover": {
+          "status": "not_run",
+          "evidence": []
+        }
+      }
     },
     {
       "id": "P1-RESP-01",
@@ -129,7 +319,17 @@
       "mandatory": true,
       "expected": "列表/详情分页投影真实stage/Mandate/Assignment/来源/等待原因，无第二工单状态权威",
       "status": "not_run",
-      "evidence": []
+      "evidence": [],
+      "evidenceStages": [
+        "pre_release"
+      ],
+      "completionStage": "pre_release",
+      "stageResults": {
+        "pre_release": {
+          "status": "not_run",
+          "evidence": []
+        }
+      }
     },
     {
       "id": "P1-RESP-02",
@@ -138,7 +338,17 @@
       "mandatory": true,
       "expected": "受控补充、attention答复、重试与停止作用到真实Engine，原生Session可查",
       "status": "not_run",
-      "evidence": []
+      "evidence": [],
+      "evidenceStages": [
+        "pre_release"
+      ],
+      "completionStage": "pre_release",
+      "stageResults": {
+        "pre_release": {
+          "status": "not_run",
+          "evidence": []
+        }
+      }
     },
     {
       "id": "P1-RESP-03",
@@ -147,7 +357,17 @@
       "mandatory": true,
       "expected": "错scope、过期答复、重复提交、无权限动作拒绝；筛选/断线不丢未保存输入",
       "status": "not_run",
-      "evidence": []
+      "evidence": [],
+      "evidenceStages": [
+        "pre_release"
+      ],
+      "completionStage": "pre_release",
+      "stageResults": {
+        "pre_release": {
+          "status": "not_run",
+          "evidence": []
+        }
+      }
     },
     {
       "id": "P1-RESP-04",
@@ -156,7 +376,17 @@
       "mandatory": true,
       "expected": "草稿交付不标业务任务完成，错误/空/排队/等待/失败状态中文可理解",
       "status": "not_run",
-      "evidence": []
+      "evidence": [],
+      "evidenceStages": [
+        "pre_release"
+      ],
+      "completionStage": "pre_release",
+      "stageResults": {
+        "pre_release": {
+          "status": "not_run",
+          "evidence": []
+        }
+      }
     },
     {
       "id": "P1-WATCH-01",
@@ -165,7 +395,17 @@
       "mandatory": true,
       "expected": "明确库存对象、范围、期限、通知及终止条件，缺对象/期限不猜测",
       "status": "not_run",
-      "evidence": []
+      "evidence": [],
+      "evidenceStages": [
+        "pre_release"
+      ],
+      "completionStage": "pre_release",
+      "stageResults": {
+        "pre_release": {
+          "status": "not_run",
+          "evidence": []
+        }
+      }
     },
     {
       "id": "P1-WATCH-02",
@@ -174,7 +414,17 @@
       "mandatory": true,
       "expected": "真实worker waiting保持原live Ticket，业务版本变更无需再提示即可续办",
       "status": "not_run",
-      "evidence": []
+      "evidence": [],
+      "evidenceStages": [
+        "pre_release"
+      ],
+      "completionStage": "pre_release",
+      "stageResults": {
+        "pre_release": {
+          "status": "not_run",
+          "evidence": []
+        }
+      }
     },
     {
       "id": "P1-WATCH-03",
@@ -183,7 +433,17 @@
       "mandatory": true,
       "expected": "白名单业务引用与持久consumer游标；错scope/对象/旧版本/失效对象被拒绝",
       "status": "not_run",
-      "evidence": []
+      "evidence": [],
+      "evidenceStages": [
+        "pre_release"
+      ],
+      "completionStage": "pre_release",
+      "stageResults": {
+        "pre_release": {
+          "status": "not_run",
+          "evidence": []
+        }
+      }
     },
     {
       "id": "P1-WATCH-04",
@@ -192,7 +452,17 @@
       "mandatory": true,
       "expected": "重复事件、consumer崩溃、重启和换Assignment不重复草稿/通知，积压变化不丢",
       "status": "not_run",
-      "evidence": []
+      "evidence": [],
+      "evidenceStages": [
+        "pre_release"
+      ],
+      "completionStage": "pre_release",
+      "stageResults": {
+        "pre_release": {
+          "status": "not_run",
+          "evidence": []
+        }
+      }
     },
     {
       "id": "P1-WATCH-05",
@@ -201,7 +471,17 @@
       "mandatory": true,
       "expected": "blocked/attention不被机器消息恢复；用户答复续原工单，普通ended工单不被机器复活",
       "status": "not_run",
-      "evidence": []
+      "evidence": [],
+      "evidenceStages": [
+        "pre_release"
+      ],
+      "completionStage": "pre_release",
+      "stageResults": {
+        "pre_release": {
+          "status": "not_run",
+          "evidence": []
+        }
+      }
     },
     {
       "id": "P1-WATCH-06",
@@ -210,7 +490,17 @@
       "mandatory": true,
       "expected": "用户停止/授权到期/来源删除/Skill撤销/权限失效后不能唤醒或写入，恢复不复活",
       "status": "not_run",
-      "evidence": []
+      "evidence": [],
+      "evidenceStages": [
+        "pre_release"
+      ],
+      "completionStage": "pre_release",
+      "stageResults": {
+        "pre_release": {
+          "status": "not_run",
+          "evidence": []
+        }
+      }
     },
     {
       "id": "P1-WATCH-07",
@@ -219,7 +509,17 @@
       "mandatory": true,
       "expected": "无变化零通知；回执/tick/助手输出不再触发自身，只有内部待确认草稿无外部业务写入",
       "status": "not_run",
-      "evidence": []
+      "evidence": [],
+      "evidenceStages": [
+        "pre_release"
+      ],
+      "completionStage": "pre_release",
+      "stageResults": {
+        "pre_release": {
+          "status": "not_run",
+          "evidence": []
+        }
+      }
     },
     {
       "id": "P1-RULE-01",
@@ -228,7 +528,17 @@
       "mandatory": true,
       "expected": "唯一库存缺货复核规则默认observe，展示真实评估依据/would-accept且零worker/草稿写入",
       "status": "not_run",
-      "evidence": []
+      "evidence": [],
+      "evidenceStages": [
+        "pre_release"
+      ],
+      "completionStage": "pre_release",
+      "stageResults": {
+        "pre_release": {
+          "status": "not_run",
+          "evidence": []
+        }
+      }
     },
     {
       "id": "P1-RULE-02",
@@ -237,7 +547,17 @@
       "mandatory": true,
       "expected": "经过合成原生验收和独立审核后仅该规则窄auto；每个风险窗口/版本只创建一次",
       "status": "not_run",
-      "evidence": []
+      "evidence": [],
+      "evidenceStages": [
+        "pre_release"
+      ],
+      "completionStage": "pre_release",
+      "stageResults": {
+        "pre_release": {
+          "status": "not_run",
+          "evidence": []
+        }
+      }
     },
     {
       "id": "P1-RULE-03",
@@ -246,7 +566,17 @@
       "mandatory": true,
       "expected": "已有授权watch不重复接单，关闭规则/策略改变限制后续工作；未匹配事件不开工",
       "status": "not_run",
-      "evidence": []
+      "evidence": [],
+      "evidenceStages": [
+        "pre_release"
+      ],
+      "completionStage": "pre_release",
+      "stageResults": {
+        "pre_release": {
+          "status": "not_run",
+          "evidence": []
+        }
+      }
     },
     {
       "id": "P1-RULE-04",
@@ -255,25 +585,70 @@
       "mandatory": true,
       "expected": "外来文本/CSV/提示词不能扩权；默认coding规则不启用，运营worker无研发凭据",
       "status": "not_run",
-      "evidence": []
+      "evidence": [],
+      "evidenceStages": [
+        "pre_release"
+      ],
+      "completionStage": "pre_release",
+      "stageResults": {
+        "pre_release": {
+          "status": "not_run",
+          "evidence": []
+        }
+      }
     },
     {
       "id": "P1-MAINT-01",
       "requirementId": "P1-MAINTENANCE",
       "group": "每日维护接替",
       "mandatory": true,
-      "expected": "既有automation同ID更新，原01:00时区/target/通知保留并读回，未创建重复调度",
+      "expected": "既有automation同ID在PAUSED下更新，原01:00时区/target/通知保留；P1业务完成后恢复ACTIVE并读回，无重复调度",
       "status": "not_run",
-      "evidence": []
+      "evidence": [],
+      "evidenceStages": [
+        "handover",
+        "closeout"
+      ],
+      "completionStage": "closeout",
+      "stageResults": {
+        "handover": {
+          "status": "not_run",
+          "evidence": []
+        },
+        "closeout": {
+          "status": "not_run",
+          "evidence": []
+        }
+      }
     },
     {
       "id": "P1-MAINT-02",
       "requirementId": "P1-MAINTENANCE",
       "group": "每日维护接替",
       "mandatory": true,
-      "expected": "旧活跃Leader与排队触发不能继续旧写入，新服务和维护权威只有一个",
+      "expected": "启动后S0暂停旧研发触发并排空旧活跃Leader/排队任务，旧业务服务继续；切换后生产和维护仅有一个权威",
       "status": "not_run",
-      "evidence": []
+      "evidence": [],
+      "evidenceStages": [
+        "pre_release",
+        "cutover",
+        "handover"
+      ],
+      "completionStage": "handover",
+      "stageResults": {
+        "pre_release": {
+          "status": "not_run",
+          "evidence": []
+        },
+        "cutover": {
+          "status": "not_run",
+          "evidence": []
+        },
+        "handover": {
+          "status": "not_run",
+          "evidence": []
+        }
+      }
     },
     {
       "id": "P1-MAINT-03",
@@ -282,16 +657,46 @@
       "mandatory": true,
       "expected": "私有去重历史稳定映射，待确认/撤回/删除/已交付不重复分波；未完沿原ID和修复次数",
       "status": "not_run",
-      "evidence": []
+      "evidence": [],
+      "evidenceStages": [
+        "pre_release",
+        "handover"
+      ],
+      "completionStage": "handover",
+      "stageResults": {
+        "pre_release": {
+          "status": "not_run",
+          "evidence": []
+        },
+        "handover": {
+          "status": "not_run",
+          "evidence": []
+        }
+      }
     },
     {
       "id": "P1-MAINT-04",
       "requirementId": "P1-MAINTENANCE",
       "group": "每日维护接替",
       "mandatory": true,
-      "expected": "受控无变化维护检查指向新权威，零新波次/零模型/零旧写入；P1未完成不擅自启动开发",
+      "expected": "handover_validation实际只读检查指向新权威，零新波次/零模型/零旧写入；普通触发在businessDelivery未完成或其他Leader持锁时退出，不把配置读回当实际调度",
       "status": "not_run",
-      "evidence": []
+      "evidence": [],
+      "evidenceStages": [
+        "pre_release",
+        "handover"
+      ],
+      "completionStage": "handover",
+      "stageResults": {
+        "pre_release": {
+          "status": "not_run",
+          "evidence": []
+        },
+        "handover": {
+          "status": "not_run",
+          "evidence": []
+        }
+      }
     },
     {
       "id": "P1-PUB-01",
@@ -300,7 +705,17 @@
       "mandatory": true,
       "expected": "新README和个人主页按最新SHA最小修改并读回，其他主页内容保留，全部声明有实际证据",
       "status": "not_run",
-      "evidence": []
+      "evidence": [],
+      "evidenceStages": [
+        "handover"
+      ],
+      "completionStage": "handover",
+      "stageResults": {
+        "handover": {
+          "status": "not_run",
+          "evidence": []
+        }
+      }
     },
     {
       "id": "P1-PUB-02",
@@ -309,7 +724,17 @@
       "mandatory": true,
       "expected": "旧README链接接替者并停功能维护；旧服务/后台/旧调度停用，恢复资产清单保留",
       "status": "not_run",
-      "evidence": []
+      "evidence": [],
+      "evidenceStages": [
+        "handover"
+      ],
+      "completionStage": "handover",
+      "stageResults": {
+        "handover": {
+          "status": "not_run",
+          "evidence": []
+        }
+      }
     },
     {
       "id": "P1-PUB-03",
@@ -318,7 +743,22 @@
       "mandatory": true,
       "expected": "待推公开历史和文档隐私扫描无凭据/真实反馈/身份/私有路径/数据库，许可证和上游归属保留",
       "status": "not_run",
-      "evidence": []
+      "evidence": [],
+      "evidenceStages": [
+        "pre_release",
+        "handover"
+      ],
+      "completionStage": "handover",
+      "stageResults": {
+        "pre_release": {
+          "status": "not_run",
+          "evidence": []
+        },
+        "handover": {
+          "status": "not_run",
+          "evidence": []
+        }
+      }
     },
     {
       "id": "P1-FINAL-01",
@@ -327,7 +767,17 @@
       "mandatory": true,
       "expected": "真实模型完整授权跟进→新业务变更→attention/答复→内部草稿→真实结果投递，完整usage",
       "status": "not_run",
-      "evidence": []
+      "evidence": [],
+      "evidenceStages": [
+        "pre_release"
+      ],
+      "completionStage": "pre_release",
+      "stageResults": {
+        "pre_release": {
+          "status": "not_run",
+          "evidence": []
+        }
+      }
     },
     {
       "id": "P1-FINAL-02",
@@ -336,7 +786,22 @@
       "mandatory": true,
       "expected": "实际浏览器执行核心动作、公网登录/WS/重启后状态和建议持久化通过",
       "status": "not_run",
-      "evidence": []
+      "evidence": [],
+      "evidenceStages": [
+        "pre_release",
+        "cutover"
+      ],
+      "completionStage": "cutover",
+      "stageResults": {
+        "pre_release": {
+          "status": "not_run",
+          "evidence": []
+        },
+        "cutover": {
+          "status": "not_run",
+          "evidence": []
+        }
+      }
     },
     {
       "id": "P1-FINAL-03",
@@ -345,7 +810,17 @@
       "mandatory": true,
       "expected": "同情景收益记录人工提示/决策、重复/遗漏、耗时和usage，不夸大速度或成本收益",
       "status": "not_run",
-      "evidence": []
+      "evidence": [],
+      "evidenceStages": [
+        "pre_release"
+      ],
+      "completionStage": "pre_release",
+      "stageResults": {
+        "pre_release": {
+          "status": "not_run",
+          "evidence": []
+        }
+      }
     },
     {
       "id": "P1-FINAL-04",
@@ -354,7 +829,33 @@
       "mandatory": true,
       "expected": "精确候选Windows/Linux CI、独立审核、生产切换与恢复验证均完成，全部P1强制项有分层证据",
       "status": "not_run",
-      "evidence": []
+      "evidence": [],
+      "evidenceStages": [
+        "pre_release",
+        "cutover",
+        "handover",
+        "closeout"
+      ],
+      "completionStage": "closeout",
+      "stageResults": {
+        "pre_release": {
+          "status": "not_run",
+          "evidence": []
+        },
+        "cutover": {
+          "status": "not_run",
+          "evidence": []
+        },
+        "handover": {
+          "status": "not_run",
+          "evidence": []
+        },
+        "closeout": {
+          "status": "not_run",
+          "evidence": []
+        }
+      }
     }
-  ]
+  ],
+  "gateDefinition": "docs/waves/P1/GATES.zh.md"
 }

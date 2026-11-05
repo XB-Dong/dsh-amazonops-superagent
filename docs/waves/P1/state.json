@@ -33,6 +33,92 @@
   },
   "taskIndex": "docs/waves/P1/tasks.json",
   "inputManifest": "docs/waves/P1/inputs.json",
-  "releaseGate": "All mandatory acceptance passed on exact candidate and independently reviewed, final source snapshot reconciled before new writes.",
-  "nextAction": "Wait for the user start instruction; on start run S0 fresh baseline checks, not stale preparation probes."
+  "releaseGate": "G1 pre_release evidence plus accepted exact-candidate review; G2 final source reconciliation/pre_open safety before writes; G3 actual handover and independent business acceptance; G4 ACTIVE readback and all 39 cases before final completion.",
+  "nextAction": "Wait for the user start instruction; on start run S0 fresh baseline checks, not stale preparation probes.",
+  "businessDelivery": "not_started",
+  "taskPackets": 11,
+  "gates": {
+    "pre_release": {
+      "status": "not_run",
+      "caseIds": [
+        "P1-CLOUD-01",
+        "P1-CLOUD-02",
+        "P1-CLOUD-03",
+        "P1-CLOUD-04",
+        "P1-CLOUD-05",
+        "P1-MIG-01",
+        "P1-MIG-02",
+        "P1-MIG-03",
+        "P1-MIG-04",
+        "P1-MIG-05",
+        "P1-MIG-06",
+        "P1-MIG-08",
+        "P1-RESP-01",
+        "P1-RESP-02",
+        "P1-RESP-03",
+        "P1-RESP-04",
+        "P1-WATCH-01",
+        "P1-WATCH-02",
+        "P1-WATCH-03",
+        "P1-WATCH-04",
+        "P1-WATCH-05",
+        "P1-WATCH-06",
+        "P1-WATCH-07",
+        "P1-RULE-01",
+        "P1-RULE-02",
+        "P1-RULE-03",
+        "P1-RULE-04",
+        "P1-MAINT-02",
+        "P1-MAINT-03",
+        "P1-MAINT-04",
+        "P1-PUB-03",
+        "P1-FINAL-01",
+        "P1-FINAL-02",
+        "P1-FINAL-03",
+        "P1-FINAL-04"
+      ]
+    },
+    "cutover": {
+      "status": "not_run",
+      "caseIds": [
+        "P1-CLOUD-01",
+        "P1-CLOUD-02",
+        "P1-CLOUD-03",
+        "P1-CLOUD-04",
+        "P1-CLOUD-05",
+        "P1-MIG-01",
+        "P1-MIG-02",
+        "P1-MIG-03",
+        "P1-MIG-04",
+        "P1-MIG-05",
+        "P1-MIG-06",
+        "P1-MIG-07",
+        "P1-MIG-08",
+        "P1-MAINT-02",
+        "P1-FINAL-02",
+        "P1-FINAL-04"
+      ]
+    },
+    "handover": {
+      "status": "not_run",
+      "caseIds": [
+        "P1-MAINT-01",
+        "P1-MAINT-02",
+        "P1-MAINT-03",
+        "P1-MAINT-04",
+        "P1-PUB-01",
+        "P1-PUB-02",
+        "P1-PUB-03",
+        "P1-FINAL-04"
+      ]
+    },
+    "closeout": {
+      "status": "not_run",
+      "caseIds": [
+        "P1-MAINT-01",
+        "P1-FINAL-04"
+      ]
+    }
+  },
+  "gateDefinition": "docs/waves/P1/GATES.zh.md"
 }

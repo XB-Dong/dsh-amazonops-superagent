@@ -31,7 +31,6 @@
     "P1-MIG-04",
     "P1-MIG-05",
     "P1-MIG-06",
-    "P1-MIG-07",
     "P1-MIG-08",
     "P1-RESP-01",
     "P1-RESP-02",
@@ -48,19 +47,16 @@
     "P1-RULE-02",
     "P1-RULE-03",
     "P1-RULE-04",
-    "P1-MAINT-01",
     "P1-MAINT-02",
     "P1-MAINT-03",
     "P1-MAINT-04",
-    "P1-PUB-01",
-    "P1-PUB-02",
     "P1-PUB-03",
     "P1-FINAL-01",
     "P1-FINAL-02",
     "P1-FINAL-03",
     "P1-FINAL-04"
   ],
-  "instructions": "Independently review exact frozen candidate and execute selected high-risk checks; distinguish independent execution from reading author logs. Return actionable findings and gaps; no production writes.",
+  "instructions": "Independently review the exact frozen release candidate and all pre_release stage evidence; execute selected high-risk checks. This is not final production acceptance and must not depend on later cutover/profile/automation success. Return accepted releaseCandidateReview or actionable findings. No production writes.",
   "status": "prepared_waiting_for_start",
   "dispatchable": false,
   "dispatchGate": "User start message plus S0 current-baseline and private-input revalidation; Leader records exact dispatch commit and frozen interface SHA before activation. Preparation baseline is not automatically the later execution baseline.",
@@ -75,5 +71,6 @@
     "required_release_gate_failed",
     "out_of_scope_external_business_action"
   ],
-  "deliverable": "Exact commit, changed paths, commands/exit codes, real Red/Green when applicable, raw evidence hashes outside Git, known gaps and integration notes. No invented production/model/browser passes."
+  "deliverable": "Exact commit, changed paths, commands/exit codes, real Red/Green when applicable, raw evidence hashes outside Git, known gaps and integration notes. No invented production/model/browser passes.",
+  "evidenceStage": "pre_release"
 }

@@ -7,8 +7,8 @@
   "artifacts": [
     {
       "path": "docs/waves/P1/PLAN.md",
-      "sha256": "32a2eb1c1c1e981cb5832b900887c310cf4119f1890971b9c219bfb5594a6a91",
-      "bytes": 5394
+      "sha256": "98b37f87971d6afdae460c7a521cef0842dd4bd99b44d171aa26157e9331d1b2",
+      "bytes": 6182
     },
     {
       "path": "docs/waves/P1/SPEC.zh.md",
@@ -17,13 +17,13 @@
     },
     {
       "path": "docs/waves/P1/MIGRATION-CUTOVER.zh.md",
-      "sha256": "f5dfb720e1b4dbd3461a1aa85bf30cc151878f57731750a8d6bb3b33fd0c4120",
-      "bytes": 3804
+      "sha256": "411794032f12ec586149e28bc68449ebc5b937e5ef8c5b502e3d86ad2472e6b6",
+      "bytes": 4042
     },
     {
       "path": "docs/waves/P1/MAINTENANCE.zh.md",
-      "sha256": "e081855a0e12d654a90cd3c7e79bc136a9ee37ce8ed73d6bd4c884dff1b18f34",
-      "bytes": 3725
+      "sha256": "3df245ac4728f947c663e454a2766e344af9625ad1a405558a161d18763db3e5",
+      "bytes": 5160
     },
     {
       "path": "docs/waves/P1/PUBLICATION-DRAFT.zh.md",
@@ -32,13 +32,13 @@
     },
     {
       "path": "docs/waves/P1/EVIDENCE.zh.md",
-      "sha256": "a7020bf4facc6052bbdb9674e39591c0d0102ebc210f1e05fd0a85660cc43285",
-      "bytes": 2293
+      "sha256": "fc41185ba414aa8beb392bae28e66d89116e5f6d553dc3aaa7ef28e4bf4da009",
+      "bytes": 2501
     },
     {
       "path": "docs/waves/P1/acceptance.json",
-      "sha256": "b2510a7568fa623d6f3883f8c1c0c28125cae9137d4766023ffd084059726ef7",
-      "bytes": 12505
+      "sha256": "892f4df0244b209e9fc2cbf5e7bbe80384026a82322fb037079462b903abfdbd",
+      "bytes": 23605
     },
     {
       "path": "docs/product/changes/2026-11-05.md",
@@ -49,6 +49,11 @@
       "path": "docs/audit/context-maps/P1-PREPARATION-20261105.md",
       "sha256": "c39fc287634e067fd84ffe56d20bdb2d0a6e6cb3fca1d7ea534c32c19fc3d311",
       "bytes": 4394
+    },
+    {
+      "path": "docs/waves/P1/GATES.zh.md",
+      "sha256": "7a0870b2d39560c31d2446ff22c4569d2c3b1f042b57bb4c866d0b6258dc9810",
+      "bytes": 2853
     }
   ]
 }

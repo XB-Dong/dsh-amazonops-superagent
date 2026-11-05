@@ -96,6 +96,15 @@
         "P1-CUTOVER"
       ],
       "status": "prepared_waiting_for_start"
+    },
+    {
+      "id": "P1-CLOSEOUT",
+      "path": "tasks/P1-CLOSEOUT.json",
+      "owner": "p1_review",
+      "dependencies": [
+        "P1-HANDOVER"
+      ],
+      "status": "prepared_waiting_for_start"
     }
   ]
 }

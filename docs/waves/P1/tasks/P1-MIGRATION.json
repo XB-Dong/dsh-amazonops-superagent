@@ -18,7 +18,9 @@
     "scripts/recovery.ts",
     "packages/business/core/recovery.ts",
     "tests/integration/recovery*.ts",
-    "tests/business/migration*.ts"
+    "tests/business/migration*.ts",
+    "scripts/migration*.ts",
+    "packages/business/core/migration*.ts"
   ],
   "excludedWritePaths": [],
   "dependencies": [

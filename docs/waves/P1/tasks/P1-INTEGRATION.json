@@ -35,7 +35,7 @@
     "P1-FINAL-03",
     "P1-FINAL-04"
   ],
-  "instructions": "Integrate without overlapping writers; run Windows/Linux/offline/native/browser/necessary real-model acceptance and preserve actual evidence, counts and budget history; freeze exact release candidate.",
+  "instructions": "Integrate without overlapping writers; run Windows/Linux/offline/native/browser/necessary real-model acceptance and preserve actual evidence, counts and budget history; freeze exact release candidate. Complete pre_release portions only; later actual production/handover evidence remains not_run/partial until observed.",
   "status": "prepared_waiting_for_start",
   "dispatchable": false,
   "dispatchGate": "User start message plus S0 current-baseline and private-input revalidation; Leader records exact dispatch commit and frozen interface SHA before activation. Preparation baseline is not automatically the later execution baseline.",
@@ -50,5 +50,6 @@
     "required_release_gate_failed",
     "out_of_scope_external_business_action"
   ],
-  "deliverable": "Exact commit, changed paths, commands/exit codes, real Red/Green when applicable, raw evidence hashes outside Git, known gaps and integration notes. No invented production/model/browser passes."
+  "deliverable": "Exact commit, changed paths, commands/exit codes, real Red/Green when applicable, raw evidence hashes outside Git, known gaps and integration notes. No invented production/model/browser passes.",
+  "evidenceStage": "pre_release"
 }

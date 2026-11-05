@@ -38,7 +38,7 @@
     "P1-FINAL-03",
     "P1-FINAL-04"
   ],
-  "instructions": "Switch existing automation with supported tool and readback, preserve fields/history and single-leader lease, controlled maintenance probe, retire old runtime/maintenance, minimally update profile/new README and old retirement notice only after verified cutover.",
+  "instructions": "Switch existing automation with supported tool and readback, preserve fields/history and single-leader lease, controlled maintenance probe, retire old runtime/maintenance, minimally update profile/new README and old retirement notice only after verified cutover. Keep the same automation PAUSED while changing prompt/authority and running explicit read-only handover_validation. Never claim scheduler actually fired from configuration readback. Final reviewer accepts business handover before Leader marks P1 business delivery complete and restores ACTIVE under closeout gate.",
   "status": "prepared_waiting_for_start",
   "dispatchable": false,
   "dispatchGate": "User start message plus S0 current-baseline and private-input revalidation; Leader records exact dispatch commit and frozen interface SHA before activation. Preparation baseline is not automatically the later execution baseline.",
@@ -53,5 +53,6 @@
     "required_release_gate_failed",
     "out_of_scope_external_business_action"
   ],
-  "deliverable": "Exact commit, changed paths, commands/exit codes, real Red/Green when applicable, raw evidence hashes outside Git, known gaps and integration notes. No invented production/model/browser passes."
+  "deliverable": "Exact commit, changed paths, commands/exit codes, real Red/Green when applicable, raw evidence hashes outside Git, known gaps and integration notes. No invented production/model/browser passes.",
+  "evidenceStage": "handover"
 }

@@ -37,7 +37,7 @@
     "P1-MIG-07",
     "P1-MIG-08"
   ],
-  "instructions": "After actual start and all release gates, verify private cloud fingerprint, drain every old writer and maintenance leader, final snapshot/rebuild/reconcile, switch existing HTTPS entry, prove new writes survive and prepare post-write-safe recovery.",
+  "instructions": "After actual start and all release gates, verify private cloud fingerprint, drain every old writer and maintenance leader, final snapshot/rebuild/reconcile, switch existing HTTPS entry, prove new writes survive and prepare post-write-safe recovery. Requires accepted pre_release review, then final snapshot reconciliation and isolated pre-open safety gate; does not require future handover or closeout cases already passed.",
   "status": "prepared_waiting_for_start",
   "dispatchable": false,
   "dispatchGate": "User start message plus S0 current-baseline and private-input revalidation; Leader records exact dispatch commit and frozen interface SHA before activation. Preparation baseline is not automatically the later execution baseline.",
@@ -52,5 +52,6 @@
     "required_release_gate_failed",
     "out_of_scope_external_business_action"
   ],
-  "deliverable": "Exact commit, changed paths, commands/exit codes, real Red/Green when applicable, raw evidence hashes outside Git, known gaps and integration notes. No invented production/model/browser passes."
+  "deliverable": "Exact commit, changed paths, commands/exit codes, real Red/Green when applicable, raw evidence hashes outside Git, known gaps and integration notes. No invented production/model/browser passes.",
+  "evidenceStage": "cutover"
 }

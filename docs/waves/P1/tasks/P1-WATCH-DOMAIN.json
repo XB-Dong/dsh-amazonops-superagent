@@ -20,7 +20,8 @@
   ],
   "excludedWritePaths": [
     "packages/business/core/recovery.ts",
-    "tests/business/migration*.ts"
+    "tests/business/migration*.ts",
+    "packages/business/core/migration*.ts"
   ],
   "dependencies": [
     "P1-FOUNDATION"

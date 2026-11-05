@@ -25,7 +25,7 @@
     "P1-RESP-01",
     "P1-WATCH-01"
   ],
-  "instructions": "Revalidate exact local/remote/production baselines and writer inventory after start; freeze native probes and shared DTO/security/migration contracts before dependent dispatch.",
+  "instructions": "Revalidate exact local/remote/production baselines and writer inventory after start; freeze native probes and shared DTO/security/migration contracts before dependent dispatch. After explicit start, pause the same existing daily automation via supported tool, drain actual old/queued development writers, preserve old business availability. A new lock alone cannot fence the old prompt.",
   "status": "prepared_waiting_for_start",
   "dispatchable": false,
   "dispatchGate": "User start message plus S0 current-baseline and private-input revalidation; Leader records exact dispatch commit and frozen interface SHA before activation. Preparation baseline is not automatically the later execution baseline.",

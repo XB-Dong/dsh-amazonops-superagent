@@ -110,9 +110,9 @@ try {
   }else assert.ok(prior?.deliveryProof,'Observe-only resume requires the already recorded native watch delivery proof');
   // The watch already handled A's risk. A fresh, explicitly enrolled object tests
   // positive admission without asking the model to duplicate the existing draft.
-  const ruleForecast=await api('actions/forecast',{requestId:'p1-live-rule-seed',store:'Synthetic',site:'US',listing:'B',asOf,
+  const ruleForecast=await api('actions/forecast',{requestId:'p1-live-rule-seed-c',store:'Synthetic',site:'US',listing:'C',asOf,
     manualDaily:3,manualReason:'尚未处理过的合成观察对象'});
-  const ruleInventory=await api('actions/inventory',{forecastId:ruleForecast.id,physicalSku:'B',asOf,available:1,reserved:0,inbound:[],
+  const ruleInventory=await api('actions/inventory',{forecastId:ruleForecast.id,physicalSku:'C',asOf,available:1,reserved:0,inbound:[],
     leadDays:{purchase:1,transport:2,receiving:1},safetyDays:2,horizon:7,demandFactors:[]});
   const recoveryId=observeOnly?`p1-live-observe-${Date.now()}`:undefined;
   if(observeOnly)await api('followups/rule',{requestId:`${recoveryId}-off`,mode:'off',inventoryIds:[]});

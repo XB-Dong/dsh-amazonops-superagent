@@ -1,9 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { DatabaseSync } from 'node:sqlite';
-import { mkdirSync, mkdtempSync, writeFileSync, readFileSync, readdirSync, lstatSync, existsSync, symlinkSync, rmSync, realpathSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, writeFileSync, readFileSync, readdirSync, lstatSync, existsSync, symlinkSync, rmSync, realpathSync, copyFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join, resolve } from 'node:path';
+import { join, resolve, dirname } from 'node:path';
 import { createHash } from 'node:crypto';
 import { spawnSync } from 'node:child_process';
 import { Business } from '../../packages/business/application.ts';
@@ -93,21 +93,38 @@ test('Windows short TEMP runs the original registry containment case with actual
 test('Windows CLI short repository alias cannot publish private output into the repository', {
   skip: process.platform !== 'win32',
 }, () => {
-  const f = fixture(), root = realpathSync.native(resolve('.'));
-  const destination = join(root, 'migration-alias-output-denied');
-  assert.equal(existsSync(destination), false, 'Use a fresh fixed test destination');
+  const f = fixture();
   try {
     f.close();
-    const alias = shortName(root);
-    const result = spawnSync(process.execPath, ['--experimental-transform-types', 'scripts/migration.ts', 'export',
-      '--source', f.source, '--destination', join(alias, 'migration-alias-output-denied'), '--registry', f.registryPath,
-      '--source-quiesced', 'false'], { encoding: 'utf8', windowsHide: true });
-    assert.equal(result.status, 1, result.stdout);
-    assert.equal(JSON.parse(result.stderr.trim().split('\n').at(-1)!).error, 'MIGRATION_OUTPUT_INSIDE_REPOSITORY');
-    assert.equal(existsSync(destination), false);
+    // Hosted Windows checkout volumes may disable DOS names. Exercise the actual CLI on the
+    // same TEMP volume as the other real-alias probes, without depending on checkout aliases.
+    const checkout = join(f.root, 'Long isolated migration repository checkout'); mkdirSync(checkout);
+    const root = realpathSync.native(checkout), alias = shortName(root);
+    for (const file of ['scripts/migration.ts', 'packages/business/core/migration.ts',
+      'packages/business/core/migration-files.ts', 'packages/business/core/migration-stage.ts',
+      'packages/business/core/migration-state.ts', 'packages/business/core/store.ts',
+      'packages/business/core/privacy.ts', 'packages/business/core/budget.ts']) {
+      const output = join(root, file); mkdirSync(dirname(output), { recursive: true });
+      copyFileSync(resolve(file), output);
+    }
+    // All imported runtime dependencies of this CLI are Node built-ins; no install or stub.
+    writeFileSync(join(root, 'package.json'), JSON.stringify({ type: 'module' }));
+    const destination = join(root, 'migration-alias-output-denied'), before = tree(f.source);
+    for (const paths of [
+      { script: join(alias, 'scripts', 'migration.ts'), destination },
+      { script: join(root, 'scripts', 'migration.ts'), destination: join(alias, 'migration-alias-output-denied') },
+    ]) {
+      const result = spawnSync(process.execPath, ['--experimental-transform-types', paths.script, 'export',
+        '--source', f.source, '--destination', paths.destination, '--registry', f.registryPath,
+        '--source-quiesced', 'false'], { cwd: root, encoding: 'utf8', windowsHide: true });
+      assert.equal(result.status, 1, result.stdout);
+      assert.equal(JSON.parse(result.stderr.trim().split('\n').at(-1)!).error, 'MIGRATION_OUTPUT_INSIDE_REPOSITORY');
+      assert.equal(existsSync(destination), false);
+      assert.deepEqual(tree(f.source), before);
+    }
   } finally {
-    if (existsSync(destination)) rmSync(destination, { recursive: true });
     try { f.close(); } catch {}
+    rmSync(f.root, { recursive: true, force: true });
   }
 });
 

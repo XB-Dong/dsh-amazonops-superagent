@@ -9,14 +9,15 @@ export function maintenanceCli(args: string[]) {
   const input: Record<string, string> = {};
   for (let i = 0; i < rest.length; i += 2) {
     const key = rest[i];
-    if (!['--data', '--registry', '--authority', '--owner', '--destination', '--state', '--mode', '--output'].includes(key) ||
+    if (!['--data', '--prior-data','--registry', '--authority', '--owner', '--destination', '--state', '--mode', '--output'].includes(key) ||
       input[key] !== undefined || !rest[i + 1]) throw new Error('MAINTENANCE_ARGUMENTS_INVALID');
     input[key] = rest[i + 1];
   }
-  for (const key of ['--data', '--registry', '--authority', '--owner', ...(command === 'init' ? ['--destination'] : ['--state', '--mode', '--output'])])
+  for (const key of ['--data', '--registry', '--authority', '--owner', ...(command === 'init' ? ['--prior-data','--destination'] : ['--state', '--mode', '--output'])])
     if (!input[key]) throw new Error('MAINTENANCE_ARGUMENTS_INVALID');
   const options = { data: input['--data'], registry: input['--registry'], authority: input['--authority'], owner: input['--owner'] };
-  if (command === 'init') return initializeMaintenance({ ...options, destination: input['--destination'] });
+  if (command === 'init') return initializeMaintenance({ ...options,priorData:input['--prior-data'],destination: input['--destination'] });
+  if(input['--prior-data'])throw new Error('MAINTENANCE_ARGUMENTS_INVALID');
   const report = checkMaintenance({ ...options, state: input['--state'], mode: input['--mode'], output: input['--output'] });
   return { ok: true, mode: report.mode, actionable: report.actionable, sourceStable: report.sourceStable,
     feedbackChanges: report.changes.feedback.added.length + report.changes.feedback.changed.length + report.changes.feedback.removed.length,
@@ -24,6 +25,7 @@ export function maintenanceCli(args: string[]) {
     deletionChanges: report.changes.tombstones.added.length + report.changes.tombstones.changed.length + report.changes.tombstones.removed.length,
     registryChanged: report.registryChanged, privacyChanged: report.privacyChanged,
     pendingCaptureOutstanding: report.pendingCaptureOutstanding,
+    legacyOutstandingCount:report.legacyOutstanding.length,unregisteredFeedbackCount:report.unregisteredFeedback.length,
     legacyHistoryCount: report.legacyHistoryCount, canDevelop: false, modelCalls: 0, newWaves: 0 };
 }
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {

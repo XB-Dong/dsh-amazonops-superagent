@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { DatabaseSync } from 'node:sqlite';
-import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, readdirSync, lstatSync, existsSync, symlinkSync } from 'node:fs';
+import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, readdirSync, lstatSync, existsSync, symlinkSync, copyFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { createHash } from 'node:crypto';
@@ -31,7 +31,7 @@ function fixture() {
   const registry = join(root, 'legacy-registry.json');
   writeFileSync(registry, JSON.stringify({ feedbackRevisions: [
     { id: 'delivered', revision: 1, decision: 'delivered' },
-    { id: 'pending', revision: 1, decision: 'partially_delivered_scope_pending' },
+    { id: 'pending', revision: 1, decision: 'partially_delivered_personal_ordering_pending', pending: { reason: 'Synthetic user confirmation required' } },
     { id: 'deleted', revision: 2, decision: 'implemented_source_deleted_excluded' },
     { id: 'withdrawn', revision: 2, decision: 'withdrawn_excluded' },
     { id: 'duplicate', revision: 1, decision: 'duplicate_excluded' },
@@ -42,12 +42,15 @@ function fixture() {
     ownerThreadId: 'synthetic-owner', businessDelivery: 'handover', expiresAt: '2026-11-05T12:30:00.000Z' };
   writeFileSync(authority, JSON.stringify(authorityValue));
   const state = join(root, 'maintenance-state.json');
-  const options = { data, registry, authority, owner: 'synthetic-owner', now };
+  const priorData = join(root, 'frozen-prior'); mkdirSync(priorData);
+  const freezePrior = () => { for (const name of readdirSync(data)) copyFileSync(join(data, name), join(priorData, name)); };
+  freezePrior();
+  const options = { data, priorData, registry, authority, owner: 'synthetic-owner', now };
   const init = () => initializeMaintenance({ ...options, destination: state });
   let reportNumber = 0;
   const check = (mode = 'handover_validation') => checkMaintenance({ ...options, state, mode,
     output: join(root, `report-${++reportNumber}.json`) }) as any;
-  return { root, data, db, registry, authority, authorityValue, state, options, put, init, check };
+  return { root, data, priorData, freezePrior, db, registry, authority, authorityValue, state, options, put, init, check };
 }
 
 test('maintenance: initialized legacy history has no actionable change and inputs remain unchanged with active WAL', () => {
@@ -164,7 +167,10 @@ test('maintenance: real CLI performs a private check and stdout contains only ag
     const before = tree(f.data);
     const invoke = (...args: string[]) => spawnSync(process.execPath, ['--experimental-transform-types',
       resolve('scripts/maintenance.ts'), ...args], { encoding: 'utf8', timeout: 30000, windowsHide: true });
-    const initialized = invoke('init', ...common, '--destination', f.state);
+    const missingCheckpoint=invoke('init',...common,'--destination',f.state);
+    assert.equal(missingCheckpoint.status,1);assert.match(missingCheckpoint.stderr,/MAINTENANCE_ARGUMENTS_INVALID/);
+    assert.equal(existsSync(f.state),false);
+    const initialized = invoke('init', ...common, '--prior-data', f.priorData, '--destination', f.state);
     assert.equal(initialized.status, 0, initialized.stderr);
     f.put('new-cli-feedback');
     const reportPath = join(f.root, 'private-cli-report.json');
@@ -211,6 +217,7 @@ test('maintenance: unresolved capture already present at handover remains visibl
   try {
     f.put('initial-source', 'source', { origin: 'user' });
     f.put('initial-capture', 'job', { type: 'capture', status: 'pending', sourceId: 'initial-source' });
+    f.freezePrior();
     f.init();
     const pending = f.check();
     assert.equal(pending.pendingCaptureOutstanding, true); assert.equal(pending.actionable, true);
@@ -220,4 +227,78 @@ test('maintenance: unresolved capture already present at handover remains visibl
     assert.equal(drained.pendingCaptureOutstanding, false); assert.equal(drained.actionable, false);
     assert.equal(drained.changes.pendingCapture.removed.length, 2);
   } finally { f.db.close(); }
+});
+
+test('maintenance: initialization never absorbs suggestions, same-revision amendments, withdrawals or deletions after the audited checkpoint', () => {
+  for (const scenario of ['new', 'metadata-unchanged-payload', 'supplement', 'withdrawn', 'deleted']) {
+    const f = fixture();
+    try {
+      if (scenario === 'new') f.put('latest-before-init');
+      if (scenario === 'metadata-unchanged-payload') f.put('delivered', 'feedback', { text: 'Synthetic changed text with identical revision/status/timestamp' });
+      if (scenario === 'supplement') f.put('delivered', 'feedback', { count: 2, amendments: [{ text: 'Synthetic new supplement', sourceId: 'new-source' }] });
+      if (scenario === 'withdrawn') f.put('delivered', 'feedback', { status: 'withdrawn' });
+      if (scenario === 'deleted') {
+        f.db.prepare('DELETE FROM entities WHERE scope=? AND id=?').run('main', 'delivered');
+        f.db.prepare('INSERT INTO tombstones VALUES (?,?,?)').run('main', 'delivered', '2026-11-05T12:00:00Z');
+      }
+      const before=tree(f.data),priorBefore=tree(f.priorData);f.init();
+      const initialized=JSON.parse(readFileSync(f.state,'utf8'));
+      assert.equal(initialized.snapshot.feedback.length,2,'checkpoint keeps the reviewed earlier complete set');
+      assert.equal(initialized.initializedSnapshot.feedback.length,scenario==='new'?3:scenario==='deleted'?1:2);
+      assert.notEqual(initialized.sourceIdentity,initialized.checkpointSourceIdentity,'checks bind final production rather than the frozen copy');
+      const first=f.check(),second=f.check();
+      assert.equal(first.actionable,true,`${scenario} must survive initialization`);
+      assert.equal(second.actionable,true,`${scenario} must remain outstanding without explicit resolution`);
+      assert.deepEqual(second.changes.feedback,first.changes.feedback);
+      const group=scenario==='new'?'added':scenario==='deleted'?'removed':'changed';
+      assert.equal(first.changes.feedback[group].length,1);
+      assert.deepEqual(tree(f.data),before);assert.deepEqual(tree(f.priorData),priorBefore);
+    } finally { f.db.close(); }
+  }
+});
+
+test('maintenance: complete legacy metadata is retained and unknown or unregistered history remains outstanding', () => {
+  for (const scenario of ['known-pending', 'unknown', 'missing-decision', 'no-registry']) {
+    const f=fixture();try {
+      const registry=JSON.parse(readFileSync(f.registry,'utf8'));
+      registry.feedbackRevisions[0]={...registry.feedbackRevisions[0],contentHash:'legacy-hash-uses-another-algorithm',status:'captured',sourceUpdatedAt:'Synthetic unchanged source time',pending:['Synthetic held scope']};
+      if(scenario==='unknown')registry.feedbackRevisions[0].decision='unclassified_old_suggestion';
+      if(scenario==='missing-decision')delete registry.feedbackRevisions[0].decision;
+      if(scenario==='no-registry')registry.feedbackRevisions=registry.feedbackRevisions.filter((row:any)=>row.id!=='delivered');
+      writeFileSync(f.registry,JSON.stringify(registry));f.init();
+      const state=JSON.parse(readFileSync(f.state,'utf8'));
+      assert.deepEqual(state.legacyDecisions,registry.feedbackRevisions);
+      assert.deepEqual(state.legacyRegistry,registry);
+      const report=f.check();assert.equal(report.actionable,scenario!=='known-pending');
+      assert.equal(report.canDevelop,false);assert.equal(report.modelCalls,0);assert.equal(report.newWaves,0);
+    }finally{f.db.close();}
+  }
+});
+
+test('maintenance: a reviewed separate checkpoint is mandatory and all output paths protect the prior input tree',()=>{
+  const f=fixture();try {
+    const {priorData,...withoutCheckpoint}=f.options;
+    assert.throws(()=>initializeMaintenance({...withoutCheckpoint,destination:f.state} as any),/CHECKPOINT_REQUIRED/);
+    assert.throws(()=>initializeMaintenance({...f.options,priorData:f.data,destination:f.state}),/CHECKPOINT_OVERLAP/);
+    assert.throws(()=>initializeMaintenance({...f.options,destination:join(priorData,'state.json')}),/OUTPUT_OVERLAP/);
+    const linked=join(f.root,'linked-prior');symlinkSync(priorData,linked,process.platform==='win32'?'junction':'dir');
+    assert.throws(()=>initializeMaintenance({...f.options,priorData:linked,destination:f.state}),/LINK/);
+    const before=tree(priorData);f.init();
+    assert.throws(()=>checkMaintenance({...f.options,state:f.state,mode:'handover_validation',output:join(priorData,'report.json')}),/OUTPUT_OVERLAP/);
+    assert.deepEqual(tree(priorData),before);
+    const old=JSON.parse(readFileSync(f.state,'utf8'));old.schemaVersion='amazonops-maintenance/1';writeFileSync(f.state,JSON.stringify(old));
+    assert.throws(()=>f.check(),/STATE_INVALID/);
+  }finally{f.db.close();}
+});
+
+test('maintenance: initialization preserves prior privacy changes and complete registry metadata changes',()=>{
+  const f=fixture();try {
+    writeFileSync(join(f.data,'privacy-ledger.jsonl'),'Synthetic private deletion event\n');
+    f.init();const first=f.check();assert.equal(first.privacyChanged,true);assert.equal(first.actionable,true);
+    const registry=JSON.parse(readFileSync(f.registry,'utf8'));
+    registry.feedbackRevisions[0].sourceUpdatedAt='Synthetic amendment without changing decision or revision';
+    registry.feedbackRevisions[0].pending={reason:'Synthetic updated pending scope'};writeFileSync(f.registry,JSON.stringify(registry));
+    const second=f.check();assert.equal(second.registryChanged,true);assert.equal(second.actionable,true);
+    assert.equal(second.legacyHistoryCount,5);assert.equal(second.canDevelop,false);
+  }finally{f.db.close();}
 });

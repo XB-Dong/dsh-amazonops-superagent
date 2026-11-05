@@ -18,4 +18,9 @@ export type FollowupEvent = Base & {
   inventoryId: string; watchId?: string; ruleRevision?: number; ruleMode?: 'observe' | 'auto';
   risk: RiskSnapshot; status: 'pending' | 'delivered'; sources: string[];
 };
-export type FollowupSnapshot = { watches: InventoryWatch[]; rule: InventoryRule | null; events: FollowupEvent[] };
+export type FollowupSnapshot = {
+  watches: InventoryWatch[]; rule: InventoryRule | null; events: FollowupEvent[];
+  autoAvailable?: boolean; autoBlockedReason?: string;
+  assessments?: { eventId: string; decision: 'would_accept' | 'accepted' | 'ignored' | 'unavailable' | 'pending';
+    reason: string; at?: string; ticketId?: string }[];
+};

@@ -1,12 +1,23 @@
 /** Deterministic Anthropic-compatible SSE fixture; production agent/tool code is untouched. */
 import { createServer, type ServerResponse } from 'node:http';
-import { appendFileSync } from 'node:fs';
+import { appendFileSync,readFileSync,existsSync } from 'node:fs';
 import { join } from 'node:path';
 
 export type FixtureRequest = { tools?: { name: string }[]; messages?: { role: string; content: any }[]; model: string };
 export const draftTitle = '本机离线验收：检查库存草稿';
 export const draftChecklist = ['核对合成库存报表', '由cc确认后执行'];
 export const resultText = '已保存库存检查任务草稿，等待cc确认；尚未执行外部操作。';
+export type NativeRequestContext={sessionId:string;turn:number;step:number;stepSeq:number;inputs:any[];precedingEvents:any[]};
+function nativeRequestContext(evidence:string,worker:boolean):NativeRequestContext|undefined{
+  const path=join(evidence,'session-events.jsonl');if(!existsSync(path))return;
+  const lines=readFileSync(path,'utf8').split('\n');lines.pop();
+  const events=lines.filter(Boolean).map(line=>JSON.parse(line));
+  const started=events.findLast(row=>row.event.type==='step/start'&&row.sessionId.startsWith('worker-')===worker);
+  if(!started)return;
+  const history=events.filter(row=>row.sessionId===started.sessionId);
+  return {sessionId:started.sessionId,turn:started.event.data.turn,step:started.event.data.step,stepSeq:started.event.seq,
+    inputs:history.filter(row=>row.event.seq>started.event.seq&&row.event.type==='user/message').map(row=>row.event.data),precedingEvents:history.slice(-12)};
+}
 function blocks(body: FixtureRequest) {
   return (body.messages ?? []).flatMap(message => Array.isArray(message.content) ? message.content : [{ type: 'text', text: message.content }]);
 }
@@ -33,7 +44,7 @@ function response(res: ServerResponse, index: number, tool?: { name: string; inp
   res.end();
 }
 export async function fakeModel(evidence: string) {
-  const requests: { role: string; tool?: string; input?: unknown; path: string }[] = [];
+  const requests: { role: string; tool?: string; input?: unknown; path: string;observedAt:number;nativeContext?:NativeRequestContext }[] = [];
   const control = { holdWorkers: false, quietRouter: false, activeWorkers: 0, abortedWorkers: 0,
     prepareChecklist: draftChecklist,
     copyFrom: undefined as { taskId: string; revision: number } | undefined };
@@ -80,7 +91,7 @@ export async function fakeModel(evidence: string) {
             title: draftTitle, worktree_name: 'offline-stock-draft', acknowledgement: '将保存库存检查草稿，等待cc确认。' }] } };
         }
       }
-      const record = { role: worker ? 'worker' : 'router', tool: tool?.name, input: tool?.input, path: req.url ?? '' };
+      const record = { role: worker ? 'worker' : 'router', tool: tool?.name, input: tool?.input, path: req.url ?? '',observedAt:Date.now(),nativeContext:nativeRequestContext(evidence,!!worker) };
       requests.push(record);
       appendFileSync(join(evidence, 'model-requests.jsonl'), JSON.stringify({ ...record, body }) + '\n');
       if (worker && control.holdWorkers) {

@@ -10,6 +10,7 @@ import { buildProject } from '../../scripts/build.mjs';
 import { localPatch } from '../../profiles/local.ts';
 import { scrubEnvironment, lineWriter } from '../../scripts/start.mjs';
 import { fakeModel, draftTitle, draftChecklist, resultText } from './native-e2e-model.ts';
+import { assertNativeInitialFlow } from './native-e2e-flow.ts';
 import { createHash } from 'node:crypto';
 import { DatabaseSync } from 'node:sqlite';
 
@@ -50,6 +51,7 @@ test('offline real DSH routes, executes scoped task tool, reports and delivers e
   assert.ok(port > 4315);
   const origin = `http://127.0.0.1:${port}`;
   const networkEvidence = join(evidence, 'network.jsonl');
+  const noticeRelease=join(evidence,'release-notice-fetch');
   writeFileSync(networkEvidence, '');
   const manifest = await buildProject({ root });
   const probe = join(root, 'lib/native-e2e-probe.js');
@@ -88,7 +90,9 @@ test('offline real DSH routes, executes scoped task tool, reports and delivers e
     writeProfile(runHome);
     const environment = scrubEnvironment(process.env, runHome, key);
     environment.AMAZONOPS_NETWORK_EVIDENCE = networkEvidence;
+    environment.AMAZONOPS_E2E_NOTICE_RELEASE=noticeRelease;
     child = spawn(process.execPath, ['--require', join(root, 'tests/integration/native-e2e-network.cjs'),
+      '--require',join(root,'tests/integration/native-e2e-notice-delay.cjs'),
       join(root, 'node_modules/@deepseek-ai/dsh/lib/bin.js'), 'web', '--patch', patch, '--no-open'],
     { cwd: root, env: environment, windowsHide: true, stdio: ['ignore', 'pipe', 'pipe', 'ipc'] });
     const writer = lineWriter((chunk: string) => { logs += chunk; writeFileSync(join(evidence, 'host.log'), logs); }, [password, key]);
@@ -174,11 +178,36 @@ test('offline real DSH routes, executes scoped task tool, reports and delivers e
     assert.equal(workerSession.events.findLast((event: any) => event.type === 'turn/end').data.reason.kind, 'completed',
       'A delivered ready report must naturally conclude the worker turn, never fail with TICKET_ENDED');
     assert.ok(workerSession.events.some((event: any) => event.type === 'tool/result' && JSON.stringify(event).includes(snapshot.tasks[0].id)));
-    const capturedCalls = model.requests.length;
+    await until('real pending notice fetch at controlled transport boundary',async()=>existsSync(`${noticeRelease}.waiting`)?true:undefined);
     assert.equal(model.requests.filter(request => request.role === 'worker').length, 2,
       'The ready worker must conclude immediately after prepare and report without a third model step');
-    await new Promise(done => setTimeout(done, 100));
-    assert.equal(model.requests.length, capturedCalls, 'Successful route/reply/report results must not request a redundant next model step');
+    writeFileSync(noticeRelease,'release the actual loopback request');
+    await until('notice input consumed and native master turn completed',async()=>{
+      const master=await inspectWorker(native.masterId),lastStart=master.events.findLast((event:any)=>event.type==='turn/start');
+      return model.requests.some(request=>request.nativeContext?.inputs.some((input:any)=>input.source?.form==='notice'&&JSON.stringify(input).includes('ticket_ended')))&&
+        master.events.some((event:any)=>event.type==='turn/end'&&event.data.turn===lastStart?.data.turn)?true:undefined;
+    });
+    const settledEvents=readFileSync(join(evidence,'session-events.jsonl'),'utf8').trim().split('\n').map(line=>JSON.parse(line));
+    const flowIds={master:native.masterId,ticket:work.tickets[0].id,trigger:submitted.value.messageId};
+    const flow=assertNativeInitialFlow(settledEvents,model.requests,flowIds);
+    assert.ok(flow.continuations.some(row=>row.sessionId===native.masterId),'controlled scheduling must exercise a genuine post-terminal inbox continuation');
+    const withoutNotice=settledEvents.filter(row=>!(row.event.type==='user/message'&&row.event.data.source?.form==='notice'&&JSON.stringify(row.event.data).includes('ticket_ended')));
+    assert.throws(()=>assertNativeInitialFlow(withoutNotice,model.requests,flowIds),/without fresh inbox input/,
+      'the provenance assertion must reject an extra terminal step without the actual new input');
+    const withoutQueue=settledEvents.filter(row=>!(row.event.type==='agent/inbox/spliced'&&row.event.data.inserted?.some((message:any)=>message.source?.form==='notice'&&JSON.stringify(message).includes('ticket_ended'))));
+    assert.throws(()=>assertNativeInitialFlow(withoutQueue,model.requests,flowIds),/actual durable inbox/,
+      'a synthetic text-only notice cannot excuse a redundant step');
+    const lastSeq=Math.max(...settledEvents.filter(row=>row.sessionId===native.masterId).map(row=>row.event.seq));
+    const phantom=(type:string,seq:number,data:any)=>({sessionId:native.masterId,event:{type,seq,data}});
+    const emptyTurn=[...settledEvents,phantom('turn/start',lastSeq+1,{turn:999}),phantom('step/start',lastSeq+2,{turn:999,step:1}),
+      phantom('step/end',lastSeq+3,{turn:999,step:1}),phantom('turn/end',lastSeq+4,{turn:999,reason:{kind:'completed'}})];
+    const emptyRequest={role:'router',path:'/fixture',observedAt:Date.now(),nativeContext:{sessionId:native.masterId,turn:999,step:1,stepSeq:lastSeq+2,inputs:[],precedingEvents:[]}};
+    assert.throws(()=>assertNativeInitialFlow(emptyTurn,[...model.requests,emptyRequest],flowIds),/new native turn requires fresh admitted inbox input/,
+      'an additional turn without a new durable inbox item must fail the replacement assertion');
+    assert.equal((await api('snapshot')).value.tasks.length,1);
+    assert.equal((await api('work')).value.messages.filter((message:any)=>message.text===resultText).length,1);
+    writeFileSync(join(evidence,'terminal-flow.json'),JSON.stringify({flow,requests:model.requests},null,2));
+    const capturedCalls=model.requests.length;
     const backup = await api('actions/backup', {});
     assert.equal(backup.response.status, 200, JSON.stringify(backup.value));
     assert.match(backup.value.id, /^[\w.:-]+$/);
@@ -366,6 +395,7 @@ test('offline real DSH routes, executes scoped task tool, reports and delivers e
     assert.ok(network.some(row => row.layer === 'fetch'), 'Real provider must reach the local SSE fixture');
     t.diagnostic(`Native evidence: ${home}; model requests=${model.requests.length}; tool results=${results.length}; external network attempts=0`);
   } finally {
+    writeFileSync(noticeRelease,'release during cleanup');
     await shutdown();
     model.server.closeAllConnections();
     await new Promise<void>(done => model.server.close(() => done()));

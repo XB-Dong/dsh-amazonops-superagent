@@ -2,7 +2,8 @@ import { randomUUID } from 'node:crypto';
 import { z } from 'zod';
 import { digest, type Business, type Base } from '../business/index.ts';
 import type { Runtime, SourceKind, Trigger } from '../../vendor/superagent/src/extension.ts';
-import type { WorkSnapshot } from '../contracts/model.ts';
+import type { WorkSnapshot, WorkAction } from '../contracts/model.ts';
+import { actOnWork, projectResponsibility } from './work-actions.ts';
 import { admitEvent } from './operations.ts';
 import { safeText } from '../business/core/validation.ts';
 
@@ -81,8 +82,10 @@ export class WorkbenchSource {
   sessions(scope:string):ReadonlySet<string> {
     return new Set(this.runtime.store.tickets.list().filter(t=>this.allowedTicket(scope,t.id)).map(t=>`worker-${t.id}`));
   }
-  work(scope:string):WorkSnapshot {
-    const tickets=this.runtime.store.tickets.list().filter(ticket=>this.allowedTicket(scope,ticket.id));
+  work(scope:string,page?:{offset:number;limit:number}):WorkSnapshot {
+    if(page&&(!Number.isSafeInteger(page.offset)||page.offset<0||!Number.isSafeInteger(page.limit)||page.limit<1||page.limit>100))throw new Error('INVALID_OFFSET');
+    const allTickets=this.runtime.store.tickets.list().filter(ticket=>this.allowedTicket(scope,ticket.id));
+    const tickets=page?allTickets.slice(page.offset,page.offset+page.limit):allTickets;
     const triggers=this.runtime.store.read.triggers({source:'amazonops'},0,500).items
       .filter(trigger=>trigger.meta.scope===scope&&!this.business.store.isDeleted(scope,trigger.id));
     const replies=this.runtime.store.db.prepare("SELECT value FROM outbox WHERE json_extract(value,'$.channel.source')=? AND json_extract(value,'$.channel.address.scope')=? ORDER BY rowid DESC LIMIT 200")
@@ -90,13 +93,17 @@ export class WorkbenchSource {
       .filter(row=>row.status==='sent'&&(!row.ticketId||this.allowedTicket(scope,row.ticketId)));
     return {tickets:tickets.map(ticket=>{
       const report=ticket.assignments.findLast(assignment=>assignment.report)?.report;
+      const origin=this.runtime.store.triggers.get(ticket.origin.triggerId)!;
       return {id:ticket.id,title:ticket.title,status:ticket.ended?.outcome??report?.state??'working',sessionId:`worker-${ticket.id}`,
+        ...projectResponsibility(ticket,origin.threads[0]!.id),
         ...(report?{latestReport:{text:report.summary,status:report.state}}:{})};
     }),messages:[...triggers.map(trigger=>({id:trigger.id,threadId:trigger.threads[0]!.id,role:'user' as const,text:trigger.text,at:trigger.at,
       ticketId:tickets.find(ticket=>ticket.origin.triggerIds.includes(trigger.id)||ticket.inputs.some(input=>input.kind==='trigger'&&input.triggerId===trigger.id))?.id})),
       ...replies.reverse().map(reply=>({id:reply.id,threadId:reply.channel.thread,role:'assistant' as const,text:reply.text,ticketId:reply.ticketId,
-        at:this.deliveryTime(scope,reply.id)??tickets.find(ticket=>ticket.id===reply.ticketId)?.updatedAt??new Date(0).toISOString()}))].sort((a,b)=>a.at.localeCompare(b.at))};
+        at:this.deliveryTime(scope,reply.id)??allTickets.find(ticket=>ticket.id===reply.ticketId)?.updatedAt??new Date(0).toISOString()}))].sort((a,b)=>a.at.localeCompare(b.at)),
+      ...(page?{pagination:{offset:page.offset,total:allTickets.length,nextOffset:page.offset+page.limit<allTickets.length?page.offset+page.limit:null}}:{})};
   }
+  action(scope:string,input:WorkAction):Promise<unknown>{return actOnWork(this,scope,input);}
   private deliveryTime(scope:string,id:string):string|undefined {
     const row=this.business.store.db.prepare('SELECT result FROM receipts WHERE scope=? AND request_key=?').get(scope,`native-delivery:${id}`);
     return row?(JSON.parse(String(row.result)) as {at?:string}).at:undefined;

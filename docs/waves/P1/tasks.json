@@ -9,7 +9,8 @@
       "path": "tasks/P1-FOUNDATION.json",
       "owner": "Leader",
       "dependencies": [],
-      "status": "prepared_waiting_for_start"
+      "status": "completed",
+      "completionEvidence": "docs/waves/P1/execution-evidence.json"
     },
     {
       "id": "P1-CLOUD",
@@ -18,7 +19,8 @@
       "dependencies": [
         "P1-FOUNDATION"
       ],
-      "status": "prepared_waiting_for_start"
+      "status": "completed",
+      "completionEvidence": "docs/waves/P1/execution-evidence.json"
     },
     {
       "id": "P1-MIGRATION",
@@ -27,7 +29,8 @@
       "dependencies": [
         "P1-FOUNDATION"
       ],
-      "status": "prepared_waiting_for_start"
+      "status": "completed",
+      "completionEvidence": "docs/waves/P1/execution-evidence.json"
     },
     {
       "id": "P1-WATCH-DOMAIN",
@@ -36,7 +39,8 @@
       "dependencies": [
         "P1-FOUNDATION"
       ],
-      "status": "prepared_waiting_for_start"
+      "status": "completed",
+      "completionEvidence": "docs/waves/P1/execution-evidence.json"
     },
     {
       "id": "P1-ORCHESTRATION",
@@ -46,7 +50,8 @@
         "P1-FOUNDATION",
         "P1-WATCH-DOMAIN"
       ],
-      "status": "prepared_waiting_for_start"
+      "status": "completed",
+      "completionEvidence": "docs/waves/P1/execution-evidence.json"
     },
     {
       "id": "P1-CLIENT",
@@ -55,7 +60,8 @@
       "dependencies": [
         "P1-FOUNDATION"
       ],
-      "status": "prepared_waiting_for_start"
+      "status": "completed",
+      "completionEvidence": "docs/waves/P1/execution-evidence.json"
     },
     {
       "id": "P1-INTEGRATION",
@@ -68,7 +74,8 @@
         "P1-ORCHESTRATION",
         "P1-CLIENT"
       ],
-      "status": "prepared_waiting_for_start"
+      "status": "completed",
+      "completionEvidence": "docs/waves/P1/execution-evidence.json"
     },
     {
       "id": "P1-REVIEW",
@@ -77,7 +84,8 @@
       "dependencies": [
         "P1-INTEGRATION"
       ],
-      "status": "prepared_waiting_for_start"
+      "status": "completed",
+      "completionEvidence": "docs/waves/P1/execution-evidence.json"
     },
     {
       "id": "P1-CUTOVER",
@@ -86,7 +94,8 @@
       "dependencies": [
         "P1-REVIEW"
       ],
-      "status": "prepared_waiting_for_start"
+      "status": "completed",
+      "completionEvidence": "docs/waves/P1/execution-evidence.json"
     },
     {
       "id": "P1-HANDOVER",
@@ -95,7 +104,8 @@
       "dependencies": [
         "P1-CUTOVER"
       ],
-      "status": "prepared_waiting_for_start"
+      "status": "completed",
+      "completionEvidence": "docs/waves/P1/execution-evidence.json"
     },
     {
       "id": "P1-CLOSEOUT",
@@ -104,7 +114,10 @@
       "dependencies": [
         "P1-HANDOVER"
       ],
-      "status": "prepared_waiting_for_start"
+      "status": "completed",
+      "completionEvidence": "docs/waves/P1/execution-evidence.json"
     }
-  ]
+  ],
+  "executionStatus": "completed",
+  "preparedPacketsMeaning": "Historical task inputs and preparation hashes remain unchanged; this index records final execution."
 }

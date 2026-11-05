@@ -1,7 +1,7 @@
 {
   "schemaVersion": "0.3",
   "waveId": "P1",
-  "phase": "executing",
+  "phase": "completed",
   "specVersion": "0.3.0",
   "preparedDate": "2026-11-05",
   "timezone": "Asia/Shanghai",
@@ -17,29 +17,31 @@
   },
   "preparationStatus": "historical_ready_before_explicit_start",
   "repositoryVisibility": "public_verified",
-  "githubProfile": "publication_in_progress",
-  "automation": "same_id_new_prompt_paused_verified",
-  "legacyProjectWrites": "retirement_only_private_operations_guard_updated",
+  "githubProfile": "published_readback_verified",
+  "automation": "same_id_active_new_prompt_readback_verified",
+  "legacyProjectWrites": "retirement_published_original_local_changes_preserved",
   "cloudAccess": "production_verified",
   "modelCalls": 65,
   "productionDeployment": "new_application_active_public_verified_legacy_disabled",
   "productionMigration": "completed_full_reconciliation",
   "productImplementation": "completed",
-  "productAcceptance": "partial_handover_closeout_pending",
+  "productAcceptance": "passed",
   "mandatoryCases": 39,
   "independentReview": {
     "status": "accepted",
-    "scope": "pre_release_35_cases_only",
+    "scope": "G1 exact candidate and G3 actual handover plus G4 readback",
     "reviewedSha": "16b2ae1a1a967e3155e99a8d9b2c4b6f8525892c",
     "report": "docs/audit/reviews/P1-PRE-RELEASE-20261105.zh.md",
     "productTests": "cross_platform_native_browser_model_and_actual_systemd_verified",
-    "businessHandoverReview": "not_run"
+    "businessHandoverReview": "accepted",
+    "closeoutReview": "accepted",
+    "closeoutReport": "docs/audit/reviews/P1-HANDOVER-20261105.zh.md"
   },
   "taskIndex": "docs/waves/P1/tasks.json",
   "inputManifest": "docs/waves/P1/inputs.json",
   "releaseGate": "G1 pre_release evidence plus accepted exact-candidate review; G2 final source reconciliation/pre_open safety before writes; G3 actual handover and independent business acceptance; G4 ACTIVE readback and all 39 cases before final completion.",
-  "nextAction": "Publish successor README/profile and legacy retirement notice; independent G3 acceptance, then same-ID ACTIVE readback and final closeout",
-  "businessDelivery": "handover",
+  "nextAction": "Daily new-assistant maintenance only; no later feature wave started",
+  "businessDelivery": "completed",
   "taskPackets": 11,
   "gates": {
     "pre_release": {
@@ -104,7 +106,7 @@
       ]
     },
     "handover": {
-      "status": "partial",
+      "status": "passed",
       "caseIds": [
         "P1-MAINT-01",
         "P1-MAINT-02",
@@ -117,7 +119,7 @@
       ]
     },
     "closeout": {
-      "status": "not_run",
+      "status": "passed",
       "caseIds": [
         "P1-MAINT-01",
         "P1-FINAL-04"
@@ -125,7 +127,7 @@
     }
   },
   "gateDefinition": "docs/waves/P1/GATES.zh.md",
-  "activeStage": "S6",
+  "activeStage": "completed",
   "executionBaselineSha": "ccb36eef91787aa8e53854e02e247ab9f5475b15",
   "startedDate": "2026-11-05",
   "startInstruction": "User explicitly said 启动 in this chat",
@@ -236,9 +238,11 @@
       "originalRegistryBytesArchived": true,
       "sameAutomationId": true,
       "sameTimeAndTargetAndHistory": true,
-      "automationStatus": "PAUSED",
-      "businessDelivery": "handover",
-      "firstActualScheduledInvocation": "not_yet_observed"
+      "automationStatus": "ACTIVE",
+      "businessDelivery": "completed",
+      "firstActualScheduledInvocation": "not_yet_observed",
+      "actualManualDailyCheckExecuted": true
     }
-  }
+  },
+  "completedDate": "2026-11-05"
 }

@@ -1,7 +1,7 @@
 {
   "schemaVersion": "0.3",
   "wave": "P1",
-  "status": "production_cutover_verified_handover_in_progress",
+  "status": "completed",
   "model": {
     "requests": 65,
     "verifiedRequests": 63,
@@ -139,6 +139,41 @@
       "bytes": 7305,
       "sha256": "ee9e4276cf59500563a940ab853c85ffe1c7a42d9175eb3067298d1614403eb6",
       "rawLocation": "maintainer_private_only"
+    },
+    {
+      "id": "P1-PUBLICATION",
+      "artifact": "publication-readback.json",
+      "bytes": 769,
+      "sha256": "dd76f426fa0b0215553d94f9435d3355780075c9bacf4f5b322cb2bf6296a877",
+      "rawLocation": "maintainer_private_only"
+    },
+    {
+      "id": "P1-G3-REVIEW",
+      "artifact": "g3-business-handover-review.json",
+      "bytes": 8571,
+      "sha256": "e6dc7191a2dad8b51c8c4d61f9ad0a68c1bda0fff86eab18d538d25e57a7ee95",
+      "rawLocation": "maintainer_private_only"
+    },
+    {
+      "id": "P1-G4-REVIEW",
+      "artifact": "g4-closeout-review.json",
+      "bytes": 5664,
+      "sha256": "bdfb66c156aac21f73c6c34c2a795c72145eda7f9dbd6b345ab161095bcb8373",
+      "rawLocation": "maintainer_private_only"
+    },
+    {
+      "id": "P1-AUTOMATION-ACTIVE-READBACK",
+      "artifact": "automation-g4-readback.json",
+      "bytes": 424,
+      "sha256": "81ca63fd36724e54271465d4fc279932e532a231600822005e9571c2a2f92622",
+      "rawLocation": "maintainer_private_only"
+    },
+    {
+      "id": "P1-MANUAL-DAILY-CHECK",
+      "artifact": "g4-readonly-daily-summary.json",
+      "bytes": 902,
+      "sha256": "2955734aa4815d18c3f802e8022a72d36dc969e96e3303cb35df0051eb3b9e00",
+      "rawLocation": "maintainer_private_only"
     }
   ],
   "releaseCandidateSha": "16b2ae1a1a967e3155e99a8d9b2c4b6f8525892c",
@@ -191,9 +226,10 @@
     "originalRegistryBytesArchived": true,
     "sameAutomationId": true,
     "sameTimeAndTargetAndHistory": true,
-    "automationStatus": "PAUSED",
-    "businessDelivery": "handover",
-    "firstActualScheduledInvocation": "not_yet_observed"
+    "automationStatus": "ACTIVE",
+    "businessDelivery": "completed",
+    "firstActualScheduledInvocation": "not_yet_observed",
+    "actualManualDailyCheckExecuted": true
   },
   "productionBrowser": {
     "navigationEntries": 13,
@@ -223,5 +259,18 @@
       "watch": 15
     },
     "noSpeedOrCostBenefitClaim": true
+  },
+  "publication": {
+    "newReadmePublishedAndReadBack": true,
+    "profileSha": "014664fee2bce47c5762de38bbd036c3fa187882",
+    "legacyRetirementSha": "b564ed8c8a4995eb6cf3a1321adf4ea87adf9df2",
+    "profileOtherSectionsPreserved": true,
+    "legacyOriginalWorkingChangesPreserved": true
+  },
+  "independentReview": {
+    "pre_release": "accepted",
+    "businessHandoverReview": "accepted",
+    "closeoutReadback": "accepted",
+    "publicReport": "docs/audit/reviews/P1-HANDOVER-20261105.zh.md"
   }
 }

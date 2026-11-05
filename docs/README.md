@@ -1,6 +1,6 @@
 # 文档导航
 
-- 当前P1接替：[执行报告](testing/P1-EXECUTION-20261105.zh.md)、[执行证据](waves/P1/execution-evidence.json)、[上线与维护](operations/PRODUCTION.zh.md)、[状态](waves/P1/state.json)、[验收](waves/P1/acceptance.json)、[分阶段门槛](waves/P1/GATES.zh.md)。云端已接替，维护/公开交付正在收口，未将待完成阶段提前标为通过。
+- 当前P1接替：[执行报告](testing/P1-EXECUTION-20261105.zh.md)、[执行证据](waves/P1/execution-evidence.json)、[上线与维护](operations/PRODUCTION.zh.md)、[状态](waves/P1/state.json)、[验收](waves/P1/acceptance.json)、[分阶段门槛](waves/P1/GATES.zh.md)。云端接替、公开发布、同ID每日维护与39项验收完成；[独立交接审核](audit/reviews/P1-HANDOVER-20261105.zh.md)已接受。
 - P1规格与历史准备：[计划](waves/P1/PLAN.md)、[规格](waves/P1/SPEC.zh.md)、[迁移与切换](waves/P1/MIGRATION-CUTOVER.zh.md)、[维护接替](waves/P1/MAINTENANCE.zh.md)、[公开文案](waves/P1/PUBLICATION-DRAFT.zh.md)、[任务](waves/P1/tasks.json)、[就绪历史](waves/P1/READINESS.zh.md)。
 
 - 已完成执行：[P0计划](waves/P0/PLAN.md)、[P0状态](waves/P0/state.json)、[多Agent开发规则](engineering/MULTI-AGENT.zh.md)、[本机恢复](operations/LOCAL-RECOVERY.md)。

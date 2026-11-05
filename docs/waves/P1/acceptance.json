@@ -3,7 +3,7 @@
   "waveId": "P1",
   "specVersion": "0.3.0",
   "caseCount": 39,
-  "productAcceptance": "partial",
+  "productAcceptance": "passed",
   "cases": [
     {
       "id": "P1-CLOUD-01",
@@ -779,7 +779,7 @@
       "group": "每日维护接替",
       "mandatory": true,
       "expected": "既有automation同ID在PAUSED下更新，原01:00时区/target/通知保留；P1业务完成后恢复ACTIVE并读回，无重复调度",
-      "status": "not_run",
+      "status": "passed",
       "evidence": [],
       "evidenceStages": [
         "handover",
@@ -788,12 +788,20 @@
       "completionStage": "closeout",
       "stageResults": {
         "handover": {
-          "status": "not_run",
-          "evidence": []
+          "status": "passed",
+          "evidence": [
+            "docs/waves/P1/execution-evidence.json",
+            "docs/testing/P1-EXECUTION-20261105.zh.md",
+            "docs/audit/reviews/P1-HANDOVER-20261105.zh.md"
+          ]
         },
         "closeout": {
-          "status": "not_run",
-          "evidence": []
+          "status": "passed",
+          "evidence": [
+            "docs/waves/P1/execution-evidence.json",
+            "docs/testing/P1-EXECUTION-20261105.zh.md",
+            "docs/audit/reviews/P1-HANDOVER-20261105.zh.md"
+          ]
         }
       }
     },
@@ -803,7 +811,7 @@
       "group": "每日维护接替",
       "mandatory": true,
       "expected": "启动后S0暂停旧研发触发并排空旧活跃Leader/排队任务，旧业务服务继续；切换后生产和维护仅有一个权威",
-      "status": "partial",
+      "status": "passed",
       "evidence": [
         "docs/waves/P1/execution-evidence.json"
       ],
@@ -829,8 +837,12 @@
           ]
         },
         "handover": {
-          "status": "not_run",
-          "evidence": []
+          "status": "passed",
+          "evidence": [
+            "docs/waves/P1/execution-evidence.json",
+            "docs/testing/P1-EXECUTION-20261105.zh.md",
+            "docs/audit/reviews/P1-HANDOVER-20261105.zh.md"
+          ]
         }
       }
     },
@@ -840,7 +852,7 @@
       "group": "每日维护接替",
       "mandatory": true,
       "expected": "私有去重历史稳定映射，待确认/撤回/删除/已交付不重复分波；未完沿原ID和修复次数",
-      "status": "partial",
+      "status": "passed",
       "evidence": [
         "docs/waves/P1/execution-evidence.json"
       ],
@@ -858,8 +870,12 @@
           ]
         },
         "handover": {
-          "status": "not_run",
-          "evidence": []
+          "status": "passed",
+          "evidence": [
+            "docs/waves/P1/execution-evidence.json",
+            "docs/testing/P1-EXECUTION-20261105.zh.md",
+            "docs/audit/reviews/P1-HANDOVER-20261105.zh.md"
+          ]
         }
       }
     },
@@ -869,7 +885,7 @@
       "group": "每日维护接替",
       "mandatory": true,
       "expected": "handover_validation实际只读检查指向新权威，零新波次/零模型/零旧写入；普通触发在businessDelivery未完成或其他Leader持锁时退出，不把配置读回当实际调度",
-      "status": "partial",
+      "status": "passed",
       "evidence": [
         "docs/waves/P1/execution-evidence.json"
       ],
@@ -887,8 +903,12 @@
           ]
         },
         "handover": {
-          "status": "not_run",
-          "evidence": []
+          "status": "passed",
+          "evidence": [
+            "docs/waves/P1/execution-evidence.json",
+            "docs/testing/P1-EXECUTION-20261105.zh.md",
+            "docs/audit/reviews/P1-HANDOVER-20261105.zh.md"
+          ]
         }
       }
     },
@@ -898,7 +918,7 @@
       "group": "公开展示及退役",
       "mandatory": true,
       "expected": "新README和个人主页按最新SHA最小修改并读回，其他主页内容保留，全部声明有实际证据",
-      "status": "not_run",
+      "status": "passed",
       "evidence": [],
       "evidenceStages": [
         "handover"
@@ -906,8 +926,12 @@
       "completionStage": "handover",
       "stageResults": {
         "handover": {
-          "status": "not_run",
-          "evidence": []
+          "status": "passed",
+          "evidence": [
+            "docs/waves/P1/execution-evidence.json",
+            "docs/testing/P1-EXECUTION-20261105.zh.md",
+            "docs/audit/reviews/P1-HANDOVER-20261105.zh.md"
+          ]
         }
       }
     },
@@ -917,7 +941,7 @@
       "group": "公开展示及退役",
       "mandatory": true,
       "expected": "旧README链接接替者并停功能维护；旧服务/后台/旧调度停用，恢复资产清单保留",
-      "status": "not_run",
+      "status": "passed",
       "evidence": [],
       "evidenceStages": [
         "handover"
@@ -925,8 +949,12 @@
       "completionStage": "handover",
       "stageResults": {
         "handover": {
-          "status": "not_run",
-          "evidence": []
+          "status": "passed",
+          "evidence": [
+            "docs/waves/P1/execution-evidence.json",
+            "docs/testing/P1-EXECUTION-20261105.zh.md",
+            "docs/audit/reviews/P1-HANDOVER-20261105.zh.md"
+          ]
         }
       }
     },
@@ -936,7 +964,7 @@
       "group": "公开展示及退役",
       "mandatory": true,
       "expected": "待推公开历史和文档隐私扫描无凭据/真实反馈/身份/私有路径/数据库，许可证和上游归属保留",
-      "status": "partial",
+      "status": "passed",
       "evidence": [
         "docs/waves/P1/execution-evidence.json"
       ],
@@ -954,8 +982,12 @@
           ]
         },
         "handover": {
-          "status": "not_run",
-          "evidence": []
+          "status": "passed",
+          "evidence": [
+            "docs/waves/P1/execution-evidence.json",
+            "docs/testing/P1-EXECUTION-20261105.zh.md",
+            "docs/audit/reviews/P1-HANDOVER-20261105.zh.md"
+          ]
         }
       }
     },
@@ -1045,7 +1077,7 @@
       "group": "最终闭环与审核",
       "mandatory": true,
       "expected": "精确候选Windows/Linux CI、独立审核、生产切换与恢复验证均完成，全部P1强制项有分层证据",
-      "status": "partial",
+      "status": "passed",
       "evidence": [
         "docs/waves/P1/execution-evidence.json"
       ],
@@ -1072,12 +1104,20 @@
           ]
         },
         "handover": {
-          "status": "not_run",
-          "evidence": []
+          "status": "passed",
+          "evidence": [
+            "docs/waves/P1/execution-evidence.json",
+            "docs/testing/P1-EXECUTION-20261105.zh.md",
+            "docs/audit/reviews/P1-HANDOVER-20261105.zh.md"
+          ]
         },
         "closeout": {
-          "status": "not_run",
-          "evidence": []
+          "status": "passed",
+          "evidence": [
+            "docs/waves/P1/execution-evidence.json",
+            "docs/testing/P1-EXECUTION-20261105.zh.md",
+            "docs/audit/reviews/P1-HANDOVER-20261105.zh.md"
+          ]
         }
       }
     }

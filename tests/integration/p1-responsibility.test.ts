@@ -64,3 +64,26 @@ test('unit: stop reaches the actual native command once and stale versions fail 
     assert.deepEqual(f.stopped, [row.id]);
   } finally { f.dispose(); }
 });
+
+test('fault: an answer committed to native intake survives a lost response without a second input', async () => {
+  const f = fixture();
+  try {
+    const { row } = await f.ticket();
+    row.attention = { id: 'question-recover', question: '继续吗？' };
+    const receive = f.runtime.context;
+    f.runtime.context = () => ({ receive: async (trigger: unknown) => {
+      await receive().receive(trigger);
+      row.updatedAt = '2026-01-02T00:00:00.000Z';
+      throw new Error('SIMULATED_NATIVE_COMMITTED_RESPONSE_LOSS');
+    } });
+    const action = { ticketId: row.id, requestId: 'answer-recover', action: 'answer',
+      expectedUpdatedAt: '2026-01-01T00:00:00.000Z', attentionId: 'question-recover', text: '继续合成检查' };
+    await assert.rejects((f.source as any).action('main', action), /SIMULATED_NATIVE_COMMITTED_RESPONSE_LOSS/);
+    const count = f.received.length;
+    f.runtime.context = receive;
+    const result = await (f.source as any).action('main', action);
+    assert.equal(f.received.length, count);
+    assert.equal(result.messageId, 'human-work-action-answer-recover');
+    assert.deepEqual(await (f.source as any).action('main', action), result);
+  } finally { f.dispose(); }
+});

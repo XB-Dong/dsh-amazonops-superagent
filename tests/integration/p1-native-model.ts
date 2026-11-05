@@ -13,7 +13,7 @@ function response(res:ServerResponse,index:number,tool?:Call){
   emit('message_delta',{type:'message_delta',delta:{stop_reason:tool?'tool_use':'end_turn'},usage:{output_tokens:20}});
   emit('message_stop',{type:'message_stop'});res.end();
 }
-export async function p1Model(evidence:string){
+export async function p1Model(evidence:string,options:{beforeTool?:(call:Call,role:string)=>Promise<void>}={}){
   const requests:{role:string;tool?:string;input?:Record<string,unknown>}[]=[];
   const server=createServer(async(req,res)=>{try{
     let raw='';for await(const chunk of req)raw+=chunk;
@@ -75,7 +75,9 @@ export async function p1Model(evidence:string){
       }
     }
     const record={role:worker?'worker':'router',tool:tool?.name,input:tool?.input};requests.push(record);
-    appendFileSync(join(evidence,'model-requests.jsonl'),JSON.stringify({...record,body})+'\n');response(res,requests.length,tool);
+    appendFileSync(join(evidence,'model-requests.jsonl'),JSON.stringify({...record,body})+'\n');
+    if(tool)await options.beforeTool?.(tool,record.role);
+    response(res,requests.length,tool);
   }catch(error){res.writeHead(500);res.end(JSON.stringify({error:String(error)}));}});
   await new Promise<void>(done=>server.listen(0,'127.0.0.1',done));
   return {server,requests,url:`http://127.0.0.1:${(server.address() as {port:number}).port}`};

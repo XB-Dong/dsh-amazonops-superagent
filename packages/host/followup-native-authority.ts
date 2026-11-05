@@ -6,6 +6,14 @@ import { liveEntity } from '../business/followups/risk.ts';
 export const RISK_RULE_ID='inventory-risk-review';
 export const RISK_BOT='inventory-risk';
 export const RISK_INSTRUCTION='只对明确纳入的库存方案，依据服务端确定性缺货风险创建一份内部复核草稿。相同风险窗口不重复。禁止外部系统、代码、部署和权限变更；无明确风险或对象则忽略。';
+const automaticGates=new WeakMap<Business,()=>boolean>();
+export function registerAutomaticGate(business:Business,enabled:()=>boolean):void{automaticGates.set(business,enabled);}
+export function proactiveAutoEnabled(business:Business):boolean{
+  try{return automaticGates.get(business)?.()===true;}catch{return false;}
+}
+export function automaticEventAllowed(business:Business,event:FollowupEvent):boolean{
+  return event.ruleMode!=='auto'||proactiveAutoEnabled(business);
+}
 export const sameIdentity=(a:{store:string;site:string;listing:string;physicalSku:string},b:typeof a)=>
   a.store===b.store&&a.site===b.site&&a.listing===b.listing&&a.physicalSku===b.physicalSku;
 
@@ -43,7 +51,7 @@ export function readableBusinessTrigger(business:Business,trigger:Trigger):boole
 export function permittedBusinessTrigger(business:Business,trigger:Trigger):boolean {
   if(!readableBusinessTrigger(business,trigger))return false;
   if(trigger.human)return true;
-  try{currentEvent(business,'main',String(trigger.meta.eventId));return true;}catch{return false;}
+  try{return automaticEventAllowed(business,currentEvent(business,'main',String(trigger.meta.eventId)));}catch{return false;}
 }
 export function ticketWatch(business:Business,runtime:Runtime,ticket:Ticket,requireActive=true):InventoryWatch|undefined {
   const origin=runtime.store.triggers.get(ticket.origin.triggerId);

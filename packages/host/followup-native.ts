@@ -1,7 +1,7 @@
 import { Followups, digest, type Base, type Business } from '../business/index.ts';
 import type { WatchCreate, InventoryWatch, FollowupSnapshot, FollowupEvent } from '../contracts/followups.ts';
 import { ticketStage, type Trigger, type Decision } from '../../vendor/superagent/src/extension.ts';
-import { RISK_BOT,RISK_RULE_ID,RISK_INSTRUCTION,currentEvent,ticketWatch,authorizeFollowup,readableBusinessTrigger } from './followup-native-authority.ts';
+import { RISK_BOT,RISK_RULE_ID,RISK_INSTRUCTION,currentEvent,ticketWatch,authorizeFollowup,readableBusinessTrigger,proactiveAutoEnabled,automaticEventAllowed } from './followup-native-authority.ts';
 import type { WorkbenchSource } from './source.ts';
 
 type RuleInput={requestId:string;mode:'off'|'observe'|'auto';inventoryIds:string[]};
@@ -36,7 +36,7 @@ export class FollowupNative {
   }
   async configureRule(scope:string,input:RuleInput,options:{autoAvailable:boolean}):Promise<unknown>{
     if(scope!=='main')throw new Error('SCOPE_FORBIDDEN');request(input.requestId);
-    if(input.mode==='auto'&&!options.autoAvailable)throw new Error('AUTO_NOT_VALIDATED');
+    if(input.mode==='auto'&&(!options.autoAvailable||!proactiveAutoEnabled(this.business)))throw new Error('AUTO_NOT_VALIDATED');
     this.syncDecisions(scope);
     const rule=this.business.store.transaction(()=>{
       const source=this.business.store.once(scope,`rule-human-source:${input.requestId}`,()=>this.business.store.source(scope,
@@ -76,7 +76,9 @@ export class FollowupNative {
   }
   async syncPolicy():Promise<void>{
     const runtime=this.source.runtime,settings=runtime.store.settings();
-    const rule=this.domain.rule('main'),mode=rule?.mode??'observe';
+    const rule=this.domain.rule('main');
+    // Preserve the stored rule intent; a trusted runtime gate alone can activate automatic work.
+    const mode=rule?.mode==='auto'&&!proactiveAutoEnabled(this.business)?'off':rule?.mode??'observe';
     const policy={...settings.policy,rules:[{id:RISK_RULE_ID,name:'库存缺货内部复核',enabled:mode!=='off',instruction:RISK_INSTRUCTION}],
       sources:{...settings.policy.sources,amazonops:{allowed:[{id:'cc',name:'cc'}],bots:[{id:RISK_BOT,name:'库存风险规则'}]}}};
     if(digest(policy)!==digest(settings.policy))await runtime.settings.save('policy',policy,runtime.store.blockRevision('policy'),'sync');
@@ -84,12 +86,13 @@ export class FollowupNative {
   }
   snapshot(scope:string,options:{autoAvailable:boolean}={autoAvailable:false}):FollowupSnapshot{
     const view=this.domain.snapshot(scope),runtime=this.source.runtime;
+    const autoAvailable=options.autoAvailable&&proactiveAutoEnabled(this.business);
     const events=this.business.store.list<FollowupEvent>(scope,'followup-event').filter(event=>{
       try{currentEvent(this.business,scope,event.id);return true;}catch{return false;}
     });
     const decisions=runtime.store.db.prepare('SELECT value FROM decision ORDER BY rowid DESC').all().map(row=>JSON.parse(String(row.value)));
-    return {...view,events,autoAvailable:options.autoAvailable,
-      ...options.autoAvailable?{}:{autoBlockedReason:'自动接单尚未通过原生验收及独立审核，当前可以先观察。'},
+    return {...view,events,autoAvailable,
+      ...autoAvailable?{}:{autoBlockedReason:'自动接单尚未通过原生验收及独立审核，当前可以先观察。'},
       assessments:events.filter(event=>event.eventClass==='risk_candidate').map(event=>{
         const decision=decisions.find(d=>d.triggerIds.includes(`event-${event.id}`));
         return {eventId:event.id,decision:!decision?'pending':decision.audit?.would_accept?'would_accept':decision.kind==='accept'?'accepted':
@@ -102,6 +105,7 @@ export class FollowupNative {
     this.pumping=this.run(scope).finally(()=>{this.pumping=undefined;});return this.pumping;
   }
   private async run(scope:string):Promise<void>{
+    await this.syncPolicy();
     this.domain.expire(scope);
     this.syncDecisions(scope);
     for(const ticket of this.source.runtime.store.tickets.list()){
@@ -123,6 +127,7 @@ export class FollowupNative {
     }
     this.domain.scan(scope);
     for(const event of this.domain.pending(scope)){
+      if(!automaticEventAllowed(this.business,event))continue;
       let thread:string;
       if(event.watchId){
         const watch=this.domain.get(scope,event.watchId),ticket=watch.ticketId?this.source.runtime.store.tickets.get(watch.ticketId):undefined;

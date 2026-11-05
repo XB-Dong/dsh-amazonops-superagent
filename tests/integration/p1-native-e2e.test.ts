@@ -19,6 +19,7 @@ test('actual native finite watch continues on business change, hands decision to
   await buildProject({root,hostEntry:join(root,'tests/integration/p1-native-fixture-host.ts')});
   const profile=localPatch({root,home,password,port,live:true,modelAccount:'test'});
   const entries=profile.flatMap((r:any)=>r.insert??[]),host=entries.find((r:any)=>r.id==='amazonops-host');host.config.evidence=evidence;
+  host.config.proactiveAutoEnabled=true;
   const provider=(profile.find((r:any)=>r.id==='llm-deepseek') as any).config;provider.baseURL=model.url;
   const patch=join(home,'profile.json');writeFileSync(patch,JSON.stringify(profile));
   async function api(path:string,body?:unknown){

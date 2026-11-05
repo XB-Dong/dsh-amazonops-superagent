@@ -14,7 +14,7 @@ import { json,readBody,failure } from '../../packages/host/http.ts';
 import type { Runtime,OperationsExtensions } from '../../vendor/superagent/src/extension.ts';
 
 export const inject=['webServer','llm','sessionPersistence'];
-export function apply(ctx:Context,config:{dataDir:string;password:string;evidence:string}){
+export function apply(ctx:Context,config:{dataDir:string;password:string;evidence:string;proactiveAutoEnabled?:boolean}){
   const business=new Business(config.dataDir),auth=new Auth(config.password);
   const budget=new ModelBudget(join(config.dataDir,'model-budget.sqlite'),{maxCalls:null,maxInputTokens:null,maxOutputTokens:null,maxTotalTokens:null});
   const accounting=installAccounting(ctx,budget,{live:true,maxRequestsPerTurn:12,defaultOutputTokens:2048});
@@ -26,7 +26,7 @@ export function apply(ctx:Context,config:{dataDir:string;password:string;evidenc
   const boundary=installBoundary(server,origin,auth);
   ctx.inject(['orchestrator'],async child=>{
     const current=child.get('orchestrator') as unknown as Runtime;await current.ready;
-    runtime=current;source=new WorkbenchSource(current,business);const off=source.register();await source.initializePolicy();
+    runtime=current;source=new WorkbenchSource(current,business,{proactiveAutoEnabled:()=>config.proactiveAutoEnabled===true});const off=source.register();await source.initializePolicy();
     child.effect(()=>()=>{off();source=undefined;runtime=undefined;});
   });
   ctx.on('session/event',(session,event)=>appendFileSync(join(config.evidence,'session-events.jsonl'),JSON.stringify({sessionId:session.id,event})+'\n'),{global:true});
@@ -52,9 +52,14 @@ export function apply(ctx:Context,config:{dataDir:string;password:string;evidenc
       if(path==='change'){json(res,business.command('main','forecast',{requestId:String(body.requestId),store:'Synthetic',site:'US',listing:'A',asOf:'2026-11-05',manualDaily:Number(body.quantity),manualReason:'Synthetic changed demand'}));return;}
       if(path==='action'){json(res,await source.action('main',body as any));return;}
       if(path==='rule'){json(res,await source.followups.configureRule('main',body as any,{autoAvailable:true}));return;}
+      if(path==='stage-rule'){
+        const authority=business.store.source('main','Synthetic persisted auto rule intent');
+        const rule=source.followups.domain.configureRule('main',body as any,authority.id);source.followups.domain.scan('main');
+        await source.followups.syncPolicy();json(res,rule);return;
+      }
       if(path==='stop'){json(res,source.followups.stopWatch('main',body as any));return;}
       if(path==='state'){
-        json(res,{ready:true,work:source.work('main'),followups:source.followups.snapshot('main',{autoAvailable:true}),
+        json(res,{ready:true,work:source.work('main'),followups:source.followups.snapshot('main',{autoAvailable:true}),settings:runtime.store.settings(),pending:source.followups.domain.pending('main'),
           tickets:runtime.store.tickets.list(),triggers:runtime.store.read.triggers({source:'amazonops'},0,500).items,
           decisions:runtime.store.db.prepare('SELECT value FROM decision').all().map(row=>JSON.parse(String(row.value))),
           outbox:runtime.store.db.prepare('SELECT value FROM outbox').all().map(row=>JSON.parse(String(row.value))),

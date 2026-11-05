@@ -7,14 +7,17 @@ import { actOnWork, projectResponsibility } from './work-actions.ts';
 import { admitEvent } from './operations.ts';
 import { safeText } from '../business/core/validation.ts';
 import { FollowupNative } from './followup-native.ts';
-import { currentEvent, ticketWatch, permittedBusinessTrigger } from './followup-native-authority.ts';
+import { currentEvent, ticketWatch, permittedBusinessTrigger,registerAutomaticGate,automaticEventAllowed } from './followup-native-authority.ts';
 
 type MessageReceipt={hash:string;threadId:string;sourceId:string};
 type OutboxMessage={id:string;channel:{source:string;thread:string;address:Record<string,string>};text:string;ticketId?:string;status:string};
 export class WorkbenchSource {
   runtime:Runtime; business:Business;
   readonly followups:FollowupNative;
-  constructor(runtime:Runtime,business:Business){this.runtime=runtime;this.business=business;this.followups=new FollowupNative(this);}
+  constructor(runtime:Runtime,business:Business,options:{proactiveAutoEnabled?:()=>boolean}={}){
+    this.runtime=runtime;this.business=business;registerAutomaticGate(business,options.proactiveAutoEnabled??(()=>false));
+    this.followups=new FollowupNative(this);
+  }
   async initializePolicy():Promise<void> {
     const policy=this.runtime.store.settings().policy;
     if(!policy.sources.amazonops)await this.runtime.settings.save('policy',{...policy,sources:{...policy.sources,amazonops:{allowed:[{id:'cc',name:'cc'}]}}},
@@ -28,7 +31,7 @@ export class WorkbenchSource {
         if(meta.scope!=='main')return {listened:false,reason:'untrusted_event'};
         if(meta.eventClass==='human_request')return {listened:true,observed:false};
         try{const event=currentEvent(this.business,'main',String(meta.eventId));
-          if(meta.eventClass===event.eventClass)return {listened:true,observed:event.eventClass==='risk_candidate'};
+          if(meta.eventClass===event.eventClass&&automaticEventAllowed(this.business,event))return {listened:true,observed:event.eventClass==='risk_candidate'};
         }catch{}
         return {listened:false,reason:'untrusted_event'};
       },
